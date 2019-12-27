@@ -17,7 +17,7 @@ module double_multipler(clk, rst, ready, op1, op2, res, done);
     wire done1, done2;    
     
     
-verilog_multiplier mul1 (
+vhdl_multiplier mul1 (
     .clk (clk),
     .rst (rst),
     .ready (ready1),
@@ -27,7 +27,7 @@ verilog_multiplier mul1 (
     .done (done1)
 );
 
-verilog_multiplier mul2 (
+vhdl_multiplier mul2 (
     .clk (clk),
     .rst (rst),
     .ready (ready2),

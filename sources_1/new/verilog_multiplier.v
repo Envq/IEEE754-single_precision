@@ -18,7 +18,7 @@ module verilog_multiplier(clk, rst, ready, op1, op2, res, done);
     reg[47:0] mant_tmp;
     reg special, norm_again;
     parameter T_ZER=0, T_INF=1, T_NAN=2, T_NUM=3;
-    reg[3:0] op1_type, op2_type, res_type;
+    reg[2:0] op1_type, op2_type, res_type;
 
 
 // FSM
@@ -112,7 +112,7 @@ begin
                 sign1 <= op1[31];             
                 esp1 <= op1[30:23];
                 mant1[23] <= 1'b1;
-                mant1[22:0] = op1[22:0];
+                mant1[22:0] <= op1[22:0];
                 // Get informations of op2
                 sign2 <= op2[31];             
                 esp2 <= op2[30:23];
@@ -123,26 +123,26 @@ begin
             // Special case op1 check
             ST_EVAL1: begin
                 if (esp1 == 8'd255)
-                    if (mant1 == 0)
+                    if (mant1[22:0] == 23'd0)
                         op1_type <= T_INF;
                     else
                         op1_type <= T_NAN;
                 else
-                    if (esp1 == 8'd0 && mant1 == 23'd0)
+                    if (esp1 == 8'd0 && mant1[22:0] == 23'd0)
                         op1_type <= T_ZER;
                     else
                         op1_type <= T_NUM;
             end
             
             // Special case op2 check
-            ST_EVAL2: begin
+            ST_EVAL2: begin            
                 if (esp2 == 8'd255)
-                    if (mant2 == 0)
+                    if (mant2[22:0] == 23'd0)
                         op2_type <= T_INF;
                     else
                         op2_type <= T_NAN;
                 else
-                    if (esp2 == 8'd0 && mant2 == 23'd0)
+                    if (esp2 == 8'd0 && (mant2[22:0] == 23'd0))
                         op2_type <= T_ZER;
                     else
                         op2_type <= T_NUM;
@@ -239,15 +239,15 @@ begin
             ST_FINISH: begin
                 case (res_type)
                     T_ZER: begin
-                        res[22:0] <= 31'b0000000000000000000000000000000;
+                        res[31:0] <= 31'b0000000000000000000000000000000;
                     end
                     
                     T_INF: begin
-                        res[22:0] <= 31'b1111111100000000000000000000000;
+                        res[31:0] <= 31'b1111111100000000000000000000000;
                     end
                     
                     T_NAN: begin
-                        res[22:0] <= 31'b1111111111111111111111111111111;
+                        res[31:0] <= 31'b1111111111111111111111111111111;
                     end
                     
                     default: begin
