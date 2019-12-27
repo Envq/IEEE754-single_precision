@@ -1,38 +1,32 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL; -- for arithmetic functions with Signed or Unsigned values
+
 package multiplier_pkg is
     type MULT_STATE is (ST_START, ST_EVAL1, ST_EVAL2, ST_CHECK, ST_ELAB, ST_UNDERF, ST_NORM1, ST_ROUND, ST_NORM2, ST_OVERF, ST_FINISH);
-    constant T_ZER : bit_vector(2 downto 0) := "00";
-    constant T_INF : bit_vector(2 downto 0) := "01";
-    constant T_NAN : bit_vector(2 downto 0) := "10";
-    constant T_NUM : bit_vector(2 downto 0) := "11";
+    constant T_ZER : std_logic_vector(2 downto 0) := "00";
+    constant T_INF : std_logic_vector(2 downto 0) := "01";
+    constant T_NAN : std_logic_vector(2 downto 0) := "10";
+    constant T_NUM : std_logic_vector(2 downto 0) := "11";
 end multiplier_pkg;
 
-
 library IEEE;
-use WORK.multiplier_pkg.all;
 use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx leaf cells in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
-
+use IEEE.NUMERIC_STD.ALL; -- for arithmetic functions with Signed or Unsigned values
+use WORK.multiplier_pkg.all;
 
 entity vhdl_multiplier is
-    Port (  clk, rst, ready: in bit;
-            op1, op2: in bit_vector(31 downto 1);
-            res: out bit_vector(31 downto 1);
-            done: out bit);
+    Port (  clk, rst, ready: in std_logic;
+            op1, op2: in std_logic_vector(31 downto 1);
+            res: out std_logic_vector(31 downto 1);
+            done: out std_logic);
 end vhdl_multiplier;
 
 
 architecture Behavioral of vhdl_multiplier is
     signal STATE, NEXT_STATE: MULT_STATE;
-    signal special, norm_again : bit;
-    signal res_type : bit_vector(2 downto 0);
+    signal special, norm_again : std_logic;
+    signal res_type : std_logic_vector(2 downto 0);
 begin
 
     FSM: process(STATE, ready, special, norm_again)
@@ -97,13 +91,17 @@ begin
     end process FSM;
 
     DATAPATH: process(clk, rst)
-        variable sign1, sign2 : bit;
-        variable esp1, esp2 : bit_vector(7 downto 0);
-        variable mant1, mant2 : bit_vector(23 downto 0);
-        variable esp_tmp : bit_vector(9 downto 0);
-        variable mant_tmp : bit_vector(47 downto 0);
-        variable op1_type, op2_type : bit_vector(2 downto 0);
-    begin
+        variable sign1, sign2 : std_logic;
+        variable esp1, esp2 : std_logic_vector(7 downto 0);
+        variable mant1, mant2 : std_logic_vector(23 downto 0);
+        variable esp_tmp : std_logic_vector(9 downto 0);
+        variable mant_tmp : std_logic_vector(47 downto 0);
+        variable op1_type, op2_type : std_logic_vector(2 downto 0);
+        variable p3 : std_logic_vector(7 downto 0);
+        variable p1 : std_logic_vector(3 downto 0);
+        variable p2 : std_logic_vector(3 downto 0);
+    begin   
+    
         if rst = '1' then
             STATE <= ST_START;
                     
@@ -128,16 +126,17 @@ begin
                     esp2 := op2(30 downto 23);
                     mant2(23) := '1';
                     mant2(22 downto 0) := op2(22 downto 0);
-                            
+                
+                -- Special case op1 check            
                 when ST_EVAL1 =>
-                    if esp1 = "11111111" then
-                        if mant1(22 downto 0) = "00000000000000000000000" then
+                    if (esp1 = "11111111") then
+                        if (mant1(22 downto 0) = "00000000000000000000000") then
                             op1_type := T_INF;
                         else
                             op1_type := T_NAN;
                         end if;
                     else
-                        if esp1 = "00000000" and mant1(22 downto 0) = "00000000000000000000000" then
+                        if (esp1 = "00000000" and mant1(22 downto 0) = "00000000000000000000000") then
                             op1_type := T_ZER;
                         else
                             op1_type := T_NUM;
@@ -145,54 +144,119 @@ begin
                     end if;
                             
             
+                -- Special case op2 check
                 when ST_EVAL2 =>
-                    NEXT_STATE <= ST_CHECK;
-            
+                    if (esp2 = "11111111") then
+                        if (mant2(22 downto 0) = "00000000000000000000000") then
+                            op2_type := T_INF;
+                        else
+                            op2_type := T_NAN;
+                        end if;
+                    else
+                        if (esp2 = "00000000" and mant2(22 downto 0) = "00000000000000000000000") then
+                            op2_type := T_ZER;
+                        else
+                            op2_type := T_NUM;
+                        end if;
+                    end if;
+                
+                -- Check special case for res
                 when ST_CHECK =>
-                    if special = '1' then
-                        NEXT_STATE <= ST_FINISH;
+                    if (op1_type = T_NAN OR op2_type = T_NAN OR
+                        (op1_type = T_ZER AND op2_type = T_INF) OR
+                        (op2_type = T_ZER AND op1_type = T_INF)) then
+                        res_type <= T_NAN;
+                        special <= '1';
+                            
+                    elsif (op1_type = T_ZER OR op2_type = T_ZER) then
+                        res_type <= T_ZER;
+                        special <= '1';
+                        
+                    elsif (op1_type = T_INF OR op2_type = T_INF) then
+                        res_type <= T_INF;
+                        special <= '1';
+                        
                     else
-                        NEXT_STATE <= ST_ELAB;
+                        res_type <= T_NUM;
+                        special <= '0';
                     end if;
-            
+                
+                -- Process esp and mant
                 when ST_ELAB =>
-                    if special = '1' then
-                        NEXT_STATE <= ST_FINISH;
-                    else
-                        NEXT_STATE <= ST_UNDERF;
-                    end if;
-            
+                    mant_tmp := std_logic_vector(unsigned(mant1) + unsigned(mant2));
+                    esp_tmp := std_logic_vector(unsigned(esp1) + unsigned(esp2) - 127);  
+                
+                -- Underflow check
                 when ST_UNDERF =>
-                    if special = '1' then
-                        NEXT_STATE <= ST_FINISH;
-                    else
-                        NEXT_STATE <= ST_NORM1;
+                    if (esp_tmp(9) = '1') then           --undeflow check
+                        res_type <= T_ZER;
+                        special <= '1';
+                    else 
+                        res_type <= T_NUM;
+                        special <= '0';
                     end if;
-            
+                
+                -- Normalize result
                 when ST_NORM1 =>
-                    NEXT_STATE <= ST_ROUND;
-            
-                when ST_ROUND =>
-                    if norm_again = '1' then
-                        NEXT_STATE <= ST_NORM2;
+                    if (mant_tmp(47) = '1') then
+                        res(22 downto 0) <= mant_tmp(46 downto 24);             --store mant
+                        esp_tmp := std_logic_vector(unsigned(esp_tmp) + 1);     --increment esp
                     else
-                        NEXT_STATE <= ST_OVERF;
+                        res(22 downto 0) <= mant_tmp(45 downto 23);             --store mant
+                        mant_tmp := std_logic_vector(unsigned(mant_tmp) sll 1); --norm mant_tmp
                     end if;
-            
+                
+                -- Round result
+                when ST_ROUND =>
+                    if (mant_tmp(23) = '1' OR (mant_tmp(22 downto 0) = "01111111111111111111111")) then
+                        res(22 downto 0) <= std_logic_vector(unsigned(res(22 downto 0)) + 1);
+                        norm_again <= '1';
+                    else
+                        norm_again <= '0';
+                    end if;
+                
+                -- Normalize result after rounding
                 when ST_NORM2 =>
-                    NEXT_STATE <= ST_OVERF;
-            
+                    if (res(22 downto 0) == "11111111111111111111111") then
+                        esp_tmp <= esp_tmp + 10'd1;
+                        res(22 downto 0) <= "00000000000000000000000";
+                    else
+                        res(22 downto 0) <= res(22 downto 0) + 23'd1;
+                    end if;
+                
+                -- Overflow check
                 when ST_OVERF =>
-                    NEXT_STATE <= ST_FINISH;
-            
+                    if (esp_tmp(8) = '1') begin           --overflow check
+                        res_type <= T_INF;
+                        special <= '1';
+                    else
+                        res_type <= T_NUM;
+                        special <= '0';
+                        res(31 downto 23) <= esp_tmp(7 downto 0);
+                    end if;
+                
+                -- Finish
                 when ST_FINISH =>
-                    NEXT_STATE <= ST_START;
+                    case res_type is
+                        when T_ZER =>
+                            res(31 downto 0) <= "0000000000000000000000000000000";
+                        
+                        when T_INF =>
+                            res(31 downto 0) <= "1111111100000000000000000000000";
+                        
+                        when T_NAN =>
+                            res(31 downto 0) <= "1111111111111111111111111111111";
+                        
+                        when OTHERS =>
+                            -- Do nothing
+                    end case;                                        
+                    res(31) <= sign1 XOR sign2;         --get sign
+                    done <= '1';
                 
                 when OTHERS =>
-                    NEXT_STATE <= STATE;                
+                    -- Do nothing      
+                           
             end case;
         end if;
     end process DATAPATH;
-
-
 end Behavioral;

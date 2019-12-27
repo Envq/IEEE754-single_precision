@@ -175,12 +175,12 @@ begin
             // Process esp and mant
             ST_ELAB: begin
                 mant_tmp <= mant1 * mant2;
-                esp_tmp <= esp1 + esp2 - 10'd127;       // 127 for norm
+                esp_tmp <= esp1 + esp2 - 10'd127;       //127 for norm
             end
             
             // Underflow check
             ST_UNDERF: begin
-                if (esp_tmp[9] == 1'b1) begin           // undeflow check
+                if (esp_tmp[9] == 1'b1) begin           //undeflow check
                     res_type <= T_ZER;
                     special <= 1'b1;
                 end
@@ -193,12 +193,12 @@ begin
             // Normalize result
             ST_NORM1: begin
                 if (mant_tmp[47] == 1'b1) begin
-                    res[22:0] <= mant_tmp[46:24];        // store mant
-                    esp_tmp <= esp_tmp + 10'd1;          // increment esp
+                    res[22:0] <= mant_tmp[46:24];        //store mant
+                    esp_tmp <= esp_tmp + 10'd1;          //increment esp
                 end
                 else begin
-                    res[22:0] <= mant_tmp[45:23];        // store mant
-                    mant_tmp <= mant_tmp << 1'b1;        // norm mant_tmp
+                    res[22:0] <= mant_tmp[45:23];        //store mant
+                    mant_tmp <= mant_tmp << 1'b1;        //norm mant_tmp
                 end 
             end
             
@@ -224,7 +224,7 @@ begin
             
             // Overflow check
             ST_OVERF: begin
-                if (esp_tmp[8] == 1'b1) begin           // overflow check
+                if (esp_tmp[8] == 1'b1) begin           //overflow check
                     res_type <= T_INF;
                     special <= 1'b1;
                 end
@@ -255,7 +255,7 @@ begin
                     end
                 endcase
                 
-                res[31] <= sign1 ^ sign2;    // Get sign
+                res[31] <= sign1 ^ sign2;    //get sign
                 done <= 1'b1;
             end
                 
