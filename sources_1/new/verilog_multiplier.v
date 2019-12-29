@@ -192,37 +192,32 @@ begin
             
             // Normalize result
             ST_NORM1: begin
-                if (mant_tmp[47] == 1'b1) begin
-                    res[22:0] <= mant_tmp[46:24];        //store mant
+                if (mant_tmp[47] == 1'b1) 
                     esp_tmp <= esp_tmp + 10'd1;          //increment esp
-                end
                 else begin
-                    res[22:0] <= mant_tmp[45:23];        //store mant
                     mant_tmp <= mant_tmp << 1'b1;        //norm mant_tmp
                 end 
             end
             
             // Round result
             ST_ROUND: begin
-                if (mant_tmp[23] == 1'b1 || (mant_tmp[22:0] == 23'b01111111111111111111111)) begin
-                    res[22:0] <= res[22:0] + 23'd1;
+                if (mant_tmp[23] == 1'b1 || (mant_tmp[22:0] == 23'b01111111111111111111111))
                     norm_again <= 1'b1;
-                end
                 else
                     norm_again <= 1'b0;
             end
             
             // Normalize result after rounding
             ST_NORM2: begin
-                if (res[22:0] == 23'b11111111111111111111111) begin
+                if (mant_tmp[46:24] == 23'b11111111111111111111111) begin
                     esp_tmp <= esp_tmp + 10'd1;
-                    res[22:0] <= 23'b00000000000000000000000;
+                    mant_tmp[46:24] <= 23'b00000000000000000000000;
                 end
                 else
-                    res[22:0] <= res[22:0] + 23'd1;
+                    mant_tmp[46:24] <= mant_tmp[46:24] + 23'd1;
             end
             
-            // Overflow check
+            // Overflow check and store 
             ST_OVERF: begin
                 if (esp_tmp[8] == 1'b1) begin           //overflow check
                     res_type <= T_INF;
@@ -231,7 +226,8 @@ begin
                 else begin
                     res_type <= T_NUM;
                     special <= 1'b0;
-                    res[31:23] <= esp_tmp[7:0];
+                    res[30:23] <= esp_tmp[7:0];         //store esp
+                    res[22:0] <= mant_tmp[46:24];       //store mant
                 end
             end
             
@@ -239,15 +235,15 @@ begin
             ST_FINISH: begin
                 case (res_type)
                     T_ZER: begin
-                        res[31:0] <= 31'b0000000000000000000000000000000;
+                        res[30:0] <= 31'b0000000000000000000000000000000;
                     end
                     
                     T_INF: begin
-                        res[31:0] <= 31'b1111111100000000000000000000000;
+                        res[30:0] <= 31'b1111111100000000000000000000000;
                     end
                     
                     T_NAN: begin
-                        res[31:0] <= 31'b1111111111111111111111111111111;
+                        res[30:0] <= 31'b1111111111111111111111111111111;
                     end
                     
                     default: begin

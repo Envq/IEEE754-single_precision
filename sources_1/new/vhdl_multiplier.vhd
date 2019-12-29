@@ -4,10 +4,10 @@ use IEEE.NUMERIC_STD.ALL; -- for arithmetic functions with Signed or Unsigned va
 
 package multiplier_pkg is
     type MULT_STATE is (ST_START, ST_EVAL1, ST_EVAL2, ST_CHECK, ST_ELAB, ST_UNDERF, ST_NORM1, ST_ROUND, ST_NORM2, ST_OVERF, ST_FINISH);
-    constant T_ZER : std_logic_vector(2 downto 0) := "00";
-    constant T_INF : std_logic_vector(2 downto 0) := "01";
-    constant T_NAN : std_logic_vector(2 downto 0) := "10";
-    constant T_NUM : std_logic_vector(2 downto 0) := "11";
+    constant T_ZER : std_logic_vector(1 downto 0) := "00";
+    constant T_INF : std_logic_vector(1 downto 0) := "01";
+    constant T_NAN : std_logic_vector(1 downto 0) := "10";
+    constant T_NUM : std_logic_vector(1 downto 0) := "11";
 end multiplier_pkg;
 
 library IEEE;
@@ -17,8 +17,8 @@ use WORK.multiplier_pkg.all;
 
 entity vhdl_multiplier is
     Port (  clk, rst, ready: in std_logic;
-            op1, op2: in std_logic_vector(31 downto 1);
-            res: out std_logic_vector(31 downto 1);
+            op1, op2: in std_logic_vector(31 downto 0);
+            res: out std_logic_vector(31 downto 0);
             done: out std_logic);
 end vhdl_multiplier;
 
@@ -26,7 +26,7 @@ end vhdl_multiplier;
 architecture Behavioral of vhdl_multiplier is
     signal STATE, NEXT_STATE: MULT_STATE;
     signal special, norm_again : std_logic;
-    signal res_type : std_logic_vector(2 downto 0);
+    signal res_type : std_logic_vector(1 downto 0);
 begin
 
     FSM: process(STATE, ready, special, norm_again)
@@ -96,7 +96,7 @@ begin
         variable mant1, mant2 : std_logic_vector(23 downto 0);
         variable esp_tmp : std_logic_vector(9 downto 0);
         variable mant_tmp : std_logic_vector(47 downto 0);
-        variable op1_type, op2_type : std_logic_vector(2 downto 0);
+        variable op1_type, op2_type : std_logic_vector(1 downto 0);
         variable p3 : std_logic_vector(7 downto 0);
         variable p1 : std_logic_vector(3 downto 0);
         variable p2 : std_logic_vector(3 downto 0);
@@ -199,17 +199,14 @@ begin
                 -- Normalize result
                 when ST_NORM1 =>
                     if (mant_tmp(47) = '1') then
-                        res(22 downto 0) <= mant_tmp(46 downto 24);             --store mant
                         esp_tmp := std_logic_vector(unsigned(esp_tmp) + 1);     --increment esp
                     else
-                        res(22 downto 0) <= mant_tmp(45 downto 23);             --store mant
                         mant_tmp := std_logic_vector(unsigned(mant_tmp) sll 1); --norm mant_tmp
                     end if;
                 
                 -- Round result
                 when ST_ROUND =>
                     if (mant_tmp(23) = '1' OR (mant_tmp(22 downto 0) = "01111111111111111111111")) then
-                        res(22 downto 0) <= std_logic_vector(unsigned(res(22 downto 0)) + 1);
                         norm_again <= '1';
                     else
                         norm_again <= '0';
@@ -217,35 +214,36 @@ begin
                 
                 -- Normalize result after rounding
                 when ST_NORM2 =>
-                    if (res(22 downto 0) == "11111111111111111111111") then
-                        esp_tmp <= esp_tmp + 10'd1;
-                        res(22 downto 0) <= "00000000000000000000000";
+                    if (mant_tmp(46 downto 24) = "11111111111111111111111") then
+                        esp_tmp := std_logic_vector(unsigned(esp_tmp) + 1);     --increment esp
+                        mant_tmp(46 downto 24) := "00000000000000000000000";    --reset mant
                     else
-                        res(22 downto 0) <= res(22 downto 0) + 23'd1;
+                        mant_tmp(46 downto 24) := std_logic_vector(unsigned(mant_tmp(46 downto 24)) + 1);
                     end if;
                 
-                -- Overflow check
+                -- Overflow check and store mant
                 when ST_OVERF =>
-                    if (esp_tmp(8) = '1') begin           --overflow check
+                    if (esp_tmp(8) = '1') then                      --overflow check
                         res_type <= T_INF;
                         special <= '1';
                     else
                         res_type <= T_NUM;
                         special <= '0';
-                        res(31 downto 23) <= esp_tmp(7 downto 0);
+                        res(30 downto 23) <= esp_tmp(7 downto 0);   --store esp
+                        res(22 downto 0) <= mant_tmp(46 downto 24); --store mant_tmp
                     end if;
                 
                 -- Finish
                 when ST_FINISH =>
                     case res_type is
                         when T_ZER =>
-                            res(31 downto 0) <= "0000000000000000000000000000000";
+                            res(30 downto 0) <= "0000000000000000000000000000000";
                         
                         when T_INF =>
-                            res(31 downto 0) <= "1111111100000000000000000000000";
+                            res(30 downto 0) <= "1111111100000000000000000000000";
                         
                         when T_NAN =>
-                            res(31 downto 0) <= "1111111111111111111111111111111";
+                            res(30 downto 0) <= "1111111111111111111111111111111";
                         
                         when OTHERS =>
                             -- Do nothing
