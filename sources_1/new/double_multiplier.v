@@ -27,7 +27,7 @@ vhdl_multiplier mul1 (
     .done (done1)
 );
 
-vhdl_multiplier mul2 (
+verilog_multiplier mul2 (
     .clk (clk),
     .rst (rst),
     .ready (ready2),
@@ -135,6 +135,14 @@ begin
                 ready2 <= 1'b0;             //stop mul2
             end
             
+            ST_WAIT1: begin
+                // Do nothing
+            end
+            
+            ST_WAIT2: begin
+                // Do nothing
+            end
+            
             // Raise the flag of done and return res1
             ST_RET1: begin
                 done <= 1'b1;
@@ -146,8 +154,9 @@ begin
                 res <= res2;
             end
             
-            // Do nothing
+            // Other cases
             default : begin
+                // Do nothing
             end
         endcase
     end    
