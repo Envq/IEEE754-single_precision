@@ -9,7 +9,7 @@ module double_multipler(clk, rst, ready, op1, op2, res, done);
     output reg done;    
     
     // Statements
-    parameter ST_START=0, ST_READ1=1, ST_READ2=2, ST_WAIT=3, ST_WAIT1=4, ST_WAIT2=5, ST_RET1=6, ST_RET2=7;
+    parameter ST_START=0, ST_READ_SEC=1, ST_WAIT=2, ST_WAIT1=3, ST_WAIT2=4, ST_RET1=5, ST_RET2=6;
     reg[2:0] STATE, NEXT_STATE;
     reg ready1, ready2;
     reg[31:0] op1_tmp, op2_tmp;
@@ -44,16 +44,12 @@ begin
     case (STATE)        
         ST_START: begin
             if (ready == 1'b1)
-                NEXT_STATE <= ST_READ1;
+                NEXT_STATE <= ST_READ_SEC;
             else
                 NEXT_STATE <= STATE;
         end
         
-        ST_READ1: begin
-            NEXT_STATE <= ST_READ2;
-        end
-        
-        ST_READ2: begin
+        ST_READ_SEC: begin
             NEXT_STATE <= ST_WAIT;
         end
         
@@ -110,20 +106,22 @@ begin
         case (STATE)
             // Reset register
             ST_START: begin
-                done <= 1'b0;
-                ready2 <= 1'b0; 
-                ready1 <= 1'b0;
-            end
-            
-            // Start first multiplier
-            ST_READ1: begin      
-                op1_tmp <= op1;
-                op2_tmp <= op2;  
-                ready1 <= 1'b1;
+                if (ready == 1'b1) begin
+                    done <= 1'b0;
+                    ready1 <= 1'b1;
+                    ready2 <= 1'b0;
+                    op1_tmp <= op1;
+                    op2_tmp <= op2;
+                end
+                else begin
+                    done <= 1'b0;
+                    ready1 <= 1'b0;
+                    ready2 <= 1'b0;
+                end
             end
             
             // Start second multiplier
-            ST_READ2: begin   
+            ST_READ_SEC: begin   
                 ready1 <= 1'b0;             //stop mul1
                 op1_tmp <= op1;
                 op2_tmp <= op2; 

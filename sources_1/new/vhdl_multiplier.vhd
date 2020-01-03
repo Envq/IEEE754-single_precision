@@ -9,7 +9,8 @@ use IEEE.NUMERIC_STD.ALL; -- for arithmetic functions with Signed or Unsigned va
 use WORK.multiplier_pkg.all;
 
 entity vhdl_multiplier is
-    Port (  clk, rst, ready:    in  std_logic;
+    Port (  clk:                in  bit;
+            rst, ready:         in  std_logic;
             op1, op2:           in  std_logic_vector(31 downto 0);
             res:                out std_logic_vector(31 downto 0);
             done:               out std_logic);
@@ -20,9 +21,6 @@ architecture Behavioral of vhdl_multiplier is
     signal STATE, NEXT_STATE:   MULT_STATE;
     signal res_type:            MULT_TYPE;
     signal norm_again:          std_logic;
-    signal sign1, sign2 :         std_logic;
-    signal esp1, esp2 :           std_logic_vector(9 downto 0);
-    signal mant1, mant2 :         std_logic_vector(23 downto 0);
 begin
 
     FSM: process(STATE, ready, res_type, norm_again)
@@ -92,9 +90,9 @@ begin
     end process FSM;
 
     DATAPATH: process(clk, rst)
-        --variable sign1, sign2 :         std_logic;
-        --variable esp1, esp2 :           std_logic_vector(9 downto 0);
-        --variable mant1, mant2 :         std_logic_vector(23 downto 0);
+        variable sign1, sign2 :         std_logic;
+        variable esp1, esp2 :           std_logic_vector(9 downto 0);
+        variable mant1, mant2 :         std_logic_vector(23 downto 0);
         variable esp_tmp :              std_logic_vector(9 downto 0);
         variable mant_tmp :             std_logic_vector(47 downto 0);
         variable op1_type, op2_type :   MULT_TYPE;
@@ -113,13 +111,13 @@ begin
                     done <= '0';   
                     norm_again <= '0';
                     -- Get informations of op1
-                    sign1 <= op1(31);             
-                    esp1  <=  "00" & op1(30 downto 23);
-                    mant1 <= "1" & op1(22 downto 0);
+                    sign1 := op1(31);             
+                    esp1  :=  "00" & op1(30 downto 23);
+                    mant1 := "1" & op1(22 downto 0);
                     -- Get informations of op2
-                    sign2 <= op2(31);             
-                    esp2  <=  "00" & op2(30 downto 23);
-                    mant2 <= "1" & op2(22 downto 0);
+                    sign2 := op2(31);             
+                    esp2  :=  "00" & op2(30 downto 23);
+                    mant2 := "1" & op2(22 downto 0);
                 
                 -- Special case op1 check            
                 when ST_EVAL1 =>
