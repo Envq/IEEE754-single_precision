@@ -163,8 +163,7 @@ void MultiplierModule::datapath() {
 
         case ST_ELAB:
             esp_tmp = esp1.to_int() + esp2.to_int() - 127;
-            p = mant1.to_uint() * mant2.to_uint();
-            mant_tmp = p;
+            mant_tmp = mant1.to_uint64() * mant2.to_uint64();
             break;
 
         case ST_UNDERF:
@@ -214,28 +213,33 @@ void MultiplierModule::datapath() {
             break;
 
         case ST_FINISH:
+            res_tmp << (sign1 xor sign2);
             switch (res_type) {
             case T_ZER:
-                res.write((sign1 xor sign2, "0000000000000000000000000000000"));
+                res_tmp << "0000000000000000000000000000000";
+                res.write(res_tmp.str().c_str());
                 break;
 
             case T_INF:
-                res.write((sign1 xor sign2, "1111111100000000000000000000000"));
+                res_tmp << "1111111100000000000000000000000";
+                res.write(res_tmp.str().c_str());
                 break;
 
             case T_NAN:
-                res.write((sign1 xor sign2, "1111111111111111111111111111111"));
+                res_tmp << "1111111111111111111111111111111";
+                res.write(res_tmp.str().c_str());
                 break;
 
             case T_NUM:
-                res.write(
-                    (sign1 xor sign2, esp_tmp.range(7, 0), mant_tmp(46, 24)));
+                res_tmp << esp_tmp.range(7, 0) << mant_tmp(46, 24);
+                res.write(res_tmp.str().c_str());
                 break;
 
             default:
                 break;
             }
             done.write(sc_logic(1));
+            res_tmp.str("");    // Clean stream
             break;
 
         default:

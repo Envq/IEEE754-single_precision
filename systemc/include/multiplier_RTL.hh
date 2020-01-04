@@ -2,6 +2,7 @@
 #define DM2_H
 
 #include <systemc.h>
+#include <sstream>
 
 class MultiplierModule : public sc_core::sc_module {
   public:
@@ -49,9 +50,9 @@ class MultiplierModule : public sc_core::sc_module {
     sc_logic sign1, sign2;
     sc_lv<10> esp1, esp2;
     sc_lv<24> mant1, mant2;
-    sc_uint<48> p;
     sc_lv<10> esp_tmp;
     sc_lv<48> mant_tmp;
+    std::stringstream res_tmp;
     int op1_type, op2_type;
 
     SC_HAS_PROCESS(MultiplierModule);
