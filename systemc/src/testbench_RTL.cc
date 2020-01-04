@@ -26,7 +26,7 @@ void TestbenchModule::run() {
     // Init
     wait();
     std::cout << "Init" << std::endl;
-    ready.write(sc_logic(1));
+    ready.write(sc_logic(0));
 
     // Reset
     wait();

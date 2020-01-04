@@ -58,6 +58,8 @@ int sc_main(int argc, char *argv[]) {
     sc_trace(fp, dm.mult1->norm_again, "mult1.norm_again(mult1)");
     sc_trace(fp, dm.mult1->sign1, "mult1.sign1(mult1)");
     sc_trace(fp, dm.mult1->sign2, "mult1.sign2(mult1)");
+    sc_trace(fp, dm.mult1->esp1, "mult1.esp1(mult1)");
+    sc_trace(fp, dm.mult1->esp2, "mult1.esp2(mult1)");
     sc_trace(fp, dm.mult1->mant1, "mult1.mant1(mult1)");
     sc_trace(fp, dm.mult1->mant2, "mult1.mant2(mult1)");
     sc_trace(fp, dm.mult1->esp_tmp, "mult1.esp_tmp(mult1)");
@@ -72,6 +74,8 @@ int sc_main(int argc, char *argv[]) {
     sc_trace(fp, dm.mult2->norm_again, "mult2.norm_again(mult2)");
     sc_trace(fp, dm.mult2->sign1, "mult2.sign1(mult2)");
     sc_trace(fp, dm.mult2->sign2, "mult2.sign2(mult2)");
+    sc_trace(fp, dm.mult2->esp1, "mult2.esp1(mult2)");
+    sc_trace(fp, dm.mult2->esp2, "mult2.esp2(mult2)");
     sc_trace(fp, dm.mult2->mant1, "mult2.mant1(mult2)");
     sc_trace(fp, dm.mult2->mant2, "mult2.mant2(mult2)");
     sc_trace(fp, dm.mult2->esp_tmp, "mult2.esp_tmp(mult2)");

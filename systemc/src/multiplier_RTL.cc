@@ -163,7 +163,8 @@ void MultiplierModule::datapath() {
 
         case ST_ELAB:
             esp_tmp = esp1.to_int() + esp2.to_int() - 127;
-            mant_tmp = mant1.to_uint() * mant2.to_uint();
+            p = mant1.to_uint() * mant2.to_uint();
+            mant_tmp = p;
             break;
 
         case ST_UNDERF:
@@ -217,7 +218,7 @@ void MultiplierModule::datapath() {
             case T_ZER:
                 res.write((sign1 xor sign2, "0000000000000000000000000000000"));
                 break;
-            
+
             case T_INF:
                 res.write((sign1 xor sign2, "1111111100000000000000000000000"));
                 break;
@@ -227,7 +228,8 @@ void MultiplierModule::datapath() {
                 break;
 
             case T_NUM:
-                res.write((sign1 xor sign2, esp_tmp.range(7,0), mant_tmp(46,24)));
+                res.write(
+                    (sign1 xor sign2, esp_tmp.range(7, 0), mant_tmp(46, 24)));
                 break;
 
             default:

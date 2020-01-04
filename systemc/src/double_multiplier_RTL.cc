@@ -8,7 +8,7 @@ DoubleMultiplierModule::DoubleMultiplierModule(
     mult1 = new MultiplierModule("multiplier1");
     mult1->clk(clk);
     mult1->rst(rst);
-    mult1->ready(ready);
+    mult1->ready(ready1);
     mult1->op1(op1_tmp);
     mult1->op2(op2_tmp);
     mult1->done(done1);
@@ -17,7 +17,7 @@ DoubleMultiplierModule::DoubleMultiplierModule(
     mult2 = new MultiplierModule("multiplier2");
     mult2->clk(clk);
     mult2->rst(rst);
-    mult2->ready(ready);
+    mult2->ready(ready2);
     mult2->op1(op1_tmp);
     mult2->op2(op2_tmp);
     mult2->done(done2);
