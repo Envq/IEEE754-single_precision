@@ -1,7 +1,7 @@
 #include "testbench_RTL.hh"
 #include <bitset>
+#include <chrono>
 #include <random>
-#include <sstream>
 
 
 
@@ -23,8 +23,7 @@ std::string float_to_binary(const float &value) {
 
 std::string inc_binary_string(const std::string &val_str) {
     uint32_t val = std::bitset<32>(val_str).to_ulong();
-    val++;
-    return float_to_binary(val);
+    return std::bitset<32>(++val).to_string();
 }
 //*********************
 
@@ -51,7 +50,7 @@ void TestbenchModule::clk_gen() {
 
 
 void TestbenchModule::run_selected() {
-    // Varibles
+    // Variables
     std::string bits1_1, bits2_1, bits1_2, bits2_2;
 
     // Reset
@@ -99,7 +98,7 @@ void TestbenchModule::run_rnd() {
     std::uniform_real_distribution<float> random_float(
         0, std::numeric_limits<float>::max());
 
-    // Varibles
+    // Variables
     unsigned int num_tests = 10000;
     unsigned int fails = 0;
     float num1_1, num2_1, num1_2, num2_2;
@@ -165,12 +164,15 @@ void TestbenchModule::run_rnd() {
 
 
 void TestbenchModule::run_all() {
-    // Varibles
+    // Variables
+    const float TIME_PERIOD = 60.0;  // sec
     std::string max_num = "01111111100000000000000000000000";
-    unsigned int num_tests = 4611686018427387904;  // 2^31 * 2^31
-    unsigned int fails = 0;
+    unsigned long time_counter = 0;
+    unsigned long mult_counter = 0;
+    unsigned long fails = 0;
     float num1_1, num2_1, num1_2, num2_2;
-    std::string bits1, bits2 = "01111111100000000000000000000000";
+    std::string bits1 = "00000000100000000000000000000000";
+    std::string bits2 = "00000000100000000000000000000000";
     std::string res1, res2;
 
     // Reset
@@ -181,6 +183,9 @@ void TestbenchModule::run_all() {
     wait();
     rst.write(sc_logic(0));
 
+    clock_t start_time = std::clock();
+    clock_t cicle_time = start_time;
+
     while (bits1 != max_num) {
         while (bits2 != max_num) {
             // Exec
@@ -190,13 +195,13 @@ void TestbenchModule::run_all() {
             op2.write(bits2.c_str());
             num1_1 = binary_to_float(bits1);
             num2_1 = binary_to_float(bits2);
-            inc_binary_string(bits2);
+            bits2 = inc_binary_string(bits2);
             wait();
             op1.write(bits1.c_str());
             op2.write(bits2.c_str());
             num1_2 = binary_to_float(bits1);
             num2_2 = binary_to_float(bits2);
-            inc_binary_string(bits2);
+            bits2 = inc_binary_string(bits2);
             ready.write(sc_logic(0));
             while (done.read() == sc_logic(0))
                 wait();
@@ -223,12 +228,28 @@ void TestbenchModule::run_all() {
                           << std::endl;
                 fails++;
             }
-        }
-    }
 
-    std::cout << std::endl << "Tests: " << num_tests << std::endl;
-    std::cout << "Fails: " << fails << std::endl;
-    std::cout << "Success: " << num_tests - fails << std::endl;
+            mult_counter++;
+
+            if ((static_cast<float>(std::clock() - cicle_time) /
+                 CLOCKS_PER_SEC) > TIME_PERIOD) {
+                cicle_time = std::clock();
+                std::cout << ++time_counter << " of [" << TIME_PERIOD << " sec]"
+                          << " ==> " << mult_counter << " mult done."
+                          << std::endl;
+            }
+        }
+
+        bits1 = inc_binary_string(bits1);
+        bits2 = "00000000000000000000000000000000";
+    }
+    clock_t end_time = std::clock();
+    float time_elapsed =
+        static_cast<float>(end_time - start_time) / CLOCKS_PER_SEC;
+
+    std::cout << std::endl << "Tests: " << std::endl;
+    std::cout << "--Fails: " << fails << std::endl;
+    std::cout << "--Time elapsed: " << time_elapsed << std::endl;
 
     sc_stop();
 }
