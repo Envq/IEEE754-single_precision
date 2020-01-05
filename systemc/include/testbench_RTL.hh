@@ -22,9 +22,9 @@ class TestbenchModule : public sc_core::sc_module {
     ~TestbenchModule();
 
   private:
-    void run_rnd();
-    void run_selected();
-    void run_all();
+    void rnd_test();
+    void targeted_test();
+    void full_test();
     void clk_gen();
 };
 

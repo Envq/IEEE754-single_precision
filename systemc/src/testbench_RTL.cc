@@ -28,9 +28,9 @@ std::string inc_binary_string(const std::string &val_str) {
 //*********************
 
 TestbenchModule::TestbenchModule(sc_module_name name) {
-    // SC_THREAD(run_selected);
-    // SC_THREAD(run_rnd);
-    SC_THREAD(run_all);
+    // SC_THREAD(targeted_test);
+    SC_THREAD(rnd_test);
+    // SC_THREAD(run_all);
     sensitive << clk.pos();
 
     SC_THREAD(clk_gen);
@@ -49,7 +49,7 @@ void TestbenchModule::clk_gen() {
 }
 
 
-void TestbenchModule::run_selected() {
+void TestbenchModule::targeted_test() {
     // Variables
     std::string bits1_1, bits2_1, bits1_2, bits2_2;
 
@@ -64,13 +64,39 @@ void TestbenchModule::run_selected() {
     // Exec
     wait();
     ready.write(sc_logic(1));
-    bits1_1 = "01000000000000000000000000000000";  // 2.0
-    bits2_1 = "01000000001000000000000000000000";  // 2.5
+    bits1_1 = "01000010110010000110011001100110"; //100.2
+    bits2_1 = "10000000000000000000000000000000"; //-0.0
     op1.write(bits1_1.c_str());
     op2.write(bits2_1.c_str());
     wait();
-    bits1_2 = "00111111101000000000000000000000";  // 1.25
-    bits2_2 = "00111111100000000000000000000000";  // 1.0
+    bits1_2 = "11111111100000000000000000000000"; //-inf;
+    bits2_2 = "01000101000110000101101101110101"; //2437.716
+    op1.write(bits1_2.c_str());
+    op2.write(bits2_2.c_str());
+    ready.write(sc_logic(0));
+    while (done.read() == sc_logic(0))
+        wait();
+    std::cout << "Mult1: " << binary_to_float(bits1_1) << " * "
+              << binary_to_float(bits2_1) << " = "
+              << binary_to_float(res.read().to_string()) << "[" << res.read()
+              << "]" << std::endl;
+    wait();
+    std::cout << "Mult2: " << binary_to_float(bits1_2) << " * "
+              << binary_to_float(bits2_2) << " = "
+              << binary_to_float(res.read().to_string()) << "[" << res.read()
+              << "]" << std::endl
+              << std::endl;
+
+    // Exec
+    wait();
+    ready.write(sc_logic(1));
+    bits1_1 = "01000010110010000110011001100110"; //100.2
+    bits2_1 = "01111111111111111111111111111111"; //NAN
+    op1.write(bits1_1.c_str());
+    op2.write(bits2_1.c_str());
+    wait();
+    bits1_2 = "11111111100000000000000000000000"; //-inf;
+    bits2_2 = "10000000000000000000000000000000"; //-0.0
     op1.write(bits1_2.c_str());
     op2.write(bits2_2.c_str());
     ready.write(sc_logic(0));
@@ -91,15 +117,19 @@ void TestbenchModule::run_selected() {
 }
 
 
-void TestbenchModule::run_rnd() {
+void TestbenchModule::rnd_test() {
     // Random settings
     std::random_device seed;
-    std::mt19937 generator(seed());
+    std::mt19937_64 generator(seed());
+    std::minstd_rand generator1(seed());
+    std::ranlux48_base generator2(seed());
     std::uniform_real_distribution<float> random_float(
         0, std::numeric_limits<float>::max());
 
     // Variables
-    unsigned int num_tests = 10000;
+    const unsigned int TESTS_NUM = 1000000;
+    const float TIME_PERIOD = 2.0;  // sec
+    unsigned long time_counter = 0;
     unsigned int fails = 0;
     float num1_1, num2_1, num1_2, num2_2;
     std::string res1, res2;
@@ -112,7 +142,10 @@ void TestbenchModule::run_rnd() {
     wait();
     rst.write(sc_logic(0));
 
-    for (size_t i = 0; i < num_tests; i++) {
+    clock_t start_time = std::clock();
+    clock_t cicle_time = start_time;
+
+    for (size_t mult_counter = 0; mult_counter < TESTS_NUM; mult_counter++) {
         // Init
         num1_1 = random_float(generator);
         num2_1 = random_float(generator);
@@ -153,17 +186,29 @@ void TestbenchModule::run_rnd() {
                       << std::endl;
             fails++;
         }
-    }
 
-    std::cout << std::endl << "Tests: " << num_tests << std::endl;
+            if ((static_cast<float>(std::clock() - cicle_time) /
+                 CLOCKS_PER_SEC) > TIME_PERIOD) {
+                cicle_time = std::clock();
+                std::cout << ++time_counter << " of [" << TIME_PERIOD << " sec]"
+                          << " ==> " << mult_counter << " mult done."
+                          << std::endl;
+            }
+    }
+    clock_t end_time = std::clock();
+    float time_elapsed =
+        static_cast<float>(end_time - start_time) / CLOCKS_PER_SEC;
+
+    std::cout << std::endl << "Tests: " << TESTS_NUM << std::endl;
     std::cout << "Fails: " << fails << std::endl;
-    std::cout << "Success: " << num_tests - fails << std::endl;
+    std::cout << "Success: " << TESTS_NUM - fails << std::endl;
+    std::cout << "Time elapsed: " << time_elapsed << std::endl;
 
     sc_stop();
 }
 
 
-void TestbenchModule::run_all() {
+void TestbenchModule::full_test() {
     // Variables
     const float TIME_PERIOD = 60.0;  // sec
     std::string max_num = "01111111100000000000000000000000";
