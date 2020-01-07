@@ -1,8 +1,7 @@
 #!/usr/bin/tclsh
 
-# source ~/vivado_projects/double_multiplier/double_multiplier.srcs/stimuli/top_level.tcl
+# source ~/vivado_projects/POJECT_PSE/Solutions/RTL/VHDL_verilog/stimuli/top_level.tcl
 
-#relaunch_sim
 restart
 
 set PERIOD 100ns
