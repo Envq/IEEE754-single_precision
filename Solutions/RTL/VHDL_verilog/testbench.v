@@ -34,6 +34,7 @@ begin
     rst <= 1'b1;
     #PERIOD;
     rst <= 1'b0;
+    #PERIOD;
     
     // Ready1
     ready <= 1'b1;

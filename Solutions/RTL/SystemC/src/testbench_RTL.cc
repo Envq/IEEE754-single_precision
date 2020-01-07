@@ -127,8 +127,8 @@ void TestbenchModule::rnd_test() {
         0, sqrt(std::numeric_limits<float>::max()));
 
     // Variables
-    const unsigned int TESTS_NUM = 6;
-    const bool PRINT_MULT = true;
+    const unsigned int TESTS_NUM = 1000;
+    const bool PRINT_MULT = false;
     const float TIME_PERIOD = 2.0;  // sec
     unsigned long time_counter = 0;
     unsigned int fails = 0;

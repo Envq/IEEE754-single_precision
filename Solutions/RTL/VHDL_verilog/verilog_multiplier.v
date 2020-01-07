@@ -108,10 +108,24 @@ end
 // DATA PATH
 always @(posedge clk, posedge rst)
 begin
-    if (rst == 1'b1) begin
-        STATE <= ST_START;                   //Reset state
-    end 
-    else begin
+    if (rst == 1'b1) begin                   //Reset regs
+        STATE <= ST_START;
+        done <= 1'b0;           
+        norm_again <= 1'b0;
+        sign1 <= 1'b0;             
+        esp1 <= 10'd0;
+        mant1 <= 24'd0;
+        sign2 <= 1'b0;             
+        esp2 <= 10'd0;
+        mant2 <= 24'd0;
+        op1_type <= T_NUM;
+        op2_type <= T_NUM;
+        res_type <= T_NUM;
+        mant_tmp <= 48'd0;
+        esp_tmp <= 24'd0;
+        res <= 32'd0;
+end 
+else begin
         STATE <= NEXT_STATE;                 //Update STATE
         case (STATE)
             // Reset register

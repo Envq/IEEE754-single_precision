@@ -17,7 +17,7 @@ module double_multipler(clk, rst, ready, op1, op2, res, done);
     wire done1, done2;    
     
     
-vhdl_multiplier mul1 (
+verilog_multiplier mul1 (
     .clk (clk),
     .rst (rst),
     .ready (ready1),
@@ -27,7 +27,7 @@ vhdl_multiplier mul1 (
     .done (done1)
 );
 
-verilog_multiplier mul2 (
+vhdl_multiplier mul2 (
     .clk (clk),
     .rst (rst),
     .ready (ready2),
@@ -98,8 +98,14 @@ end
 // DATA PATH
 always @(posedge clk, posedge rst)
 begin
-    if (rst == 1'b1) begin
-        STATE <= ST_START;                  //Reset state
+    if (rst == 1'b1) begin                  //Reset regs
+        STATE <= ST_START;
+        done <= 1'b0;
+        ready1 <= 1'b0;
+        ready2 <= 1'b0;
+        op1_tmp <= 32'd0;
+        op2_tmp <= 32'd0;
+        res <= 32'd0;
     end 
     else begin
         STATE <= NEXT_STATE;                //Update STATE

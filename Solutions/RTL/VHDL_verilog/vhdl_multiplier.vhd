@@ -98,8 +98,22 @@ begin
         variable op1_type, op2_type :   MULT_TYPE;
     begin   
     
-        if rst = '1' then
+        if rst = '1' then                   --Reset regs
             STATE <= ST_START;
+            done <= '0';           
+            norm_again <= '0';
+            sign1 := '0';             
+            esp1 := "0000000000";
+            mant1 := "000000000000000000000000";
+            sign2 := '0';             
+            esp2 := "0000000000";
+            mant2 := "000000000000000000000000";
+            op1_type := T_NUM;
+            op2_type := T_NUM;
+            res_type <= T_NUM;
+            mant_tmp := "000000000000000000000000000000000000000000000000";
+            esp_tmp := "0000000000";
+            res <= "00000000000000000000000000000000";
                     
         elsif clk'event and clk='1' then        
             STATE <= NEXT_STATE;
