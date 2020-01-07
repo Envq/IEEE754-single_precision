@@ -1,6 +1,7 @@
 #!/usr/bin/tclsh
 
-# source ~/vivado_projects/POJECT_PSE/Solutions/RTL/VHDL_verilog/stimuli/top_level.tcl
+# source ~/vivado_projects/PROJECT_PSE/Solutions/RTL/VHDL_verilog/stimuli/top_level.tcl
+
 
 restart
 
@@ -19,11 +20,11 @@ add_force op1 01000000000000000000000000000000; #2.0
 add_force op2 01000000001000000000000000000000; #2.5
 
 run $PERIOD;
-#add_force ready 0;
+add_force ready 0;
 add_force op1 00111111101000000000000000000000; #1.25
 add_force op2 00111111100000000000000000000000; #1.0
 
-for { set a 0}  {$a < 23} {incr a} {
+for { set a 0}  {$a < 18} {incr a} {
     run $PERIOD;
 }
 
@@ -38,6 +39,6 @@ add_force ready 0;
 add_force op1 11111111100000000000000000000000; #-inf
 add_force op2 00111111100000000000000000000000; #1.0
 
-for { set a 0}  {$a < 23} {incr a} {
+for { set a 0}  {$a < 18} {incr a} {
     run $PERIOD;
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/tclsh
 
-# source ~/vivado_projects/POJECT_PSE/Solutions/RTL/VHDL_verilog/stimuli/multiplier.tcl
+# source ~/vivado_projects/PROJECT_PSE/Solutions/RTL/VHDL_verilog/stimuli/multiplier.tcl
 
 restart
 

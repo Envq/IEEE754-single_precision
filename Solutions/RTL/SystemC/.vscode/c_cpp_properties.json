@@ -3,7 +3,8 @@
         {
             "includePath": [
                 "~/libraries/systemc/include/**",
-                "~/vivado_projects/double_multiplier/double_multiplier.srcs/systemc/include/**"
+                "~/pse_libraries/systemc/include/**",
+                "~/vivado_projects/PROJECT_PSE/Solutions/RTL/SystemC/include/**"
             ],
             "name": "SYSTEMC",
             "intelliSenseMode": "gcc-x64",
