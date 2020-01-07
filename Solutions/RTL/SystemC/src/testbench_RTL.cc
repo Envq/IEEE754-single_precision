@@ -64,13 +64,13 @@ void TestbenchModule::targeted_test() {
     // Exec
     wait();
     ready.write(sc_logic(1));
-    bits1_1 = "01000010110010000110011001100110"; //100.2
-    bits2_1 = "10000000000000000000000000000000"; //-0.0
+    bits1_1 = "01000010110010000110011001100110";  // 100.2
+    bits2_1 = "10000000000000000000000000000000";  //-0.0
     op1.write(bits1_1.c_str());
     op2.write(bits2_1.c_str());
     wait();
-    bits1_2 = "11111111100000000000000000000000"; //-inf;
-    bits2_2 = "01000101000110000101101101110101"; //2437.716
+    bits1_2 = "11111111100000000000000000000000";  //-inf;
+    bits2_2 = "01000101000110000101101101110101";  // 2437.716
     op1.write(bits1_2.c_str());
     op2.write(bits2_2.c_str());
     ready.write(sc_logic(0));
@@ -90,13 +90,13 @@ void TestbenchModule::targeted_test() {
     // Exec
     wait();
     ready.write(sc_logic(1));
-    bits1_1 = "01000010110010000110011001100110"; //100.2
-    bits2_1 = "01111111111111111111111111111111"; //NAN
+    bits1_1 = "01000010110010000110011001100110";  // 100.2
+    bits2_1 = "01111111111111111111111111111111";  // NAN
     op1.write(bits1_1.c_str());
     op2.write(bits2_1.c_str());
     wait();
-    bits1_2 = "11111111100000000000000000000000"; //-inf;
-    bits2_2 = "10000000000000000000000000000000"; //-0.0
+    bits1_2 = "11111111100000000000000000000000";  //-inf;
+    bits2_2 = "10000000000000000000000000000000";  //-0.0
     op1.write(bits1_2.c_str());
     op2.write(bits2_2.c_str());
     ready.write(sc_logic(0));
@@ -120,14 +120,15 @@ void TestbenchModule::targeted_test() {
 void TestbenchModule::rnd_test() {
     // Random settings
     std::random_device seed;
-    std::mt19937_64 generator(seed());
+    std::mt19937 generator(seed());
     std::minstd_rand generator1(seed());
     std::ranlux48_base generator2(seed());
     std::uniform_real_distribution<float> random_float(
-        0, std::numeric_limits<float>::max());
+        0, sqrt(std::numeric_limits<float>::max()));
 
     // Variables
-    const unsigned int TESTS_NUM = 10000;
+    const unsigned int TESTS_NUM = 6;
+    const bool PRINT_MULT = true;
     const float TIME_PERIOD = 2.0;  // sec
     unsigned long time_counter = 0;
     unsigned int fails = 0;
@@ -145,12 +146,13 @@ void TestbenchModule::rnd_test() {
     clock_t start_time = std::clock();
     clock_t cicle_time = start_time;
 
-    for (size_t mult_counter = 0; mult_counter < TESTS_NUM; mult_counter++) {
+    for (size_t mult_counter = 0; mult_counter < (TESTS_NUM / 2);
+         mult_counter++) {
         // Init
-        num1_1 = random_float(generator);
-        num2_1 = random_float(generator);
-        num1_2 = random_float(generator);
-        num2_2 = random_float(generator);
+        num1_1 = random_float(generator1);
+        num2_1 = random_float(generator1);
+        num1_2 = random_float(generator1);
+        num2_2 = random_float(generator1);
 
         // Exec
         wait();
@@ -175,6 +177,10 @@ void TestbenchModule::rnd_test() {
             std::cout << ">>> current result: " << res1 << std::endl
                       << std::endl;
             fails++;
+        } else if (PRINT_MULT) {
+            std::cout << "Mult1: " << num1_1 << " * " << num2_1 << " = "
+                      << binary_to_float(res1) << "[" << res1 << "]"
+                      << std::endl;
         }
 
         if (res2 != float_to_binary(num1_2 * num2_2)) {
@@ -185,15 +191,18 @@ void TestbenchModule::rnd_test() {
             std::cout << ">>> current result: " << res2 << std::endl
                       << std::endl;
             fails++;
+        } else if (PRINT_MULT) {
+            std::cout << "Mult2: " << num1_2 << " * " << num2_2 << " = "
+                      << binary_to_float(res2) << "[" << res2 << "]"
+                      << std::endl;
         }
 
-            if ((static_cast<float>(std::clock() - cicle_time) /
-                 CLOCKS_PER_SEC) > TIME_PERIOD) {
-                cicle_time = std::clock();
-                std::cout << ++time_counter << " of [" << TIME_PERIOD << " sec]"
-                          << " ==> " << mult_counter << " mult done."
-                          << std::endl;
-            }
+        if ((static_cast<float>(std::clock() - cicle_time) / CLOCKS_PER_SEC) >
+            TIME_PERIOD) {
+            cicle_time = std::clock();
+            std::cout << ++time_counter << " of [" << TIME_PERIOD << " sec]"
+                      << " ==> " << mult_counter << " mult done." << std::endl;
+        }
     }
     clock_t end_time = std::clock();
     float time_elapsed =

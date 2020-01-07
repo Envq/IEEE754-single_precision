@@ -94,8 +94,22 @@ void MultiplierModule::fsm() {
 }
 
 void MultiplierModule::datapath() {
-    if (rst.read() == 1) {
-        STATE = ST_START;
+    if (rst.read() == 1) {                   //Reset regs
+            STATE = ST_START;
+            done.write(sc_logic(0));           
+            norm_again.write(sc_logic(0));   
+            sign1 = sc_logic(0);             
+            esp1 = "0000000000";
+            mant1 = "000000000000000000000000";
+            sign2 = sc_logic(0);             
+            esp2 = "0000000000";
+            mant2 = "000000000000000000000000";
+            op1_type = T_NUM;
+            op2_type = T_NUM;
+            res_type = T_NUM;
+            mant_tmp = "000000000000000000000000000000000000000000000000";
+            esp_tmp = "0000000000";
+            res = "00000000000000000000000000000000";
 
     } else if (clk.read() == 1) {
         STATE = NEXT_STATE;
