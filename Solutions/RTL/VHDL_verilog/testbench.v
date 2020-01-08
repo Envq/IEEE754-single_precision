@@ -26,17 +26,20 @@ always #(PERIOD/2) clk  <= !clk; // Set clock
 initial 
 begin
     // Init
-    clk <= 1'b0;
+    clk <= 1'b1;
     ready <= 1'b0;
+    rst <= 1'b0;
+    
+    // Wait for startup FPGA
+    #(PERIOD*10);
     
     // Reset
-    #PERIOD;
     rst <= 1'b1;
     #PERIOD;
     rst <= 1'b0;
     #PERIOD;
     
-    // Ready1
+    // Exec1
     ready <= 1'b1;
     op1 <= 32'b01000000000000000000000000000000; //2.0
     op2 <= 32'b01000000001000000000000000000000; //2.5
@@ -46,7 +49,7 @@ begin
     ready <= 1'b0;
     #(PERIOD*18);
     
-    // Ready2
+    // Exec2
     ready <= 1'b1;
     op1 <= 32'b01000010110010000110011001100110; //100.2
     op2 <= 32'b10000000000000000000000000000000; //-0.0

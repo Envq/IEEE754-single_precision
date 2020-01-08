@@ -44,8 +44,10 @@ int sc_main(int argc, char *argv[]) {
     sc_trace(fp, dm.NEXT_STATE, "dm.NEXT_STATE(dm)");
     sc_trace(fp, dm.ready1, "dm.ready1(dm)");
     sc_trace(fp, dm.ready2, "dm.ready2(dm)");
-    sc_trace(fp, dm.op1_tmp, "dm.op1_tmp(dm)");
-    sc_trace(fp, dm.op2_tmp, "dm.op2_tmp(dm)");
+    sc_trace(fp, dm.op1_tmp1, "dm.op1_tmp1(dm)");
+    sc_trace(fp, dm.op2_tmp1, "dm.op2_tmp1(dm)");
+    sc_trace(fp, dm.op1_tmp2, "dm.op1_tmp2(dm)");
+    sc_trace(fp, dm.op2_tmp2, "dm.op2_tmp2(dm)");
     sc_trace(fp, dm.res1, "dm.res1(dm)");
     sc_trace(fp, dm.res2, "dm.res2(dm)");
     sc_trace(fp, dm.done1, "dm.done1(dm)");
