@@ -28,8 +28,8 @@ std::string inc_binary_string(const std::string &val_str) {
 //*********************
 
 TestbenchModule::TestbenchModule(sc_module_name name) {
-    // SC_THREAD(targeted_test);
-    SC_THREAD(rnd_test);
+    SC_THREAD(targeted_test);
+    // SC_THREAD(rnd_test);
     // SC_THREAD(run_all);
     sensitive << clk.pos();
 
@@ -53,16 +53,23 @@ void TestbenchModule::targeted_test() {
     // Variables
     std::string bits1_1, bits2_1, bits1_2, bits2_2;
 
-    // Reset
-    wait();
+    // Init
     wait();
     ready.write(sc_logic(0));
+    rst.write(sc_logic(0));
+
+    // Wait for startup FPGA
+    for (size_t i = 0; i < 1; i++) {
+        wait();
+    }
+
+    // Reset
     rst.write(sc_logic(1));
     wait();
     rst.write(sc_logic(0));
-
-    // Exec
     wait();
+
+    // Exec1
     ready.write(sc_logic(1));
     bits1_1 = "01000010110010000110011001100110";  // 100.2
     bits2_1 = "10000000000000000000000000000000";  //-0.0
@@ -87,7 +94,7 @@ void TestbenchModule::targeted_test() {
               << "]" << std::endl
               << std::endl;
 
-    // Exec
+    // Exec2
     wait();
     ready.write(sc_logic(1));
     bits1_1 = "01000010110010000110011001100110";  // 100.2

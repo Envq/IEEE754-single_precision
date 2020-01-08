@@ -38,13 +38,13 @@ void DoubleMultiplierModule::fsm() {
     switch (STATE) {
     case ST_START:
         if (ready.read() == 1) {
-            NEXT_STATE = ST_READ_SEC;
+            NEXT_STATE = ST_READ_AGAIN;
         } else {
             NEXT_STATE = STATE;
         }
         break;
 
-    case ST_READ_SEC:
+    case ST_READ_AGAIN:
         NEXT_STATE = ST_WAIT;
         break;
 
@@ -117,7 +117,7 @@ void DoubleMultiplierModule::datapath() {
 
             break;
 
-        case ST_READ_SEC:
+        case ST_READ_AGAIN:
             ready1.write(sc_logic(0));
             op1_tmp.write(op1.read());
             op2_tmp.write(op2.read());

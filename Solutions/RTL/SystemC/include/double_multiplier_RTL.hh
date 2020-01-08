@@ -21,7 +21,7 @@ class DoubleMultiplierModule : public sc_core::sc_module {
     // Internal signals
     typedef enum{
         ST_START,
-        ST_READ_SEC,
+        ST_READ_AGAIN,
         ST_WAIT,
         ST_WAIT1,
         ST_WAIT2,
