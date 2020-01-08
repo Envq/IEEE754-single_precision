@@ -39,6 +39,7 @@ L'introduzione non dovrebbe andare oltre la metà della seconda colonna (nel cas
 - descrivere cos'è un floating-point
 - descrivere la moltiplicazione
 - arrotondamento numero binario
+- handshake
 
 Il background dovrebbe contenere una descrizione, abbastanza breve, dei concetti principali che vengono utilizzati nel lavoro. Ad esempio, può contenere una breve descrizione delle caratteristiche principali degli HDL , e delle sue estensioni. Una colonna dovrebbe bastare.
 
@@ -48,10 +49,17 @@ Questa sessione non deve ripetere quanto detto a lezione, ma dare un overview de
 
 
 \section{Metodologia applicata}
-Attuando un approccio bottom-up, prima si definiscono i componenti principali cioè il {\it moltiplicatore} e il {\it doppio moltiplicatore}, descrivoli con EFSM. Dopodichè si passa all'implementazione a livello RTL in vhdl e verilog di queste e alla creazione di un piccolo testbench. A questo punto si traduce il tutto in systemC dove con la potenza del C++ si crea un testbench più complesso. Infine si procede alla sintesi e alla sintesi ad alto livello per poi confrontare i vari risultati.
+Attuando un approccio bottom-up, prima si definiscono i componenti principali cioè il {\it moltiplicatore} e il {\it doppio moltiplicatore}, descrivoli con EFSM. Dopodichè si passa all'implementazione a livello RTL in vhdl e verilog di queste e alla creazione di un piccolo testbench. A questo punto si traduce il tutto in systemC dove con la potenza del C++ si crea un testbench più complesso. Infine si procede alla sintesi e alla sintesi ad alto livello per poi confrontare i vari risultati.\\
+
+I vincoli sono:
+\begin{itemize}
+\item Un moltiplicatore dovrà essere scritto in verilog e uno in VHDL.
+\item Gli operandi e il risultato devono essere a 32 bit.
+\item Deve poter essere sintetizzabile sulla FPGA xc7z020clg400-1. Essa ha disposizione solo 125 porte. Per rispettare il limite viene utilizzata la stessa porta per il risultato e due porte per gli operandi. Quindi al primo ciclo di clock con ready uguale 1, verranno trasmessi i primi due operandi e al ciclo successivo gli altri due. Dopodichè si aspetterà il complementanto delle moltiplicazioni e verrà trasmesso il primo risultato quando done varrà 1, e il ciclo di clock successivo l'altro.
+\end{itemize}
 
 \subsection{Modellazione della EFSM del moltiplicatore}
-I segnali utilizzati sono:
+I segnali utilizzati per la comunicazione sono:
 \begin{itemize}
 \item {\it\bf rst:} (1 bit) per riportare il sistema allo stato iniziale .
 \item {\it\bf ready:} (1 bit) per permettere al sistema di uscire dallo stato iniziale .
@@ -78,7 +86,7 @@ Sono inoltre necessari 14 stati:
 
 
 \subsection{Modellazione della EFSM del doppio moltiplicatore}
-I segnali utilizzati sono:
+I segnali utilizzati per la comunicazione sono:
 \begin{itemize}
 \item {\it\bf rst:} (1 bit) per riportare il sistema allo stato iniziale .
 \item {\it\bf ready:} (1 bit) per permettere al sistema di uscire dallo stato iniziale .
@@ -89,8 +97,8 @@ I segnali utilizzati sono:
 Sono inoltre necessari 8 stati:
 
 \begin{itemize}
-\item {\it\bf ST\textunderscore START:} in cui si pone {\it done}, {\it ready1} e {\it ready2}uguali a 0 e si inizializzano {\it op1_tmp1} e {\it op2_tmp1} rispettivamenete con i valori di {\it op1} e {\it op2} i quali serviranno per il primo moltiplicatore. In esso si rimane finchè {\it ready} vale 0 altrimensi si passa a {\it ST\textunderscore RUN1}.
-\item {\it\bf ST\textunderscore RUN1:} in cui si pone {\it ready1} uguale a 1, attivando quindi il primo moltiplicatore, e si inizializzano {\it op1_tmp2} e {\it op2_tmp2} rispettivamenete con i valori di {\it op1} e {\it op2} i quali serviranno per il secondo moltiplicatore.
+\item {\it\bf ST\textunderscore START:} in cui si pone {\it done}, {\it ready1} e {\it ready2}uguali a 0 e si inizializzano {\it op1\textunderscore tmp1} e {\it op2\textunderscore tmp1} rispettivamenete con i valori di {\it op1} e {\it op2} i quali serviranno per il primo moltiplicatore. In esso si rimane finchè {\it ready} vale 0 altrimensi si passa a {\it ST\textunderscore RUN1}.
+\item {\it\bf ST\textunderscore RUN1:} in cui si pone {\it ready1} uguale a 1, attivando quindi il primo moltiplicatore, e si inizializzano {\it op1\textunderscore tmp2} e {\it op2\textunderscore tmp2} rispettivamenete con i valori di {\it op1} e {\it op2} i quali serviranno per il secondo moltiplicatore.
 \item {\it\bf ST\textunderscore RUN2:} in cui si pone {\it ready1} uguale a 0 e {\it ready2} uguale a 1, attivando quindi il secondo moltiplicatore
 \item {\it\bf ST\textunderscore WAIT:} in cui si pone {\it ready2} uguale a 0 e si aspetta che {\it done1} o {\it done2} diventino 1.
 \item {\it\bf ST\textunderscore WAIT1:} si arriva in questo stato se {\it done2} vale 1, cioè se il secondo moltiplicatore ha finito e si resta qui finchè non finisce anche il primo.
@@ -100,24 +108,58 @@ Sono inoltre necessari 8 stati:
 \end{itemize}
 
 
+\subsection{Implementazione RTL}
+L'intefaccia del {\it double\textunderscore multiplier} è formata dai segnali di input: {\it clk, rst, ready, op1, op2}; E i segnali di output {\it res, done}. \\
+L'intefaccia del {\it multiplier} è formata anch'essa dai segnali di input: {\it clk, rst, ready, op1, op2}; E i segnali di output {\it res, done}, dove:
+\begin{itemize}
+\item {\it clk, rst} sono collegati ai segnali analoghi del {\it double\textunderscore multiplier}.
+\item {\it ready} è collegato al segnale interno del {\it double\textunderscore multiplier} {\it ready1}, per multiplier1 e {\it ready2} per multiplier2.
+\item {\it op1 e op2} sono collegati ai segnali interni del {\it double\textunderscore multiplier} {\it op1\textunderscore tmp1, op2\textunderscore tmp1}, per multiplier1 e {\it op1\textunderscore tmp1, op2\textunderscore tmp2} per multiplier2.
+\item {\it res} è collegato al segnale interno del {\it double\textunderscore multiplier} {\it res1}, per multiplier1 e {\it res2} per multiplier2.
+\item {\it done} è collegato al segnale interno del {\it double\textunderscore multiplier} {\it done1}, per multiplier1 e {\it done2} per multiplier2.
+\end{itemize}
+{\it op1\textunderscore tmp1, op2\textunderscore tmp1, op1\textunderscore tmp2, op2\textunderscore tmp2} sono necessari al fine di conservare i valori della prima coppia di operandi e della seconda, che verranno passati ai moltiplicatori dei cicli di clock dopo. \\
+La FSMD è realizzata con due processi:
+\begin{itemize}
+\item fsm: processo asincrono attivato con la variazione di qualche segnale interno. Esso ha il compito di calcolare e aggiornare lo stato prossimo ``NEXT\textunderscore STATE''.
+\item datapath: processo sincrono che ha il compito di aggiornare lo stato attuale, elaborare gli output. Esso viene anche attivato dal fronte di salita del reset al fine di riportare lo stato a quello iniziale.
+\end{itemize}
+
+
 \subsection{Implementazione RTL con Verilog e VHDL}
 Si creano i seguenti files:
 \begin{itemize}
-\item {\it\bf verilog_multiplier:} implementazione verilog del moltiplicatore (sintetizzabile)
-\item {\it\bf vhdl_multiplier:} implementazione vhdl del moltiplicatore (sintetizzabile)
-\item {\it\bf double_multiplier:} implementazione verilog del doppio moltiplicatore (sintetizzabile)
+\item {\it\bf verilog\textunderscore multiplier:} implementazione verilog del moltiplicatore (sintetizzabile)
+\item {\it\bf vhdl\textunderscore multiplier:} implementazione vhdl del moltiplicatore (sintetizzabile)
+\item {\it\bf double\textunderscore multiplier:} implementazione verilog del doppio moltiplicatore (sintetizzabile)
 \item {\it\bf testbench:} implementazione verilog di un testbench da usare solo in simulazione
 \end{itemize}
+In {\it verilog\textunderscore multiplier} e {\it double\textunderscore multiplier}
+\begin{itemize}
+\item Sono definiti come ``wire'' tutti i segnali collegati alle porte di input mentre come ``reg'' tutti quelli collegati alle porte di output.
+\item Sono definiti come ``reg'' tutti i segnali interni di communicazione.
+\item Gli stati e {\it op1\textunderscore type, op2\textunderscore type, res\textunderscore type} sono stati definiti come ``parameter''.
+\end{itemize}
+In {\it vhdl\textunderscore multiplier:}
+\begin{itemize}
+\item Sono usate le librerie ``IEEE.STD\textunderscore LOGIC\textunderscore 1164.ALL'' per abilitare i tipi std\textunderscore logic e ``use IEEE.NUMERIC\textunderscore STD.ALL'' per usare funzioni aritmetiche con valori signed e unsigned
+\item Sono definiti come ``signal'' tutti i segnali collegati alle porte di input e output.
+\item Sono definiti come ``signal'' tutti i segnali interni di communicazione.
+\item Sono definite come ``variable'' {\it sign1, sign2, esp1, esp2, esp\textunderscore tmp, mant1, mant2, mant\textunderscore tmp, op1\textunderscore type, op2\textunderscore type} perchè utilizzati solo all'interno del processo ``datapath''.
+\item Gli stati e {\it op1\textunderscore type, op2\textunderscore type, res\textunderscore type} sono stati definiti all'interno del {\it package} rispettivamente come ``MULT\textunderscore STATE'' e ``MULT\textunderscore TYPE''.
+\item L'architettura utilizzata segue lo stile ``behavioral'', cioè quello più ``program-like'' in quanto più semplice e chiaro per descrivere una FSMD con due processi.
+\end{itemize}
+
 
 
 \subsection{Implementazione RTL con SystemC}
 Si creano i seguenti files e directory:
 \begin{itemize}
-\item {\it\bf Makefile:} tool per la compilazione automatica del progetto. Richiede che la variabile d'ambiente SYSTEMC_HOME contenga il path alla libreria di SystemC.
-\item {\it\bf bin:} directory che contiene l'eseguibile {\it double_multiplier_RLT.x} (generato dopo la compilazione) e {\it wave.vcd} (generato dopo l'esecuzione dell'eseguibile).
+\item {\it\bf Makefile:} tool per la compilazione automatica del progetto. Richiede che la variabile d'ambiente SYSTEMC\textunderscore HOME contenga il path alla libreria di SystemC.
+\item {\it\bf bin:} directory che contiene l'eseguibile {\it double\textunderscore multiplier\textunderscore RLT.x} (generato dopo la compilazione) e {\it wave.vcd} (generato dopo l'esecuzione dell'eseguibile).
 \item {\it\bf obj:} directory che contiene i files oggetto (generati dopo la compilazione)
-\item {\it\bf include:} directory che contiene gli headers {\it double_multiplier_RTL.hh}, {\it multiplier_RTL.hh}, {\it testbench_RTL.hh}.
-\item {\it\bf testbench:} directory che contiene i files sorgenti {\it double_multiplier_RTL.cc}, {\it multiplier_RTL.cc}, {\it testbench_RTL.cc} e {\it main_RTL.cc}.
+\item {\it\bf include:} directory che contiene gli headers {\it double\textunderscore multiplier\textunderscore RTL.hh}, {\it multiplier\textunderscore RTL.hh}, {\it testbench\textunderscore RTL.hh}.
+\item {\it\bf testbench:} directory che contiene i files sorgenti {\it double\textunderscore multiplier\textunderscore RTL.cc}, {\it multiplier\textunderscore RTL.cc}, {\it testbench\textunderscore RTL.cc} e {\it main\textunderscore RTL.cc}.
 \end{itemize}
 
 
@@ -141,7 +183,7 @@ Qua vanno ``messi i numeri''. Questa sezione dovrebbe contenere i risultati dell
 
 Per quanto riguarda le performance:
 \begin{itemize}
-\item cosa si può dire in merito alla latenza?
+\item Cosa si può dire in merito alla latenza?
 \item Qual è la frequenza massima del design? 
 \item Qual è l'area occupata dal design? 
 \end{itemize}
