@@ -103,7 +103,7 @@ end
 always @(posedge clk, posedge rst)
 begin
     if (rst == 1'b1) begin                  //Reset regs
-        STATE <= ST_START;
+        STATE <= ST_START;        
         done <= 1'b0;
         ready1 <= 1'b0;
         ready2 <= 1'b0;
