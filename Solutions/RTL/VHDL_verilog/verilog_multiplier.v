@@ -13,7 +13,7 @@ module verilog_multiplier(clk, rst, ready, op1, op2, res, done);
     reg[3:0] STATE, NEXT_STATE;
     // types num
     parameter T_NUM=0, T_NAN=1, T_ZER=2, T_INF=3; 
-    reg[2:0] op1_type, op2_type, res_type;
+    reg[1:0] op1_type, op2_type, res_type;
     // op1 and op2 informations
     reg sign1, sign2;
     reg[9:0] esp1, esp2;
