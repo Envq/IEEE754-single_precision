@@ -35,7 +35,7 @@ Nell'introduzione viene descritto in maniera astratta quello che poi viene detta
 L'introduzione non dovrebbe andare oltre la metà della seconda colonna (nel caso a due colonne), o la prima pagina (nel caso a colonna singola): bisogna cercare di essere concisi (e chiari). Alla fine, l'introduzione è solo ``chiacchiere'': deve semplicemente rendere chiari quali sono gli obiettivi del lavoro (\emph{e nel caso del corso, deve far capire a me che avete gli obiettivi chiari in testa}). Consiglio: l'introduzione (e spesso l'abstract) è l'ultima parte che viene completata.
 
 \section{Background}
-
+In questo progetto sono stati utilizzati diversi linguaggi per descrivere hardware a livello RT ovvero Verilog, VHDL e SystemC. 
 - descrivere cos'è un floating-point
 - descrivere la moltiplicazione
 - arrotondamento numero binario
@@ -58,7 +58,7 @@ I vincoli sono:
 \item Deve poter essere sintetizzabile sulla FPGA xc7z020clg400-1. Essa ha disposizione solo 125 porte. Per rispettare il limite viene utilizzata la stessa porta per il risultato e due porte per gli operandi. Quindi al primo ciclo di clock con ready uguale 1, verranno trasmessi i primi due operandi e al ciclo successivo gli altri due. Dopodichè si aspetterà il complementanto delle moltiplicazioni e verrà trasmesso il primo risultato quando done varrà 1, e il ciclo di clock successivo l'altro.
 \end{itemize}
 
-\subsection{Modellazione della EFSM del moltiplicatore}
+\subsection{Modellazione della EFSM del moltiplicatore {\it Figure \ref{fig:EFSM1}}}
 I segnali utilizzati per la comunicazione sono:
 \begin{itemize}
 \item {\it\bf rst:} (1 bit) per riportare il sistema allo stato iniziale .
@@ -85,7 +85,7 @@ Sono inoltre necessari 14 stati:
 \end{itemize}
 
 
-\subsection{Modellazione della EFSM del doppio moltiplicatore}
+\subsection{Modellazione della EFSM del doppio moltiplicatore ({\it Figure \ref{fig:EFSM2}})}
 I segnali utilizzati per la comunicazione sono:
 \begin{itemize}
 \item {\it\bf rst:} (1 bit) per riportare il sistema allo stato iniziale .
@@ -158,35 +158,53 @@ Si creano i seguenti files e directory:
 \item {\it\bf Makefile:} tool per la compilazione automatica del progetto. Richiede che la variabile d'ambiente SYSTEMC\textunderscore HOME contenga il path alla libreria di SystemC.
 \item {\it\bf bin:} directory che contiene l'eseguibile {\it double\textunderscore multiplier\textunderscore RLT.x} (generato dopo la compilazione) e {\it wave.vcd} (generato dopo l'esecuzione dell'eseguibile).
 \item {\it\bf obj:} directory che contiene i files oggetto (generati dopo la compilazione)
-\item {\it\bf include:} directory che contiene gli headers {\it double\textunderscore multiplier\textunderscore RTL.hh}, {\it multiplier\textunderscore RTL.hh}, {\it testbench\textunderscore RTL.hh}.
+\item {\it\bf include:} directory che contiene gli headers {\it double\textunderscore multiplier\textunderscore RTL.hh}, {\it multiplier\textunderscore RTL.hh}, {\it testbench\textunderscore RTL.hh}. Qui sono definite tutte le porte, segnali, variabili ed enumerazioni dei vari componenti
 \item {\it\bf testbench:} directory che contiene i files sorgenti {\it double\textunderscore multiplier\textunderscore RTL.cc}, {\it multiplier\textunderscore RTL.cc}, {\it testbench\textunderscore RTL.cc} e {\it main\textunderscore RTL.cc}.
 \end{itemize}
-
-
-In questa sezione viene descritto tutto il procedimento, ed è dunque la sezione più importante del report. Va descritto passo passo quello che avete fatto, facendo capire ``esattamente'' cosa è stato fatto.
-
-Questa sezione può essere divisa in sottosezioni. Le informazioni riportate nella lista seguente dovrebbero essere identificabili nel testo del report (\textbf{anche in ordine diverso}):
+In {\it double\textunderscore multiplier\textunderscore RTL.hh}
 \begin{itemize}
-\item Definizione dell-architettura del programma
-\item Descrizione del componente di HW digitale.
-\item Processo di ``sintesi'' verso RTL. Definizione dei sottocomponenti del componente HW, e della sua struttura. Definizione dell'interfaccia RTL, definizione della Macchina a Stati Finiti Estesa (EFSM) del componente e dei sottocomponenti. Realizzazione del componente HW utilizzando i processi in diversi stili a livello RTL. \`E inoltre possibile discutere la scelta dei tipi di dato.
-%\item Descrizione della realizzazione della parte rappresentante SW Embedded, e descritta in TLM.
-%\item Descrizione della realizzazione della parte a tempo continuo. Spiegazione delle scelte progettuali fatte per gli stili di modellazione utilizzati.
-\item Descrizione dei meccanismi di comunicazione tra le diverse parti del sistema.
+\item Sono definiti come ``sc\textunderscore signal'' tutti i segnali collegati alle porte di input e output.
+\item Sono definiti come ``sc\textunderscore signal'' tutti i segnali interni di communicazione.
+\item Gli stati sono stati definiti come ``enumerazioni''.
 \end{itemize}
+In {\it multiplier\textunderscore RTL.hh}
+\begin{itemize}
+\item Sono definiti come ``sc\textunderscore signal'' tutti i segnali collegati alle porte di input e output.
+\item Sono definiti come ``sc\textunderscore signal'' tutti i segnali interni di communicazione.
+\item Sono definite come variabili di SystemC {\it sign1, sign2, esp1, esp2, esp\textunderscore tmp, mant1, mant2, mant\textunderscore tmp, op1\textunderscore type, op2\textunderscore type} perchè utilizzati solo all'interno del processo ``datapath''.
+\item Gli stati e {\it op1\textunderscore type, op2\textunderscore type, res\textunderscore type} sono stati definiti come ``enumerazioni''.
+\end{itemize}
+A differenza di verilog e VHDL, in SystemC è necessario un file ``main'' che contenga il metodo {\it sc\textunderscore main} e che permetta di collegare il componente da testare con il testbench. In esso si utilizza {\it sc\textunderscore create\textunderscore vcd\textunderscore trace\textunderscore file} per salvare le tracce necessarie a lanciare una simulazione con tools come gtkwave.
 
-\textbf{In questa sezione deve essere riportato (brevemente) anche l'organizzazione dell'implementazione consegnata assieme al report.}
 
 \section{Risultati}
+Il testbench verilog, {\it Figure \ref{fig:SIM1}}, aspetta un po di tempo, perchè altrimenti si verificherebbero problemi dovuti allo startup della FPGA nella simulazione post-sintesi, e poi esegue due volte il {\it double\textunderscore multiplier}, prima con due coppie di operandi che danno come risultato dei numeri normali, e poi con due coppie di operandi che danno come risultati dei casi speciali. \\
 
-Qua vanno ``messi i numeri''. Questa sezione dovrebbe contenere i risultati della simulazione. La simulazione mostra che il sistema funziona correttamente? Com'è stato provato? Che tipo di testbench sono stati utilizzati? Com'è stato scomposto il sistema per verificarne la correttezza?
-
-Per quanto riguarda le performance:
+Il testbench in SystemC mette a disposizione tre thread da attivare togliendo i commenti nel costruttore del ``TestbenchModule'':
 \begin{itemize}
-\item Cosa si può dire in merito alla latenza?
-\item Qual è la frequenza massima del design? 
-\item Qual è l'area occupata dal design? 
-\end{itemize}
+\item {\it\bf targeted\textunderscore test:} che analogamente a quello in Verilog, testa due volte il {\it double\textunderscore multiplier}. {\it Figure \ref{fig:SIM2}}.
+\item {\it\bf rnd\textunderscore test:} che prova {\it TESTS\textunderscore NUM} moltiplicazioni generate casualmente tra un intervallo modificabile. {\it Figure \ref{fig:SIM3}}.
+\item {\it\bf run\textunderscore all:} che prova tutte le possibili combinazioni cioè \(2^{32} * 2^{32}\). Si può limitare il numero di combinazioni evitando di contare il bit del segno, in quanto il calcolo è un semplice xor. Poi si possono escludere tutti i numeri denormalizzati. Ma anche così il tempo necessario a completarlo è troppo elevato per la mia macchina.
+\end{itemize} \\
+
+Con la sintesi si sono ottenuti i seguenti risultati:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Questa sezione può contenere anche riflessioni personali sui risultati ottenuti. Importante: tutte le affermazioni devono essere supportate da numeri\footnote{Richard Feynman on Scientific Method (1964) -\\ https://www.youtube.com/watch?v=OL6-x0modwY}.
 
@@ -196,30 +214,41 @@ Le conclusioni dovrebbero riassumere in poche righe  tutto ciò che è stato fat
 
 \bibliographystyle{IEEEtran}
 \bibliography{biblio}
-
 \appendix
-Se non avete abbastanza spazio, potete inserire le figure delle EFSM in una  pagina extra, appendice. Un esempio di come potete fare solo le Figure~\ref{fig:grande}, \ref{fig:piccola1}, \ref{fig:piccola2}.
-
 
 \begin{figure*}[bt]
 \centering
 \includegraphics[width=\textwidth]{figures/EFSM-multiplier}
-\caption{Figura in formato grande.}
-\label{fig:grande}
+\caption{EFSM del multiplier}
+\label{fig:EFSM1}
 \end{figure*}
 
-\begin{figure}[bt]
-	\centering
-	\includegraphics[width=\columnwidth]{figures/EFSM-top_level}
-	\caption{Figura in formato piccolo, 1.}
-	\label{fig:piccola1}
-\end{figure}
+\begin{figure*}[bt]
+\centering
+\includegraphics[width=\textwidth]{figures/EFSM-top_level}
+\caption{EFSM del double\textunderscore multiplier}
+\label{fig:EFSM2}
+\end{figure*}
 
-\begin{figure}[bt]
-	\centering
-	\includegraphics[width=\columnwidth]{figures/EFSM-top_level}
-	\caption{Figura in formato piccolo, 2.}
-	\label{fig:piccola2}
-\end{figure}
+\begin{figure*}[bt]
+\centering
+\includegraphics[width=\textwidth]{figures/simulazione1}
+\caption{Simulazione in Verilog}
+\label{fig:SIM1}
+\end{figure*}
+
+\begin{figure*}[bt]
+\centering
+\includegraphics[width=\textwidth]{figures/simulazione2}
+\caption{Simulazione in SystemC con targeted\textunderscore test}
+\label{fig:SIM2}
+\end{figure*}
+
+\begin{figure*}[bt]
+\centering
+\includegraphics[width=\textwidth]{figures/simulazione3}
+\caption{Simulazione in SystemC con rnd\textunderscore test}
+\label{fig:SIM3}
+\end{figure*}
 
 \end{document}

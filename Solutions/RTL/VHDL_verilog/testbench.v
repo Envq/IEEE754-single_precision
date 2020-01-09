@@ -6,7 +6,7 @@ module testbench();
     reg[31:0] op1, op2;
     wire[31:0] res;
     wire done;
-    parameter PERIOD = 20;
+    parameter PERIOD = 7.598;
 
 
 double_multipler top_level(

@@ -28,8 +28,8 @@ std::string inc_binary_string(const std::string &val_str) {
 //*********************
 
 TestbenchModule::TestbenchModule(sc_module_name name) {
-    SC_THREAD(targeted_test);
-    // SC_THREAD(rnd_test);
+    // SC_THREAD(targeted_test);
+    SC_THREAD(rnd_test);
     // SC_THREAD(run_all);
     sensitive << clk.pos();
 
@@ -134,7 +134,7 @@ void TestbenchModule::rnd_test() {
         0, sqrt(std::numeric_limits<float>::max()));
 
     // Variables
-    const unsigned int TESTS_NUM = 1000;
+    const unsigned int TESTS_NUM = 10000;
     const bool PRINT_MULT = false;
     const float TIME_PERIOD = 2.0;  // sec
     unsigned long time_counter = 0;
