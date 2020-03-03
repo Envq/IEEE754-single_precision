@@ -11,18 +11,18 @@
 \maketitle
 
 \begin{abstract}
-Il progetto ha 3 diversi obiettivi:
-\begin{itemize}
-\item Sviluppare in VHDL, Verilog e SystemC un componente che esegua due moltiplicazioni in virgola mobile a precisione singola
-\item Sintetizzare i componenti scritti in VHDL e Verilog
-\item Eseguire High-Level-Synthesis del moltiplicatore a precisione singola
-\end{itemize}
+    Gli obiettivi di questo progetto sono:
+    \begin{itemize}
+        \item Sviluppare in VHDL, Verilog e SystemC un moltiplicatore in virgola mobile a precisione singola e un componente che permetta di eseguire due moltiplicazioni in contemporanea.
+        \item Creare i testbench per verificare la corretteza dei componenti.
+        \item Sintetizzare i componenti scritti in VHDL e Verilog.
+        \item Eseguire High-Level-Synthesis del moltiplicatore a precisione singola.
+    \end{itemize}
 \end{abstract}
 
 
 \section{Introduzione}
-Il sistema b è composto da un modulo top-level chiamato ``double\_multiplier'' il quale esegue la moltiplicazione di due operandi dati in input nello stesso ciclo di clock in cui ready viene posto a 1, e i due opereandi passati al ciclo di clock successivo
-
+Il sistema è composto da un modulo top-level chiamato ``double\_multiplier'' il quale esegue la moltiplicazione di due operandi dati in input nello stesso ciclo di clock in cui ready viene posto a 1, e i due opereandi passati al ciclo di clock successivo
 
 Nell'introduzione viene descritto in maniera astratta quello che poi viene dettagliato nel seguito del report. Una buona scaletta per l'introduzione può essere la seguente:
 \begin{itemize}
@@ -49,21 +49,20 @@ Questa sessione non deve ripetere quanto detto a lezione, ma dare un overview de
 
 
 \section{Metodologia applicata}
-Attuando un approccio bottom-up, prima si definiscono i componenti principali cioè il {\it moltiplicatore} e il {\it doppio moltiplicatore}, descrivoli con EFSM. Dopodichè si passa all'implementazione a livello RTL in vhdl e verilog di queste e alla creazione di un piccolo testbench. A questo punto si traduce il tutto in systemC dove con la potenza del C++ si crea un testbench più complesso. Infine si procede alla sintesi e alla sintesi ad alto livello per poi confrontare i vari risultati.\\
-
+Attuando un approccio bottom-up, prima si definiscono i componenti principali cioè il {\it moltiplicatore} e il {\it doppio moltiplicatore}, descrivoli con EFSM. Dopodichè si passa all'implementazione a livello RTL in vhdl e verilog di queste e alla creazione di un piccolo testbench. A questo punto si traduce il tutto in systemC dove con la potenza del C++ si crea un testbench più complesso. Infine si procede alla sintesi e alla sintesi ad alto livello per poi confrontare i vari risultati.
 I vincoli sono:
 \begin{itemize}
 \item Un moltiplicatore dovrà essere scritto in verilog e uno in VHDL.
 \item Gli operandi e il risultato devono essere a 32 bit.
-\item Deve poter essere sintetizzabile sulla FPGA xc7z020clg400-1. Essa ha disposizione solo 125 porte. Per rispettare il limite viene utilizzata la stessa porta per il risultato e due porte per gli operandi. Quindi al primo ciclo di clock con ready uguale 1, verranno trasmessi i primi due operandi e al ciclo successivo gli altri due. Dopodichè si aspetterà il complementanto delle moltiplicazioni e verrà trasmesso il primo risultato quando done varrà 1, e il ciclo di clock successivo l'altro.
+\item Deve poter essere sintetizzabile sulla FPGA  ``xc7z020clg400-1''. Essa ha disposizione solo 125 porte. Per rispettare il limite viene utilizzata la stessa porta per il risultato e due porte per gli operandi. Quindi al primo ciclo di clock con ready uguale 1, verranno trasmessi i primi due operandi e al ciclo successivo gli altri due. Dopodichè si aspetterà il complementanto delle moltiplicazioni e verrà trasmesso il primo risultato quando done varrà 1, e il ciclo di clock successivo l'altro.
 \end{itemize}
 
 \subsection{Modellazione della EFSM del moltiplicatore {\it Figure \ref{fig:EFSM1}}}
 I segnali utilizzati per la comunicazione sono:
 \begin{itemize}
-\item {\it\bf rst:} (1 bit) per riportare il sistema allo stato iniziale .
+\item \textit{\textbf{rst:}} (1 bit) per riportare il sistema allo stato iniziale .
 \item {\it\bf ready:} (1 bit) per permettere al sistema di uscire dallo stato iniziale .
-\item {\it\bf norm\_again:} (1 bit) per indicare se fare un'altra normalizzazione del numero intermedio.
+\item \textbf{\textit{f}} {\it {\bf norm\_again:} } (1 bit) per indicare se fare un'altra normalizzazione del numero intermedio .
 \item {\it\bf res\_type:} (2 bit) per indicare se il risultato vale 0, NAN o \(\infty\) e quindi andare direttamente allo stato finale oppure se è un numero (il caso denormalizzato viene gestito come se fosse normalizzato) e quindi proseguire nell'elaborazione.
 \end{itemize}
 
@@ -78,8 +77,8 @@ Sono inoltre necessari 14 stati:
 \item {\it\bf ST\_CHECK2} dove si passa a {\it ST\_FINISH} se {\it res\_type} è diverso da {\it T\_NUM}, perchè diventato {\it T\_ZER} per l'underflow.
 \item {\it\bf ST\_NORM1:} in cui si compie la normalizzazione della mantissa che deve sempre essere della forma {\it 1.valori}. Essendo la virgola posta tra il 46esimo bit e il 45esimo, si verificano due casi: Se il 47esimo bit vale 1 bisogna incrementare l'esponente, altrimenti il valore è già corretto, ma viene effettuato uno shift a sinistra per trattare allo stesso modo i due casi durante l'arrotondamento.
 \item {\it\bf ST\_ROUND:} in cui si effettua l'eventuale arrotondamento dovuto al fatto che il valore della mantissa è attualmente a 48 bit, ma bisogna portarlo a 24 bit. L'arrotondamento è fatto per eccesso, quindi si incrementerà {\it mant\_tmp[47:24]} solo se {\it mant\_tmp[23:00]} sarà \( \geq \) a ``01..1''. L'arrotondamento effettivò verrà fatto nello stato {\it ST\_NORM2}, qui ci si limita a porre {\it norm\_again} uguale a 1 per poterci andare.
-\item {\it\bf ST\_CHECK3:} dove si passa a {\it ST\_NORM2} se {\it norm\_again} è uguale a 1 altrimenti a {\it ST\_OVERF} per il controllo di eventuali overflow
-\item {\it\bf ST\_NORM2:} in cui si effettua il vero arrotondamento della mantassina. Bisogna tenere conto del caso in cui sia della forma ``1..1'' e che quindi con l'incremento vada a ``0..0'' e  venga incrementato l'esponente.
+\item \textit{\textbf{ST\_CHECK3:}} dove si passa allo stato \textit{ST\_NORM2} se \(\textit{norm} = 1\) oppure allo stato \textit{ST\_OVERF} se \(\textit{norm} = 0\).
+\item \textit{\textbf{ST\_NORM2:}} in cui si effettua il vero arrotondamento della mantassina. Bisogna tenere conto del caso in cui sia della forma ``1..1'' e che quindi con l'incremento vada a ``0..0'' e  venga incrementato l'esponente.
 \item {\it\bf ST\_OVERF:} in cui si verifica se l'esponente del risultato è in uno stato di overflow, ovvero guardando se il bit {\it esp\_tmp[8]} vale 1 ovvero se corrisponde ad un valore maggiore di 255.
 \item {\it\bf ST\_FINISH:} in cui si pone {\it done} uguale 1, si ricava {\it res[31]}, ovvero il segno del risultato facendo lo XOR fra i segni degli operandi, e in base al valore di {\it res\_type} si ottiene il resto. Dopodichè si torna allo stato inziale
 \end{itemize}
