@@ -53,9 +53,9 @@ Per prima cosa sono stati progettati i componenti principali cioè il {\it multi
     \item Gli operandi e il risultato devono essere a 32 bit.
     \item I due componenti devono essere sintetizzabili sulla FPGA ``xc7z020clg400-1'' la quale ha a disposizione solo 125 porte.
 \end{itemize}
-Per far fronte al limite delle porte logiche si utilizza il protocollo di handshake. Viene quindi utilizzata la stessa porta per il risultato e due porte per gli operandi. Al primo ciclo di clock, con il flag ``ready'' uguale a 1, verranno trasmessi i primi due operandi e al ciclo successivo gli altri due. Dopodichè si aspetterà il complementanto delle moltiplicazioni, segnalato col flag ``done'' uguale a 1, per trasmettere il primo risultato, e il secondo alciclo di clock successivo.
+Per far fronte al limite delle porte logiche è stato utilizzato il protocollo di handshake. Vengono quindi utilizzati gli stessi 32 bit per il risultato e altri 64 bit per le due coppie di operandi. Al primo ciclo di clock, con il flag ``ready'' uguale a 1, verranno trasmessi i primi due operandi e al ciclo successivo gli altri due. Dopodichè si aspetterà il complementanto delle moltiplicazioni, segnalato col flag ``done'' uguale a 1, per poi trasmettere il primo risultato, e il secondo al ciclo di clock successivo.
 
-\subsection{Modellazione della EFSM del multiplier {\it Figure \ref{fig:EFSM1}}}
+\subsection{Modellazione della EFSM del multiplier {\it [Figura \ref{fig:EFSM1}]}}
 I segnali utilizzati per la comunicazione sono:
 \begin{itemize}
     \item \textit{\textbf{rst:}} (1 bit) per riportare il sistema allo stato iniziale .
