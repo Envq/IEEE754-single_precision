@@ -1,0 +1,16 @@
+\BOOKMARK [1][-]{section.1}{Introduzione}{}% 1
+\BOOKMARK [1][-]{section.2}{Background}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Progettazione hardware}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{IEEE 754 single-precision binary floating-point format}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.3}{Moltiplicazione di due numeri floating-point}{section.2}% 5
+\BOOKMARK [1][-]{section.3}{Metodologia applicata}{}% 6
+\BOOKMARK [2][-]{subsection.3.1}{Vincoli}{section.3}% 7
+\BOOKMARK [2][-]{subsection.3.2}{Modellazione della EFSM del multiplier textit[Figura 4]}{section.3}% 8
+\BOOKMARK [2][-]{subsection.3.3}{Modellazione della EFSM del double\137multiplier \(textitFigure 5\)}{section.3}% 9
+\BOOKMARK [2][-]{subsection.3.4}{Implementazione RTL}{section.3}% 10
+\BOOKMARK [2][-]{subsection.3.5}{Implementazione RTL con Verilog e VHDL}{section.3}% 11
+\BOOKMARK [2][-]{subsection.3.6}{Implementazione RTL con SystemC}{section.3}% 12
+\BOOKMARK [1][-]{section.4}{Risultati}{}% 13
+\BOOKMARK [1][-]{section.5}{Conclusioni}{}% 14
+\BOOKMARK [1][-]{section*.1}{Riferimenti bibliografici}{}% 15
+\BOOKMARK [1][-]{section*.2}{Appendice}{}% 16

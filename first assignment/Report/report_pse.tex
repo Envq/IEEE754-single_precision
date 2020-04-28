@@ -4,6 +4,8 @@
 \author{Enrico Sgarbanti - VR446095}
 
 \usepackage{graphicx}
+\usepackage{wrapfig}
+\usepackage{hyperref}
 \usepackage[italian]{babel}
 \usepackage[utf8]{inputenc}
 
@@ -29,22 +31,57 @@ Nell'introduzione viene descritto in maniera astratta quello che poi viene detta
 
 L'introduzione non dovrebbe andare oltre la metà della seconda colonna (nel caso a due colonne), o la prima pagina (nel caso a colonna singola): bisogna cercare di essere concisi (e chiari). Alla fine, l'introduzione è solo ``chiacchiere'': deve semplicemente rendere chiari quali sono gli obiettivi del lavoro (\emph{e nel caso del corso, deve far capire a me che avete gli obiettivi chiari in testa}). Consiglio: l'introduzione (e spesso l'abstract) è l'ultima parte che viene completata.
 
+
+
 \section{Background}
-In questo progetto sono stati utilizzati diversi linguaggi per descrivere hardware a livello RT ovvero Verilog, VHDL e SystemC.
-- descrivere cos'è un floating-point
-- descrivere la moltiplicazione
-- arrotondamento numero binario
-- handshake
 
-Il background dovrebbe contenere una descrizione, abbastanza breve, dei concetti principali che vengono utilizzati nel lavoro. Ad esempio, può contenere una breve descrizione delle caratteristiche principali degli HDL , e delle sue estensioni. Una colonna dovrebbe bastare.
+\subsection{Progettazione hardware}
+Per la realizzazione di componenti hardware si possono utilizzare diverse tecniche e linguaggi.
+Un primo approccio è descrivere i componenti a livello RT utilizzando linguaggi di descrizione hardware (HDL) come VHDL e Verilog.
+Un HDL è un linguaggio specializzato per la descrizione della struttura e del comportamento di circuiti elettronici, in particolare circuiti logici digitali, e la loro analisi e simulazione. Permette inoltre la sintesi di una descrizione HDL in una netlist (una specifica di componenti elettronici fisici e il modo in cui sono collegati insieme), che può quindi essere posizionata e instradata per produrre l'insieme di maschere utilizzate per creare un circuito integrato\cite{HDL}.
+\\Un secondo approccio è descrivere le funzionalità del componente con linguaggi più ad alto livello come C, C++ o SystemC\cite{SystemC} e fare High Level Syntesis (HLS) per ottenere una descrizione dell'hardware a livello RT\cite{HLS}.
+\\Entrambi gli approcci hanno vantaggi e svantaggi. In particolare HLS riduce i tempi, ma la descrizione hardware generata sarà meno ottimizzata rispetto a quella che si potrebbe ottenere usando HDL.
 
-In questa sessione saranno citati anche lavori dello stato dell'arte. Ad esempio, si può usare~\cite{SystemC} per citare SystemC. \textbf{I riferimenti bibliografici vanno inseriti ogni volta in cui si va a citare qualcosa contenuto in un documento.}
 
-Questa sessione non deve ripetere quanto detto a lezione, ma dare un overview dei concetti principali utilizzati durante lo svolgimento dell'elaborato.
+\subsection{IEEE 754 single-precision binary floating-point format}
+Questo standard definisce il formato per la rappresentazione dei numeri in virgola mobile (compreso $\pm 0$ e i numeri denormalizzati; gli infiniti e i NaN, "not a number"), ed un set di operazioni effettuabili su questi. 
+\\In particolare la versione a precisione singola descrive il numero con 32 bit: 1 bit per segno (sign), 8 bit per l'esponente (esp) e 23 bit per la mantissa (mant)\cite{IEE754}.
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/ieee754_single_precision.png}
+    \caption{IEEE 754 single precision}
+    \label{fig:IEE754}
+\end{figure}
+\\Per la codifica in numero binario:
+\begin{itemize}
+    \item Dal segno si ricava il bit più significativo (1 se negativato 0 altrimenti).
+    \item Si converte il numero in binario.
+    \item Si sposta la virgola a sinistra fino ad avere un numero nella forma $1,... \cdot 2^{E}$.
+    \item La mantissa è la parte a destra della virgola, riempita con zeri a destra fino a riempire i 23 bit.
+    \item L'esponente è $127+E$ dove E è l'esponente ricavato dallo shift.
+\end{itemize}
+Per la decodifica del numero binario: $$(-1)^{sign}\cdot 2^{(esp-127)} \cdot (1 + \sum_{i=1}^{23}b_{23-i}\cdot 2^{-i})$$
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/ieee754_special_case.png}
+    \caption{IEEE 754 special case}
+    \label{fig:IEEE_SPECIALCASE}
+\end{figure}
+
+
+\subsection{Moltiplicazione di due numeri floating-point}
+Qui è riportato l'algoritmo usato per la moltiplicazione fra floating point. Guardare qui per ulteriori dettagli\cite{IEE754Mult}.
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/ieee_multiplication.png}
+    \caption{IEEE 754 multiplication}
+    \label{fig:IEEE_multiplication}
+\end{figure}
+
 
 
 \section{Metodologia applicata}
-Per prima cosa sono stati progettati i componenti principali (cioè il multiplier e double\_multiplier, descrivendoli con delle EFSM. Dopodichè si è passati all'implementazione a livello RTL in vhdl e verilog e alla creazione del relativo testbench. A questo punto si è tradotto il tutto anche in systemC, potendo però fare un testbench più complesso grazie alla potenza del c++. Infine è stata eseguita la sintesi dei componenti in VHDL e verilog per poi fare un confronto con la high-level-syntesis del moltiplicatore in c++.
+Per prima cosa sono stati progettati i componenti principali cioè il textit{multiplier} e il textit{double\_multiplier}, descrivendoli con delle EFSM. Dopodichè si è passati all'implementazione a livello RTL in vhdl e verilog e alla creazione del relativo testbench. A questo punto si è tradotto il tutto anche in systemC, potendo però fare un testbench più complesso grazie alla potenza del c++. Infine è stata eseguita la sintesi dei componenti in VHDL e verilog per poi fare un confronto con la high-level-syntesis del moltiplicatore in c++.
 
 \subsection{Vincoli}
 \begin{itemize}
@@ -55,34 +92,34 @@ Per prima cosa sono stati progettati i componenti principali (cioè il multiplie
 \end{itemize}
 Per far fronte al limite delle porte logiche è stato utilizzato il protocollo di handshake. Vengono quindi utilizzati gli stessi 32 bit per il risultato e altri 64 bit per le due coppie di operandi. Al primo ciclo di clock, con il flag ``ready'' uguale a 1, verranno trasmessi i primi due operandi e al ciclo successivo gli altri due. Dopodichè si aspetterà il complementanto delle moltiplicazioni, segnalato col flag ``done'' uguale a 1, per poi trasmettere il primo risultato, e il secondo al ciclo di clock successivo.
 
-\subsection{Modellazione della EFSM del multiplier {\it [Figura \ref{fig:EFSM1}]}}
+\subsection{Modellazione della EFSM del multiplier textit{[Figura \ref{fig:EFSM1}]}}
 I segnali utilizzati per la comunicazione sono:
 \begin{itemize}
-    \item \textit{\textbf{rst:}} (1 bit) per riportare il sistema allo stato iniziale .
-    \item {\it\bf ready:} (1 bit) per permettere al sistema di uscire dallo stato iniziale .
-    \item \textbf{\textit{f}} {\it {\bf norm\_again:} } (1 bit) per indicare se fare un'altra normalizzazione del numero intermedio .
-    \item {\it\bf res\_type:} (2 bit) per indicare se il risultato vale 0, NAN o \(\infty\) e quindi andare direttamente allo stato finale oppure se è un numero (il caso denormalizzato viene gestito come se fosse normalizzato) e quindi proseguire nell'elaborazione.
+    \item \textbf{rst} (1 bit): per riportare il sistema allo stato iniziale.
+    \item \textbf{ready} (1 bit): per permettere al sistema di uscire dallo stato iniziale.
+    \item \textbf{norm\_again} (1 bit): per indicare se fare un'altra normalizzazione del numero intermedio.
+    \item \textbf{res\_type} (2 bit): per indicare se il risultato vale 0, NAN o \(\infty\) e quindi andare direttamente allo stato finale oppure se è un numero (il caso denormalizzato viene gestito come se fosse normalizzato) e quindi proseguire nell'elaborazione.
 \end{itemize}
 
 Sono inoltre necessari 14 stati:
 \begin{itemize}
-    \item {\it\bf ST\_START:} in cui si pone {\it done} e {\it norm\_again} uguali a 0 e si ottengono le informazioni di segno, esponente e mantissa dei due operandi. In esso si rimane finchè {\it ready} vale 0 altrimensi si passa a {\it ST\_EVAL1}.
-    \item {\it\bf ST\_EVAL1:} e {\it ST\_EVAL2} in cui viene valutato il tipo dei due operandi fra {\it T\_ZER, T\_INF, T\_NAN e T\_NUM}
+    \item {\it\bf ST\_START:} in cui si pone textit{done} e textit{norm\_again} uguali a 0 e si ottengono le informazioni di segno, esponente e mantissa dei due operandi. In esso si rimane finchè textit{ready} vale 0 altrimensi si passa a textit{ST\_EVAL1}.
+    \item {\it\bf ST\_EVAL1:} e textit{ST\_EVAL2} in cui viene valutato il tipo dei due operandi fra textit{T\_ZER, T\_INF, T\_NAN e T\_NUM}
     \item {\it\bf ST\_EVAL3:} in cui si ricava il tipo del risultato in base al tipo degli operandi.
-    \item {\it\bf ST\_CHECK1:} dove si passa a {\it ST\_FINISH} se {\it res\_type} è diverso da {\it T\_NUM}.
+    \item {\it\bf ST\_CHECK1:} dove si passa a textit{ST\_FINISH} se textit{res\_type} è diverso da textit{T\_NUM}.
     \item {\it\bf ST\_ELAB:} in cui si sommano i due esponenti e si sottrae 127 perchè entrambi, per lo standard, sono incrementati di 127 (\((esp+127) = (esp1+127)+(esp127) - 127\)). Per compiere la somma è necessario usare una variabile ``esp\_tmp'' 10 bit altrimenti si andrebbe in overflow per valori invece leciti che ritornerebbero validi dopo la sottrazione di 127. Inoltre viene eseguita anche la moltiplicazione delle due mantisse, che essendo a 23 bit più un bit che vale sempre 1, necessita di una variabile ``mant\_tmp'' di 48 bit
-    \item {\it\bf ST\_UNDERF:} in cui si verifica se l'esponente del risultato è in uno stato di underflow, ovvero guardando se il bit {\it esp\_tmp[9]}, che nel complemento a 2 indica il segno, è 1. Infatti i valori disponibili per l'esponente vanno da 0 a 255.
-    \item {\it\bf ST\_CHECK2} dove si passa a {\it ST\_FINISH} se {\it res\_type} è diverso da {\it T\_NUM}, perchè diventato {\it T\_ZER} per l'underflow.
-    \item {\it\bf ST\_NORM1:} in cui si compie la normalizzazione della mantissa che deve sempre essere della forma {\it 1.valori}. Essendo la virgola posta tra il 46esimo bit e il 45esimo, si verificano due casi: Se il 47esimo bit vale 1 bisogna incrementare l'esponente, altrimenti il valore è già corretto, ma viene effettuato uno shift a sinistra per trattare allo stesso modo i due casi durante l'arrotondamento.
-    \item {\it\bf ST\_ROUND:} in cui si effettua l'eventuale arrotondamento dovuto al fatto che il valore della mantissa è attualmente a 48 bit, ma bisogna portarlo a 24 bit. L'arrotondamento è fatto per eccesso, quindi si incrementerà {\it mant\_tmp[47:24]} solo se {\it mant\_tmp[23:00]} sarà \( \geq \) a ``01..1''. L'arrotondamento effettivò verrà fatto nello stato {\it ST\_NORM2}, qui ci si limita a porre {\it norm\_again} uguale a 1 per poterci andare.
+    \item {\it\bf ST\_UNDERF:} in cui si verifica se l'esponente del risultato è in uno stato di underflow, ovvero guardando se il bit textit{esp\_tmp[9]}, che nel complemento a 2 indica il segno, è 1. Infatti i valori disponibili per l'esponente vanno da 0 a 255.
+    \item {\it\bf ST\_CHECK2} dove si passa a textit{ST\_FINISH} se textit{res\_type} è diverso da textit{T\_NUM}, perchè diventato textit{T\_ZER} per l'underflow.
+    \item {\it\bf ST\_NORM1:} in cui si compie la normalizzazione della mantissa che deve sempre essere della forma textit{1.valori}. Essendo la virgola posta tra il 46esimo bit e il 45esimo, si verificano due casi: Se il 47esimo bit vale 1 bisogna incrementare l'esponente, altrimenti il valore è già corretto, ma viene effettuato uno shift a sinistra per trattare allo stesso modo i due casi durante l'arrotondamento.
+    \item {\it\bf ST\_ROUND:} in cui si effettua l'eventuale arrotondamento dovuto al fatto che il valore della mantissa è attualmente a 48 bit, ma bisogna portarlo a 24 bit. L'arrotondamento è fatto per eccesso, quindi si incrementerà textit{mant\_tmp[47:24]} solo se textit{mant\_tmp[23:00]} sarà \( \geq \) a ``01..1''. L'arrotondamento effettivò verrà fatto nello stato textit{ST\_NORM2}, qui ci si limita a porre textit{norm\_again} uguale a 1 per poterci andare.
     \item \textit{\textbf{ST\_CHECK3:}} dove si passa allo stato \textit{ST\_NORM2} se \(\textit{norm} = 1\) oppure allo stato \textit{ST\_OVERF} se \(\textit{norm} = 0\).
     \item \textit{\textbf{ST\_NORM2:}} in cui si effettua il vero arrotondamento della mantassina. Bisogna tenere conto del caso in cui sia della forma ``1..1'' e che quindi con l'incremento vada a ``0..0'' e  venga incrementato l'esponente.
-    \item {\it\bf ST\_OVERF:} in cui si verifica se l'esponente del risultato è in uno stato di overflow, ovvero guardando se il bit {\it esp\_tmp[8]} vale 1 ovvero se corrisponde ad un valore maggiore di 255.
-    \item {\it\bf ST\_FINISH:} in cui si pone {\it done} uguale 1, si ricava {\it res[31]}, ovvero il segno del risultato facendo lo XOR fra i segni degli operandi, e in base al valore di {\it res\_type} si ottiene il resto. Dopodichè si torna allo stato inziale
+    \item {\it\bf ST\_OVERF:} in cui si verifica se l'esponente del risultato è in uno stato di overflow, ovvero guardando se il bit textit{esp\_tmp[8]} vale 1 ovvero se corrisponde ad un valore maggiore di 255.
+    \item {\it\bf ST\_FINISH:} in cui si pone textit{done} uguale 1, si ricava textit{res[31]}, ovvero il segno del risultato facendo lo XOR fra i segni degli operandi, e in base al valore di textit{res\_type} si ottiene il resto. Dopodichè si torna allo stato inziale
 \end{itemize}
 
 
-\subsection{Modellazione della EFSM del double\_multiplier ({\it Figure \ref{fig:EFSM2}})}
+\subsection{Modellazione della EFSM del double\_multiplier (textit{Figure \ref{fig:EFSM2}})}
 I segnali utilizzati per la comunicazione sono:
 \begin{itemize}
     \item {\it\bf rst:} (1 bit) per riportare il sistema allo stato iniziale .
@@ -94,28 +131,28 @@ I segnali utilizzati per la comunicazione sono:
 Sono inoltre necessari 8 stati:
 
 \begin{itemize}
-    \item {\it\bf ST\_START:} in cui si pone {\it done}, {\it ready1} e {\it ready2}uguali a 0 e si inizializzano {\it op1\_tmp1} e {\it op2\_tmp1} rispettivamenete con i valori di {\it op1} e {\it op2} i quali serviranno per il primo moltiplicatore. In esso si rimane finchè {\it ready} vale 0 altrimensi si passa a {\it ST\_RUN1}.
-    \item {\it\bf ST\_RUN1:} in cui si pone {\it ready1} uguale a 1, attivando quindi il primo moltiplicatore, e si inizializzano {\it op1\_tmp2} e {\it op2\_tmp2} rispettivamenete con i valori di {\it op1} e {\it op2} i quali serviranno per il secondo moltiplicatore.
-    \item {\it\bf ST\_RUN2:} in cui si pone {\it ready1} uguale a 0 e {\it ready2} uguale a 1, attivando quindi il secondo moltiplicatore
-    \item {\it\bf ST\_WAIT:} in cui si pone {\it ready2} uguale a 0 e si aspetta che {\it done1} o {\it done2} diventino 1.
-    \item {\it\bf ST\_WAIT1:} si arriva in questo stato se {\it done2} vale 1, cioè se il secondo moltiplicatore ha finito e si resta qui finchè non finisce anche il primo.
-    \item {\it\bf ST\_WAIT2:} si arriva in questo stato se {\it done1} vale 1, cioè se il primo moltiplicatore ha finito e si resta qui finchè non finisce anche il secondo.
-    \item {\it\bf ST\_RET1:} si arriva in questo stato quando entrambi i moltiplicatore hanno finito. Qui si pone {\it done} uguale a 1 e {\it res} uguale al risultato del primo moltiplicatore cioè {\it res1}.
-    \item {\it\bf ST\_RET2:} ora si pone {\it res} uguale al risultato del secondo moltiplicatore cioè {\it res2} e si ritorna allo stato iniziale.
+    \item {\it\bf ST\_START:} in cui si pone textit{done}, textit{ready1} e textit{ready2}uguali a 0 e si inizializzano textit{op1\_tmp1} e textit{op2\_tmp1} rispettivamenete con i valori di textit{op1} e textit{op2} i quali serviranno per il primo moltiplicatore. In esso si rimane finchè textit{ready} vale 0 altrimensi si passa a textit{ST\_RUN1}.
+    \item {\it\bf ST\_RUN1:} in cui si pone textit{ready1} uguale a 1, attivando quindi il primo moltiplicatore, e si inizializzano textit{op1\_tmp2} e textit{op2\_tmp2} rispettivamenete con i valori di textit{op1} e textit{op2} i quali serviranno per il secondo moltiplicatore.
+    \item {\it\bf ST\_RUN2:} in cui si pone textit{ready1} uguale a 0 e textit{ready2} uguale a 1, attivando quindi il secondo moltiplicatore
+    \item {\it\bf ST\_WAIT:} in cui si pone textit{ready2} uguale a 0 e si aspetta che textit{done1} o textit{done2} diventino 1.
+    \item {\it\bf ST\_WAIT1:} si arriva in questo stato se textit{done2} vale 1, cioè se il secondo moltiplicatore ha finito e si resta qui finchè non finisce anche il primo.
+    \item {\it\bf ST\_WAIT2:} si arriva in questo stato se textit{done1} vale 1, cioè se il primo moltiplicatore ha finito e si resta qui finchè non finisce anche il secondo.
+    \item {\it\bf ST\_RET1:} si arriva in questo stato quando entrambi i moltiplicatore hanno finito. Qui si pone textit{done} uguale a 1 e textit{res} uguale al risultato del primo moltiplicatore cioè textit{res1}.
+    \item {\it\bf ST\_RET2:} ora si pone textit{res} uguale al risultato del secondo moltiplicatore cioè textit{res2} e si ritorna allo stato iniziale.
 \end{itemize}
 
 
 \subsection{Implementazione RTL}
-L'intefaccia del {\it double\_multiplier} è formata dai segnali di input: {\it clk, rst, ready, op1, op2}; E i segnali di output {\it res, done}. \\
-L'intefaccia del {\it multiplier} è formata anch'essa dai segnali di input: {\it clk, rst, ready, op1, op2}; E i segnali di output {\it res, done}, dove:
+L'intefaccia del textit{double\_multiplier} è formata dai segnali di input: textit{clk, rst, ready, op1, op2}; E i segnali di output textit{res, done}. \\
+L'intefaccia del textit{multiplier} è formata anch'essa dai segnali di input: textit{clk, rst, ready, op1, op2}; E i segnali di output textit{res, done}, dove:
 \begin{itemize}
-    \item {\it clk, rst} sono collegati ai segnali analoghi del {\it double\_multiplier}.
-    \item {\it ready} è collegato al segnale interno del {\it double\_multiplier} {\it ready1}, per multiplier1 e {\it ready2} per multiplier2.
-    \item {\it op1 e op2} sono collegati ai segnali interni del {\it double\_multiplier} {\it op1\_tmp1, op2\_tmp1}, per multiplier1 e {\it op1\_tmp1, op2\_tmp2} per multiplier2.
-    \item {\it res} è collegato al segnale interno del {\it double\_multiplier} {\it res1}, per multiplier1 e {\it res2} per multiplier2.
-    \item {\it done} è collegato al segnale interno del {\it double\_multiplier} {\it done1}, per multiplier1 e {\it done2} per multiplier2.
+    \item textit{clk, rst} sono collegati ai segnali analoghi del textit{double\_multiplier}.
+    \item textit{ready} è collegato al segnale interno del textit{double\_multiplier} textit{ready1}, per multiplier1 e textit{ready2} per multiplier2.
+    \item textit{op1 e op2} sono collegati ai segnali interni del textit{double\_multiplier} textit{op1\_tmp1, op2\_tmp1}, per multiplier1 e textit{op1\_tmp1, op2\_tmp2} per multiplier2.
+    \item textit{res} è collegato al segnale interno del textit{double\_multiplier} textit{res1}, per multiplier1 e textit{res2} per multiplier2.
+    \item textit{done} è collegato al segnale interno del textit{double\_multiplier} textit{done1}, per multiplier1 e textit{done2} per multiplier2.
 \end{itemize}
-{\it op1\_tmp1, op2\_tmp1, op1\_tmp2, op2\_tmp2} sono necessari al fine di conservare i valori della prima coppia di operandi e della seconda, che verranno passati ai moltiplicatori dei cicli di clock dopo. \\
+textit{op1\_tmp1, op2\_tmp1, op1\_tmp2, op2\_tmp2} sono necessari al fine di conservare i valori della prima coppia di operandi e della seconda, che verranno passati ai moltiplicatori dei cicli di clock dopo. \\
 La FSMD è realizzata con due processi:
 \begin{itemize}
     \item fsm: processo asincrono attivato con la variazione di qualche segnale interno. Esso ha il compito di calcolare e aggiornare lo stato prossimo ``NEXT\_STATE''.
@@ -131,19 +168,19 @@ Si creano i seguenti files:
     \item {\it\bf double\_multiplier:} implementazione verilog del doppio moltiplicatore (sintetizzabile)
     \item {\it\bf testbench:} implementazione verilog di un testbench da usare solo in simulazione
 \end{itemize}
-In {\it verilog\_multiplier} e {\it double\_multiplier}
+In textit{verilog\_multiplier} e textit{double\_multiplier}
 \begin{itemize}
     \item Sono definiti come ``wire'' tutti i segnali collegati alle porte di input mentre come ``reg'' tutti quelli collegati alle porte di output.
     \item Sono definiti come ``reg'' tutti i segnali interni di communicazione.
-    \item Gli stati e {\it op1\_type, op2\_type, res\_type} sono stati definiti come ``parameter''.
+    \item Gli stati e textit{op1\_type, op2\_type, res\_type} sono stati definiti come ``parameter''.
 \end{itemize}
-In {\it vhdl\_multiplier:}
+In textit{vhdl\_multiplier:}
 \begin{itemize}
     \item Sono usate le librerie ``IEEE.STD\_LOGIC\_1164.ALL'' per abilitare i tipi std\_logic e ``use IEEE.NUMERIC\_STD.ALL'' per usare funzioni aritmetiche con valori signed e unsigned
     \item Sono definiti come ``signal'' tutti i segnali collegati alle porte di input e output.
     \item Sono definiti come ``signal'' tutti i segnali interni di communicazione.
-    \item Sono definite come ``variable'' {\it sign1, sign2, esp1, esp2, esp\_tmp, mant1, mant2, mant\_tmp, op1\_type, op2\_type} perchè utilizzati solo all'interno del processo ``datapath''.
-    \item Gli stati e {\it op1\_type, op2\_type, res\_type} sono stati definiti all'interno del {\it package} rispettivamente come ``MULT\_STATE'' e ``MULT\_TYPE''.
+    \item Sono definite come ``variable'' textit{sign1, sign2, esp1, esp2, esp\_tmp, mant1, mant2, mant\_tmp, op1\_type, op2\_type} perchè utilizzati solo all'interno del processo ``datapath''.
+    \item Gli stati e textit{op1\_type, op2\_type, res\_type} sono stati definiti all'interno del textit{package} rispettivamente come ``MULT\_STATE'' e ``MULT\_TYPE''.
     \item L'architettura utilizzata segue lo stile ``behavioral'', cioè quello più ``program-like'' in quanto più semplice e chiaro per descrivere una FSMD con due processi.
 \end{itemize}
 
@@ -153,34 +190,34 @@ In {\it vhdl\_multiplier:}
 Si creano i seguenti files e directory:
 \begin{itemize}
     \item {\it\bf Makefile:} tool per la compilazione automatica del progetto. Richiede che la variabile d'ambiente SYSTEMC\_HOME contenga il path alla libreria di SystemC.
-    \item {\it\bf bin:} directory che contiene l'eseguibile {\it double\_multiplier\_RLT.x} (generato dopo la compilazione) e {\it wave.vcd} (generato dopo l'esecuzione dell'eseguibile).
+    \item {\it\bf bin:} directory che contiene l'eseguibile textit{double\_multiplier\_RLT.x} (generato dopo la compilazione) e textit{wave.vcd} (generato dopo l'esecuzione dell'eseguibile).
     \item {\it\bf obj:} directory che contiene i files oggetto (generati dopo la compilazione)
-    \item {\it\bf include:} directory che contiene gli headers {\it double\_multiplier\_RTL.hh}, {\it multiplier\_RTL.hh}, {\it testbench\_RTL.hh}. Qui sono definite tutte le porte, segnali, variabili ed enumerazioni dei vari componenti
-    \item {\it\bf testbench:} directory che contiene i files sorgenti {\it double\_multiplier\_RTL.cc}, {\it multiplier\_RTL.cc}, {\it testbench\_RTL.cc} e {\it main\_RTL.cc}.
+    \item {\it\bf include:} directory che contiene gli headers textit{double\_multiplier\_RTL.hh}, textit{multiplier\_RTL.hh}, textit{testbench\_RTL.hh}. Qui sono definite tutte le porte, segnali, variabili ed enumerazioni dei vari componenti
+    \item {\it\bf testbench:} directory che contiene i files sorgenti textit{double\_multiplier\_RTL.cc}, textit{multiplier\_RTL.cc}, textit{testbench\_RTL.cc} e textit{main\_RTL.cc}.
 \end{itemize}
-In {\it double\_multiplier\_RTL.hh}
+In textit{double\_multiplier\_RTL.hh}
 \begin{itemize}
     \item Sono definiti come ``sc\_signal'' tutti i segnali collegati alle porte di input e output.
     \item Sono definiti come ``sc\_signal'' tutti i segnali interni di communicazione.
     \item Gli stati sono stati definiti come ``enumerazioni''.
 \end{itemize}
-In {\it multiplier\_RTL.hh}
+In textit{multiplier\_RTL.hh}
 \begin{itemize}
     \item Sono definiti come ``sc\_signal'' tutti i segnali collegati alle porte di input e output.
     \item Sono definiti come ``sc\_signal'' tutti i segnali interni di communicazione.
-    \item Sono definite come variabili di SystemC {\it sign1, sign2, esp1, esp2, esp\_tmp, mant1, mant2, mant\_tmp, op1\_type, op2\_type} perchè utilizzati solo all'interno del processo ``datapath''.
-    \item Gli stati e {\it op1\_type, op2\_type, res\_type} sono stati definiti come ``enumerazioni''.
+    \item Sono definite come variabili di SystemC textit{sign1, sign2, esp1, esp2, esp\_tmp, mant1, mant2, mant\_tmp, op1\_type, op2\_type} perchè utilizzati solo all'interno del processo ``datapath''.
+    \item Gli stati e textit{op1\_type, op2\_type, res\_type} sono stati definiti come ``enumerazioni''.
 \end{itemize}
-A differenza di verilog e VHDL, in SystemC è necessario un file ``main'' che contenga il metodo {\it sc\_main} e che permetta di collegare il componente da testare con il testbench. In esso si utilizza {\it sc\_create\_vcd\_trace\_file} per salvare le tracce necessarie a lanciare una simulazione con tools come gtkwave.
+A differenza di verilog e VHDL, in SystemC è necessario un file ``main'' che contenga il metodo textit{sc\_main} e che permetta di collegare il componente da testare con il testbench. In esso si utilizza textit{sc\_create\_vcd\_trace\_file} per salvare le tracce necessarie a lanciare una simulazione con tools come gtkwave.
 
 
 \section{Risultati}
-Il testbench verilog, {\it Figure \ref{fig:SIM1}}, aspetta un po di tempo, perchè altrimenti si verificherebbero problemi dovuti allo startup della FPGA nella simulazione post-sintesi, e poi esegue due volte il {\it double\_multiplier}, prima con due coppie di operandi che danno come risultato dei numeri normali, e poi con due coppie di operandi che danno come risultati dei casi speciali. \\
+Il testbench verilog, textit{Figure \ref{fig:SIM1}}, aspetta un po di tempo, perchè altrimenti si verificherebbero problemi dovuti allo startup della FPGA nella simulazione post-sintesi, e poi esegue due volte il textit{double\_multiplier}, prima con due coppie di operandi che danno come risultato dei numeri normali, e poi con due coppie di operandi che danno come risultati dei casi speciali. \\
 
 Il testbench in SystemC mette a disposizione tre thread da attivare togliendo i commenti nel costruttore del ``TestbenchModule'':
 \begin{itemize}
-    \item {\it\bf targeted\_test:} che analogamente a quello in Verilog, testa due volte il {\it double\_multiplier}. {\it Figure \ref{fig:SIM2}}.
-    \item {\it\bf rnd\_test:} che prova {\it TESTS\_NUM} moltiplicazioni generate casualmente tra un intervallo modificabile. {\it Figure \ref{fig:SIM3}}.
+    \item {\it\bf targeted\_test:} che analogamente a quello in Verilog, testa due volte il textit{double\_multiplier}. textit{Figure \ref{fig:SIM2}}.
+    \item {\it\bf rnd\_test:} che prova textit{TESTS\_NUM} moltiplicazioni generate casualmente tra un intervallo modificabile. textit{Figure \ref{fig:SIM3}}.
     \item {\it\bf run\_all:} che prova tutte le possibili combinazioni cioè \(2^{32} * 2^{32}\). Si può limitare il numero di combinazioni evitando di contare il bit del segno, in quanto il calcolo è un semplice xor. Poi si possono escludere tutti i numeri denormalizzati. Ma anche così il tempo necessario a completarlo è troppo elevato per la mia macchina.
 \end{itemize}
 Con la sintesi si sono ottenuti i seguenti risultati:
