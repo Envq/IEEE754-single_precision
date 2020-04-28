@@ -12,7 +12,7 @@
 
 
 \begin{abstract}
-    Questo documento mostra la realizzazione di un moltiplicatore in virgola mobile a precisione singola realizzato in VHDL, Verilog e SystemC ed un componente che permetta di eseguire due moltiplicazioni in parallelo. Il tutto è accompagnato da testbench e sintesi dei componenti VHDL e verilog ed un confronto con l'High-level-Synthesis di un moltiplicatore in c++.
+    Questo documento mostra la realizzazione di un moltiplicatore in virgola mobile a precisione singola realizzato in VHDL, Verilog e SystemC ed un componente che permetta di eseguire due moltiplicazioni in parallelo. Il tutto è accompagnato da testbench, sintesi dei componenti VHDL e verilog ed un confronto con l'High-level-Synthesis di un moltiplicatore scritto in c++.
 \end{abstract}
 
 
@@ -44,7 +44,7 @@ Questa sessione non deve ripetere quanto detto a lezione, ma dare un overview de
 
 
 \section{Metodologia applicata}
-Per prima cosa sono stati progettati i componenti principali cioè il {\it multiplier} e il {\it double\_multiplier}, descrivendoli con delle EFSM. Dopodichè si è passati all'implementazione a livello RTL in vhdl e verilog e alla creazione del relativo testbench. A questo punto si è tradotto il tutto anche in systemC, potendo però fare un testbench più complesso grazie alla potenza del c++. Infine è stata eseguita la sintesi dei componenti in VHDL e verilog per poi fare un confronto con la high-level-syntesis del moltiplicatore in c++.
+Per prima cosa sono stati progettati i componenti principali (cioè il multiplier e double\_multiplier, descrivendoli con delle EFSM. Dopodichè si è passati all'implementazione a livello RTL in vhdl e verilog e alla creazione del relativo testbench. A questo punto si è tradotto il tutto anche in systemC, potendo però fare un testbench più complesso grazie alla potenza del c++. Infine è stata eseguita la sintesi dei componenti in VHDL e verilog per poi fare un confronto con la high-level-syntesis del moltiplicatore in c++.
 
 \subsection{Vincoli}
 \begin{itemize}
