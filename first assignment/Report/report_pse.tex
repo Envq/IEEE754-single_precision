@@ -81,9 +81,15 @@ Qui è riportato l'algoritmo usato per la moltiplicazione fra floating point. Gu
 
 
 \section{Metodologia applicata}
-Per prima cosa sono stati progettati i componenti principali cioè il textit{multiplier} e il textit{double\_multiplier}, descrivendoli con delle EFSM. Dopodichè si è passati all'implementazione a livello RTL in vhdl e verilog e alla creazione del relativo testbench. A questo punto si è tradotto il tutto anche in systemC, potendo però fare un testbench più complesso grazie alla potenza del c++. Infine è stata eseguita la sintesi dei componenti in VHDL e verilog per poi fare un confronto con la high-level-syntesis del moltiplicatore in c++.
+Il primo passo è stato la realizzazione della EFSM di \textit{multiplier} e \textit{double\_multiplier} che ha portato ad aquisire una visisione generale.
+\\Dopo si è passati all'implementazione a livello RT con Vivado\cite{Vivado} del \textit{multiplier} sia in Verilog che in VHDL. Un primo test è stato fatto con TLC-script osservando gli output a determinati input.
+\\Consolidati questi moduli è stato poi possibile realizzato in Verilog il \textit{double\_multiplier} che prende i due componenti e li usa per calcolare due moltiplicazioni. A questo punto è stato realizzato un test più accurato in verilog controllando tutti i casi particalari per poi passare alla sintesi.
+\\È anche stato rifatto tutto in SystemC dove si è potuto fare un testbench più fine grazie alla potenza del c++.
+\\Infine si è provato a fare l'high level syntesis da un semplice codice c++ per confrontare i risultati ottenuti.
 
-\subsection{Vincoli}
+
+\subsection{Vincoli ed Architettura}
+Il progetto a diversi vincoli:
 \begin{itemize}
     \item Il multiplier deve essere scritto in VHDL, verilog e systemC.
     \item Il double\_multiplier deve essere scritto in systemC e un linguaggio a scelta tra VHDL e verilog.
@@ -91,19 +97,38 @@ Per prima cosa sono stati progettati i componenti principali cioè il textit{mul
     \item I due componenti devono essere sintetizzabili sulla FPGA ``xc7z020clg400-1'' la quale ha a disposizione solo 125 porte.
 \end{itemize}
 Per far fronte al limite delle porte logiche è stato utilizzato il protocollo di handshake. Vengono quindi utilizzati gli stessi 32 bit per il risultato e altri 64 bit per le due coppie di operandi. Al primo ciclo di clock, con il flag ``ready'' uguale a 1, verranno trasmessi i primi due operandi e al ciclo successivo gli altri due. Dopodichè si aspetterà il complementanto delle moltiplicazioni, segnalato col flag ``done'' uguale a 1, per poi trasmettere il primo risultato, e il secondo al ciclo di clock successivo.
+\\L'architettura con VHDL e Verilog è mostrata in figura \ref{fig:Architettura}. Quella per SystemC è analoga. 
+\\I segnali intermedi sono stati omessi da questa figura, ma vengono descritti nelle sezioni successive.
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.6\linewidth]{figures/architettura.jpg}
+    \caption{Architettura RTL}
+    \label{fig:Architettura}
+\end{figure}
 
-\subsection{Modellazione della EFSM del multiplier textit{[Figura \ref{fig:EFSM1}]}}
-I segnali utilizzati per la comunicazione sono:
+
+\subsection{Modellazione della EFSM del multiplier [Figura \ref{fig:EFSM1}]}
+Questo componente esegue la moltiplicazione tra numeri floating point a precisione singola.
+\\I segnali intermedi utilizzati sono:
 \begin{itemize}
-    \item \textbf{rst} (1 bit): per riportare il sistema allo stato iniziale.
-    \item \textbf{ready} (1 bit): per permettere al sistema di uscire dallo stato iniziale.
-    \item \textbf{norm\_again} (1 bit): per indicare se fare un'altra normalizzazione del numero intermedio.
-    \item \textbf{res\_type} (2 bit): per indicare se il risultato vale 0, NAN o \(\infty\) e quindi andare direttamente allo stato finale oppure se è un numero (il caso denormalizzato viene gestito come se fosse normalizzato) e quindi proseguire nell'elaborazione.
+    \item \textbf{rst} (1 bit): riporta il sistema allo stato iniziale.
+    \item \textbf{ready} (1 bit): permette al sistema di uscire dallo stato iniziale.
+    \item \textbf{norm\_again} (1 bit): indica che il numero ha bisogno di essere ulteriormente normalizzato.
+    \item \textbf{res\_type} (2 bit): indicare il tipo del risultato. Solo nel caso in cui sia un numero si procede all'elaborazione, mentre negli altri casi si passa direttamente allo stato finale. Il caso del numero denormalizzato è gestito come se fosse normalizzato.
 \end{itemize}
 
-Sono inoltre necessari 14 stati:
+I registri intermedi utilizzati sono:
 \begin{itemize}
-    \item {\it\bf ST\_START:} in cui si pone textit{done} e textit{norm\_again} uguali a 0 e si ottengono le informazioni di segno, esponente e mantissa dei due operandi. In esso si rimane finchè textit{ready} vale 0 altrimensi si passa a textit{ST\_EVAL1}.
+    \item \textbf{STATE e NEXT\_STATE} (4 bit): rappresentano lo stato attuale e lo stato prossimo.
+    \item \textbf{op1\_type e op2\_type} (2 bit): per indicare il tipo degli operandi ovvero 0, NaN, $\infty$ oppure un numero. Solo se sono entrambi sono dei numeri res\_type sarà un numero.
+    \item \textbf{esp\_tmp} (10 bit): permette di eseguire le operazioni per ricavare l'esponente finale senza perdere informazioni.
+    \item \textbf{mant\_tmp} (48 bit): permette di eseguire le operazioni per ricavare la mantissa finale senza perdere informazioni.
+    \item \textbf{sign1, sign2, esp1, esp2, mant1, mant2}: rappresentano le componenti dei due operandi.
+\end{itemize}
+
+Sono  necessari 14 stati:
+\begin{itemize}
+    \item {\it\bf ST\_START:} vengono posti \textit{done} e \textit{norm\_again} a 0 ed estratte le informazioni di segno, esponente e mantissa dei due operandi. Si rimane qui finchè \textit{ready} vale 0 altrimensi si passa a \textit{ST\_EVAL1}.
     \item {\it\bf ST\_EVAL1:} e textit{ST\_EVAL2} in cui viene valutato il tipo dei due operandi fra textit{T\_ZER, T\_INF, T\_NAN e T\_NUM}
     \item {\it\bf ST\_EVAL3:} in cui si ricava il tipo del risultato in base al tipo degli operandi.
     \item {\it\bf ST\_CHECK1:} dove si passa a textit{ST\_FINISH} se textit{res\_type} è diverso da textit{T\_NUM}.
