@@ -128,42 +128,42 @@ I registri intermedi utilizzati sono:
 
 Sono  necessari 14 stati:
 \begin{itemize}
-    \item {\it\bf ST\_START:} vengono posti \textit{done} e \textit{norm\_again} a 0 ed estratte le informazioni di segno, esponente e mantissa dei due operandi. Si rimane qui finchè \textit{ready} vale 0 altrimensi si passa a \textit{ST\_EVAL1}.
-    \item {\it\bf ST\_EVAL1:} e textit{ST\_EVAL2} in cui viene valutato il tipo dei due operandi fra textit{T\_ZER, T\_INF, T\_NAN e T\_NUM}
-    \item {\it\bf ST\_EVAL3:} in cui si ricava il tipo del risultato in base al tipo degli operandi.
-    \item {\it\bf ST\_CHECK1:} dove si passa a textit{ST\_FINISH} se textit{res\_type} è diverso da textit{T\_NUM}.
-    \item {\it\bf ST\_ELAB:} in cui si sommano i due esponenti e si sottrae 127 perchè entrambi, per lo standard, sono incrementati di 127 (\((esp+127) = (esp1+127)+(esp127) - 127\)). Per compiere la somma è necessario usare una variabile ``esp\_tmp'' 10 bit altrimenti si andrebbe in overflow per valori invece leciti che ritornerebbero validi dopo la sottrazione di 127. Inoltre viene eseguita anche la moltiplicazione delle due mantisse, che essendo a 23 bit più un bit che vale sempre 1, necessita di una variabile ``mant\_tmp'' di 48 bit
-    \item {\it\bf ST\_UNDERF:} in cui si verifica se l'esponente del risultato è in uno stato di underflow, ovvero guardando se il bit textit{esp\_tmp[9]}, che nel complemento a 2 indica il segno, è 1. Infatti i valori disponibili per l'esponente vanno da 0 a 255.
-    \item {\it\bf ST\_CHECK2} dove si passa a textit{ST\_FINISH} se textit{res\_type} è diverso da textit{T\_NUM}, perchè diventato textit{T\_ZER} per l'underflow.
-    \item {\it\bf ST\_NORM1:} in cui si compie la normalizzazione della mantissa che deve sempre essere della forma textit{1.valori}. Essendo la virgola posta tra il 46esimo bit e il 45esimo, si verificano due casi: Se il 47esimo bit vale 1 bisogna incrementare l'esponente, altrimenti il valore è già corretto, ma viene effettuato uno shift a sinistra per trattare allo stesso modo i due casi durante l'arrotondamento.
-    \item {\it\bf ST\_ROUND:} in cui si effettua l'eventuale arrotondamento dovuto al fatto che il valore della mantissa è attualmente a 48 bit, ma bisogna portarlo a 24 bit. L'arrotondamento è fatto per eccesso, quindi si incrementerà textit{mant\_tmp[47:24]} solo se textit{mant\_tmp[23:00]} sarà \( \geq \) a ``01..1''. L'arrotondamento effettivò verrà fatto nello stato textit{ST\_NORM2}, qui ci si limita a porre textit{norm\_again} uguale a 1 per poterci andare.
-    \item \textit{\textbf{ST\_CHECK3:}} dove si passa allo stato \textit{ST\_NORM2} se \(\textit{norm} = 1\) oppure allo stato \textit{ST\_OVERF} se \(\textit{norm} = 0\).
-    \item \textit{\textbf{ST\_NORM2:}} in cui si effettua il vero arrotondamento della mantassina. Bisogna tenere conto del caso in cui sia della forma ``1..1'' e che quindi con l'incremento vada a ``0..0'' e  venga incrementato l'esponente.
-    \item {\it\bf ST\_OVERF:} in cui si verifica se l'esponente del risultato è in uno stato di overflow, ovvero guardando se il bit textit{esp\_tmp[8]} vale 1 ovvero se corrisponde ad un valore maggiore di 255.
-    \item {\it\bf ST\_FINISH:} in cui si pone textit{done} uguale 1, si ricava textit{res[31]}, ovvero il segno del risultato facendo lo XOR fra i segni degli operandi, e in base al valore di textit{res\_type} si ottiene il resto. Dopodichè si torna allo stato inziale
+    \item \textbf{ST\_START:} pone \textit{done} e \textit{norm\_again} a 0 ed estre le informazioni di segno, esponente e mantissa dei due operandi. Si rimane qui finchè \textit{ready} vale 0 altrimensi si passa a \textit{ST\_EVAL1}. Se in qualsiasi stato si riceve \textit{reset} uguale a 1 allora si passa a questo stato.
+    \item \textbf{ST\_EVAL1 e ST\_EVAL2:} ricava rispettivamente il tipo di op1 e op2 fra \textit{T\_ZER, T\_INF, T\_NAN e T\_NUM}
+    \item \textbf{ST\_EVAL3:} ricava il tipo del risultato in base al tipo di op1 e op2.
+    \item \textbf{ST\_CHECK1:} controlla se \textit{res\_type} è uguale a T\_NUM e in tal caso passa a \textit{ST\_ELAB} altrimenti a \textit{ST\_FINISH}.
+    \item \textbf{ST\_ELAB:} esegue la somma tra i due esponenti e la sottrazione di 127 in quanto entrambi, per lo standard, sono incrementati di 127: $(esp+127) = (esp1+127)+(esp2+127)-127$. Per compiere la somma è necessario usare una variabile \textit{esp\_tmp} di 10 bit perchè altrimenti con 8 bit si andrebbe in overflow con valori che dopo la sottrazione sarebbero rappresentabili con 8 bit e quindi validi. Viene poi eseguita anche la moltiplicazione delle due mantisse, che essendo a 23 bit più un bit che vale sempre 1, necessita di una variabile \textit{mant\_tmp} di almeno 48 bit
+    \item \textbf{ST\_UNDERF:} controlla se \textit{esp\_tmp} è in uno stato di underflow, ovvero guardando se il bit \textit{esp\_tmp[9]}, che nel complemento a 2 indica il segno, è 1. Infatti i valori disponibili per l'esponente vanno da 0 a 255. Il controllo dell'overflow viene fatto in seguito all'arrotondamento per evitare di farlo due volte.
+    \item \textbf{ST\_CHECK2:} passa allo stato \textit{ST\_FINISH} se \textit{res\_type} è diverso da \textit{T\_NUM}, perchè diventato \textit{T\_ZER} per l'underflow.
+    \item \textbf{ST\_NORM1:} compie la normalizzazione della mantissa che deve sempre essere della forma \textit{1.bits}. Essendo la virgola posta tra il 46esimo bit e il 45esimo, si verificano due casi: Se il 47esimo bit vale 1 bisogna incrementare l'esponente, altrimenti il valore è già corretto, ma viene effettuato uno shift a sinistra per trattare allo stesso modo i due casi durante l'arrotondamento.
+    \item \textbf{ST\_ROUND:} effettua l'eventuale arrotondamento dovuto al fatto che il valore della mantissa è attualmente a 48 bit, ma bisogna portarlo a 24 bit. L'arrotondamento è fatto per eccesso, quindi si incrementera \textit{mant\_tmp[47:24]} solo se \textit{mant\_tmp[23:00]} è $\geq$ a ``01..1''. L'arrotondamento effettivo verrà fatto nello stato \textit{ST\_NORM2}, qui ci si limita a porre \textit{norm\_again} uguale a 1 per poterci andare.
+    \item \textit{\textbf{ST\_CHECK3:}} passa allo stato \textit{ST\_NORM2} se \textit{norm} è uguale a 1 oppure allo stato \textit{ST\_OVERF} se \textit{norm} è uguale a 0.
+    \item \textbf{ST\_NORM2:} effettua il vero arrotondamento della mantissa. Bisogna tenere conto del caso in cui sia della forma ``1..1'' e che quindi con l'incremento vada a ``0..0'' e  venga incrementato l'esponente.
+    \item \textbf{ST\_OVERF:} verifica se l'esponente del risultato è in uno stato di overflow, ovvero guardando se il bit \textit{esp\_tmp[8]} vale 1 ovvero se corrisponde ad un valore maggiore di 255.
+    \item \textbf{ST\_FINISH:} pone \textit{done} uguale 1 e ricava \textit{res[31]}, ovvero il segno del risultato facendo lo XOR fra i segni degli operandi. In base al valore di \textit{res\_type} si ricavano gli altri bits e si torna allo stato iniziale.
 \end{itemize}
 
 
 \subsection{Modellazione della EFSM del double\_multiplier (textit{Figure \ref{fig:EFSM2}})}
 I segnali utilizzati per la comunicazione sono:
 \begin{itemize}
-    \item {\it\bf rst:} (1 bit) per riportare il sistema allo stato iniziale .
-    \item {\it\bf ready:} (1 bit) per permettere al sistema di uscire dallo stato iniziale .
-    \item {\it\bf done1:} (1 bit) che indica quando il valore attuale di ``res1'' è il risultato della moltiplicazione.
-    \item {\it\bf done2:} (1 bit) che indica quando il valore attuale di ``res2'' è il risultato della moltiplicazione.
+    \item \textbf{rst:} (1 bit) per riportare il sistema allo stato iniziale .
+    \item \textbf{ready:} (1 bit) per permettere al sistema di uscire dallo stato iniziale .
+    \item \textbf{done1:} (1 bit) che indica quando il valore attuale di ``res1'' è il risultato della moltiplicazione.
+    \item \textbf{done2:} (1 bit) che indica quando il valore attuale di ``res2'' è il risultato della moltiplicazione.
 \end{itemize}
 
 Sono inoltre necessari 8 stati:
 
 \begin{itemize}
-    \item {\it\bf ST\_START:} in cui si pone textit{done}, textit{ready1} e textit{ready2}uguali a 0 e si inizializzano textit{op1\_tmp1} e textit{op2\_tmp1} rispettivamenete con i valori di textit{op1} e textit{op2} i quali serviranno per il primo moltiplicatore. In esso si rimane finchè textit{ready} vale 0 altrimensi si passa a textit{ST\_RUN1}.
-    \item {\it\bf ST\_RUN1:} in cui si pone textit{ready1} uguale a 1, attivando quindi il primo moltiplicatore, e si inizializzano textit{op1\_tmp2} e textit{op2\_tmp2} rispettivamenete con i valori di textit{op1} e textit{op2} i quali serviranno per il secondo moltiplicatore.
-    \item {\it\bf ST\_RUN2:} in cui si pone textit{ready1} uguale a 0 e textit{ready2} uguale a 1, attivando quindi il secondo moltiplicatore
-    \item {\it\bf ST\_WAIT:} in cui si pone textit{ready2} uguale a 0 e si aspetta che textit{done1} o textit{done2} diventino 1.
-    \item {\it\bf ST\_WAIT1:} si arriva in questo stato se textit{done2} vale 1, cioè se il secondo moltiplicatore ha finito e si resta qui finchè non finisce anche il primo.
-    \item {\it\bf ST\_WAIT2:} si arriva in questo stato se textit{done1} vale 1, cioè se il primo moltiplicatore ha finito e si resta qui finchè non finisce anche il secondo.
-    \item {\it\bf ST\_RET1:} si arriva in questo stato quando entrambi i moltiplicatore hanno finito. Qui si pone textit{done} uguale a 1 e textit{res} uguale al risultato del primo moltiplicatore cioè textit{res1}.
-    \item {\it\bf ST\_RET2:} ora si pone textit{res} uguale al risultato del secondo moltiplicatore cioè textit{res2} e si ritorna allo stato iniziale.
+    \item \textbf{ST\_START:} in cui si pone textit{done}, textit{ready1} e textit{ready2}uguali a 0 e si inizializzano textit{op1\_tmp1} e textit{op2\_tmp1} rispettivamenete con i valori di textit{op1} e textit{op2} i quali serviranno per il primo moltiplicatore. In esso si rimane finchè textit{ready} vale 0 altrimensi si passa a textit{ST\_RUN1}.
+    \item \textbf{ST\_RUN1:} in cui si pone textit{ready1} uguale a 1, attivando quindi il primo moltiplicatore, e si inizializzano textit{op1\_tmp2} e textit{op2\_tmp2} rispettivamenete con i valori di textit{op1} e textit{op2} i quali serviranno per il secondo moltiplicatore.
+    \item \textbf{ST\_RUN2:} in cui si pone textit{ready1} uguale a 0 e textit{ready2} uguale a 1, attivando quindi il secondo moltiplicatore
+    \item \textbf{ST\_WAIT:} in cui si pone textit{ready2} uguale a 0 e si aspetta che textit{done1} o textit{done2} diventino 1.
+    \item \textbf{ST\_WAIT1:} si arriva in questo stato se textit{done2} vale 1, cioè se il secondo moltiplicatore ha finito e si resta qui finchè non finisce anche il primo.
+    \item \textbf{ST\_WAIT2:} si arriva in questo stato se textit{done1} vale 1, cioè se il primo moltiplicatore ha finito e si resta qui finchè non finisce anche il secondo.
+    \item \textbf{ST\_RET1:} si arriva in questo stato quando entrambi i moltiplicatore hanno finito. Qui si pone textit{done} uguale a 1 e textit{res} uguale al risultato del primo moltiplicatore cioè textit{res1}.
+    \item \textbf{ST\_RET2:} ora si pone textit{res} uguale al risultato del secondo moltiplicatore cioè textit{res2} e si ritorna allo stato iniziale.
 \end{itemize}
 
 
@@ -188,10 +188,10 @@ La FSMD è realizzata con due processi:
 \subsection{Implementazione RTL con Verilog e VHDL}
 Si creano i seguenti files:
 \begin{itemize}
-    \item {\it\bf verilog\_multiplier:} implementazione verilog del moltiplicatore (sintetizzabile)
-    \item {\it\bf vhdl\_multiplier:} implementazione vhdl del moltiplicatore (sintetizzabile)
-    \item {\it\bf double\_multiplier:} implementazione verilog del doppio moltiplicatore (sintetizzabile)
-    \item {\it\bf testbench:} implementazione verilog di un testbench da usare solo in simulazione
+    \item \textbf{verilog\_multiplier:} implementazione verilog del moltiplicatore (sintetizzabile)
+    \item \textbf{vhdl\_multiplier:} implementazione vhdl del moltiplicatore (sintetizzabile)
+    \item \textbf{double\_multiplier:} implementazione verilog del doppio moltiplicatore (sintetizzabile)
+    \item \textbf{testbench:} implementazione verilog di un testbench da usare solo in simulazione
 \end{itemize}
 In textit{verilog\_multiplier} e textit{double\_multiplier}
 \begin{itemize}
@@ -214,11 +214,11 @@ In textit{vhdl\_multiplier:}
 \subsection{Implementazione RTL con SystemC}
 Si creano i seguenti files e directory:
 \begin{itemize}
-    \item {\it\bf Makefile:} tool per la compilazione automatica del progetto. Richiede che la variabile d'ambiente SYSTEMC\_HOME contenga il path alla libreria di SystemC.
-    \item {\it\bf bin:} directory che contiene l'eseguibile textit{double\_multiplier\_RLT.x} (generato dopo la compilazione) e textit{wave.vcd} (generato dopo l'esecuzione dell'eseguibile).
-    \item {\it\bf obj:} directory che contiene i files oggetto (generati dopo la compilazione)
-    \item {\it\bf include:} directory che contiene gli headers textit{double\_multiplier\_RTL.hh}, textit{multiplier\_RTL.hh}, textit{testbench\_RTL.hh}. Qui sono definite tutte le porte, segnali, variabili ed enumerazioni dei vari componenti
-    \item {\it\bf testbench:} directory che contiene i files sorgenti textit{double\_multiplier\_RTL.cc}, textit{multiplier\_RTL.cc}, textit{testbench\_RTL.cc} e textit{main\_RTL.cc}.
+    \item \textbf{Makefile:} tool per la compilazione automatica del progetto. Richiede che la variabile d'ambiente SYSTEMC\_HOME contenga il path alla libreria di SystemC.
+    \item \textbf{bin:} directory che contiene l'eseguibile textit{double\_multiplier\_RLT.x} (generato dopo la compilazione) e textit{wave.vcd} (generato dopo l'esecuzione dell'eseguibile).
+    \item \textbf{obj:} directory che contiene i files oggetto (generati dopo la compilazione)
+    \item \textbf{include:} directory che contiene gli headers textit{double\_multiplier\_RTL.hh}, textit{multiplier\_RTL.hh}, textit{testbench\_RTL.hh}. Qui sono definite tutte le porte, segnali, variabili ed enumerazioni dei vari componenti
+    \item \textbf{testbench:} directory che contiene i files sorgenti textit{double\_multiplier\_RTL.cc}, textit{multiplier\_RTL.cc}, textit{testbench\_RTL.cc} e textit{main\_RTL.cc}.
 \end{itemize}
 In textit{double\_multiplier\_RTL.hh}
 \begin{itemize}
@@ -241,9 +241,9 @@ Il testbench verilog, textit{Figure \ref{fig:SIM1}}, aspetta un po di tempo, per
 
 Il testbench in SystemC mette a disposizione tre thread da attivare togliendo i commenti nel costruttore del ``TestbenchModule'':
 \begin{itemize}
-    \item {\it\bf targeted\_test:} che analogamente a quello in Verilog, testa due volte il textit{double\_multiplier}. textit{Figure \ref{fig:SIM2}}.
-    \item {\it\bf rnd\_test:} che prova textit{TESTS\_NUM} moltiplicazioni generate casualmente tra un intervallo modificabile. textit{Figure \ref{fig:SIM3}}.
-    \item {\it\bf run\_all:} che prova tutte le possibili combinazioni cioè \(2^{32} * 2^{32}\). Si può limitare il numero di combinazioni evitando di contare il bit del segno, in quanto il calcolo è un semplice xor. Poi si possono escludere tutti i numeri denormalizzati. Ma anche così il tempo necessario a completarlo è troppo elevato per la mia macchina.
+    \item \textbf{targeted\_test:} che analogamente a quello in Verilog, testa due volte il textit{double\_multiplier}. textit{Figure \ref{fig:SIM2}}.
+    \item \textbf{rnd\_test:} che prova textit{TESTS\_NUM} moltiplicazioni generate casualmente tra un intervallo modificabile. textit{Figure \ref{fig:SIM3}}.
+    \item \textbf{run\_all:} che prova tutte le possibili combinazioni cioè \(2^{32} * 2^{32}\). Si può limitare il numero di combinazioni evitando di contare il bit del segno, in quanto il calcolo è un semplice xor. Poi si possono escludere tutti i numeri denormalizzati. Ma anche così il tempo necessario a completarlo è troppo elevato per la mia macchina.
 \end{itemize}
 Con la sintesi si sono ottenuti i seguenti risultati:
 
