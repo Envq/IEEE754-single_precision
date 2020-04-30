@@ -19,18 +19,12 @@
 
 
 \section{Introduzione}
-Il sistema è composto da un modulo top-level chiamato ``double\_multiplier'' il quale esegue la moltiplicazione di due operandi dati in input nello stesso ciclo di clock in cui ready viene posto a 1, e i due opereandi passati al ciclo di clock successivo
-
-Nell'introduzione viene descritto in maniera astratta quello che poi viene dettagliato nel seguito del report. Una buona scaletta per l'introduzione può essere la seguente:
-\begin{itemize}
-    \item Descrizione ad alto livello delle principali caratteristiche del sistema che si vuole modellare.
-    \item Descrizione delle motivazioni principali per l'utilizzo delle tecnologie descritte nel corso. Qual è il problema che si vuole risolvere?
-    \item Descrizione dei passi utilizzati per arrivare all'implementazione finale. Descrivere la motivazione di ciascun passo. La descrizione dei passi dovrebbe formare la descrizione del flusso di lavoro svolto per completare l'assignment.
-    \item Rapidissima descrizione dei risultati principali.
-\end{itemize}
-
-L'introduzione non dovrebbe andare oltre la metà della seconda colonna (nel caso a due colonne), o la prima pagina (nel caso a colonna singola): bisogna cercare di essere concisi (e chiari). Alla fine, l'introduzione è solo ``chiacchiere'': deve semplicemente rendere chiari quali sono gli obiettivi del lavoro (\emph{e nel caso del corso, deve far capire a me che avete gli obiettivi chiari in testa}). Consiglio: l'introduzione (e spesso l'abstract) è l'ultima parte che viene completata.
-
+Il progetto consiste nella realizzaione in hardware di un sistema che esegue due moltiplicazioni in virgola mobile a precisione singola (quindi 32 bit) in parello secondo lo standard IEEE754. Esso deve essere sintetizzabile sulla scheda FPGA ``xc7z020clg400-1'' che possiede solo 125 porte, quindi si potranno avere a disposizione solo 64 bit per gli input e 32 per l'output. Di conseguenza bisogna serializzare input e output e usare il protocollo di handshake per gestire la comunicazione fra i vari componenti.
+\\Il moltiplicatore sarà realizzato sia in Verilog che VHDL al fine di comprendere meglio le differenze e i pro e contro dei due linguaggi. L'intero sistema sarà poi tradotto anche in SystemC per fare un confronto anche con quel tipo di progettazione. Infine si analizzeranno i risultati e li si confronteranno con l'high level syntesis del codice in c++.
+\\L'approccio utilizzato è bottom-up, cioè partendo dal moltiplicatore per poi arrivare al top level. L'implementazione è preceduta dall'analisi dei requisiti e la stesura della EFSM. La stesura dell'EFSM è la parte più importante perchè qui viene tradotto l'algoritmo, descritto il flusso e scelti i vari segnali e registri necessari. Una buona EFSM permette di evitare di scrivere varie righe di codice per poi accorgersi in simulazione che qualcosa non funziona.
+\\Il progetto è piccolo quindi ci si aspetta che occupi una minima parte della FPGA e che la versione RTL sia 
+\\Ci si aspetta che la versione RTL sia significativamente più performante di quella con l'high level syntesis, motivo per cui ha senso usare questo tipo di approccio quando non si hanno stretti vincoli di tempo da rispettare per realizzare il progetto.
+\\Ci si aspetta anche che occupi una minima parte della FPGA in quanto è un progetto molto piccolo.
 
 
 \section{Background}
@@ -45,12 +39,12 @@ Un HDL è un linguaggio specializzato per la descrizione della struttura e del c
 
 \subsection{IEEE 754 single-precision binary floating-point format}
 Questo standard definisce il formato per la rappresentazione dei numeri in virgola mobile (compreso $\pm 0$ e i numeri denormalizzati; gli infiniti e i NaN, "not a number"), ed un set di operazioni effettuabili su questi. 
-\\In particolare la versione a precisione singola descrive il numero con 32 bit: 1 bit per segno (sign), 8 bit per l'esponente (esp) e 23 bit per la mantissa (mant)\cite{IEE754}.
+\\In particolare la versione a precisione singola descrive il numero con 32 bit: 1 bit per segno (sign), 8 bit per l'esponente (esp) e 23 bit per la mantissa (mant)\cite{IEEE754}.
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/ieee754_single_precision.png}
     \caption{IEEE 754 single precision}
-    \label{fig:IEE754}
+    \label{fig:IEEE754}
 \end{figure}
 \\Per la codifica in numero binario:
 \begin{itemize}
@@ -70,7 +64,7 @@ Per la decodifica del numero binario: $$(-1)^{sign}\cdot 2^{(esp-127)} \cdot (1 
 
 
 \subsection{Moltiplicazione di due numeri floating-point}
-Qui è riportato l'algoritmo usato per la moltiplicazione fra floating point. Guardare qui per ulteriori dettagli\cite{IEE754Mult}.
+Qui è riportato l'algoritmo usato per la moltiplicazione fra floating point. Guardare qui per ulteriori dettagli\cite{IEEE754Mult}.
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.6\linewidth]{figures/ieee_multiplication.png}
@@ -163,7 +157,7 @@ Questo componente esegue due moltiplicazioni tra numeri floating point a precisi
     \item \textbf{op2} (32 bit input): secondo operando.
     \item \textbf{clk} (1 bit input): segnale di clock.
     \item \textbf{rst} (1 bit input): segnale di reset. Riporta il sistema allo stato iniziale.
-    \item \textbf{ready} (1 bit input): segnale che permette al sistema di uscire dallo stato iniziale. Nello specifico indica che il prossimo ciclo di clock ci sarà il primo operando in \textit{op1} e il ciclo di clock successivo in \textit{op2}. (?)
+    \item \textbf{ready} (1 bit input): segnale che permette al sistema di uscire dallo stato iniziale. Nello specifico indica che in questo ciclo di clok \textit{op1} e \textit{op2} contengono gli operandi della prima moltiplicazione e nel ciclo di clock successivo ci saranno gli altri. (?)
     \item \textbf{done} (1 bit output): segnale che indica che il valore su \textit{res} è il risultato.
     \item \textbf{res} (32 bit output): risultato.
 \end{itemize}
