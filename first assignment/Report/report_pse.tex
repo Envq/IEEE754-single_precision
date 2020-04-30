@@ -136,8 +136,7 @@ Gli altri segnali/registri intermedi utilizzati sono:
     \item \textbf{sign1, sign2, esp1, esp2, mant1, mant2}: rappresentano le componenti dei due operandi.
 \end{itemize}
 
-Nello specifico in Verilog sono rappresentati tutti come reg, mentre in VHDL \textit{res\_type}, \textit{norm\_again}, \textit{STATE}, \textit{NEXT\_STATE} come signal e gli altri come variable.
-\\L'algoritmo della moltiplicazione è descritto grazie alla EFSM [Figura \ref{fig:EFSM_multiplier}] la quale è formata 14 stati:
+L'algoritmo della moltiplicazione è descritto grazie alla EFSM [Figura \ref{fig:EFSM_multiplier}] la quale è formata 14 stati:
 \begin{itemize}
     \item \textbf{ST\_START:} pone \textit{done} e \textit{norm\_again} a 0 ed estre le informazioni di segno, esponente e mantissa dei due operandi. Si rimane qui finchè \textit{ready} vale 0 altrimensi si passa a \textit{ST\_EVAL1}. Se in qualsiasi stato si riceve \textit{reset} uguale a 1 allora si passa a questo stato.
     \item \textbf{ST\_EVAL1 e ST\_EVAL2:} ricava rispettivamente il tipo di op1 e op2 fra \textit{T\_ZER, T\_INF, T\_NAN e T\_NUM}
@@ -178,9 +177,7 @@ Gli altri segnali/registri intermedi utilizzati sono:
     \item \textbf{op1\_tmp1, op2\_tmp1, op1\_tmp2, op2\_tmp2:} (32 bit) che servono a memorizzare temporaneamente gli operandi che arrivano nei vari cicli di clock. (?)
 \end{itemize}
 
-Nello specifico in Verilog \textit{STATE}, \textit{NEXT\_STATE}, \textit{ready1} e \textit{ready2} sono rappresentati come reg mentre \textit{res1}, \textit{res2}, \textit{done1} e \textit{done2} come wire.
-\\L'algoritmo è descritto grazie alla EFSM [Figura \ref{fig:EFSM_double_multiplier}] la quale è formata 8 stati:
-
+L'algoritmo è descritto grazie alla EFSM [Figura \ref{fig:EFSM_double_multiplier}] la quale è formata 8 stati:
 \begin{itemize}
     \item \textbf{ST\_START:} pone \textit{done}, \textit{ready1} e \textit{ready2} uguali a 0 e inizializza \textit{op1\_tmp1} e \textit{op2\_tmp1} rispettivamenete con i valori di \textit{op1} e \textit{op2} i quali serviranno per il primo moltiplicatore. Si rimane qui finchè \textit{ready} vale 0 altrimensi si passa a \textit{ST\_RUN1}. Se in qualsiasi stato si riceve \textit{reset} uguale a 1 allora si passa a questo stato e si pone \textit{rst} uguale a 1 entrambi i \textit{rst} dei multiplier.
     \item \textbf{ST\_RUN1:} pone \textit{ready1} uguale a 1, attivando quindi il primo moltiplicatore, e inizializza \textit{op1\_tmp2} e \textit{op2\_tmp2} rispettivamenete con i valori di \textit{op1} e \textit{op2} i quali serviranno per il secondo moltiplicatore.
@@ -193,43 +190,21 @@ Nello specifico in Verilog \textit{STATE}, \textit{NEXT\_STATE}, \textit{ready1}
 \end{itemize}
 
 
-\subsection{Implementazione RTL}
-L'intefaccia del \textit{double\_multiplier} è formata dai segnali di input: \textit{clk, rst, ready, op1, op2}; E i segnali di output \textit{res, done}. \\
-L'intefaccia del \textit{multiplier} è formata anch'essa dai segnali di input: \textit{clk, rst, ready, op1, op2}; E i segnali di output \textit{res, done}, dove:
-\begin{itemize}
-    \item \textit{clk, rst} sono collegati ai segnali analoghi del \textit{double\_multiplier}.
-    \item \textit{ready} è collegato al segnale interno del \textit{double\_multiplier} \textit{ready1}, per multiplier1 e \textit{ready2} per multiplier2.
-    \item \textit{op1 e op2} sono collegati ai segnali interni del \textit{double\_multiplier} \textit{op1\_tmp1, op2\_tmp1}, per multiplier1 e \textit{op1\_tmp1, op2\_tmp2} per multiplier2.
-    \item \textit{res} è collegato al segnale interno del \textit{double\_multiplier} \textit{res1}, per multiplier1 e \textit{res2} per multiplier2.
-    \item \textit{done} è collegato al segnale interno del \textit{double\_multiplier} \textit{done1}, per multiplier1 e \textit{done2} per multiplier2.
-\end{itemize}
-\textit{op1\_tmp1, op2\_tmp1, op1\_tmp2, op2\_tmp2} sono necessari al fine di conservare i valori della prima coppia di operandi e della seconda, che verranno passati ai moltiplicatori dei cicli di clock dopo.
-
-
 \subsection{Implementazione RTL con Verilog e VHDL}
-Si creano i seguenti files:
+In \textbf{verilog\_multiplier} e \textit{double\_multiplier}
 \begin{itemize}
-    \item \textbf{verilog\_multiplier:} implementazione verilog del moltiplicatore (sintetizzabile)
-    \item \textbf{vhdl\_multiplier:} implementazione vhdl del moltiplicatore (sintetizzabile)
-    \item \textbf{double\_multiplier:} implementazione verilog del doppio moltiplicatore (sintetizzabile)
-    \item \textbf{testbench:} implementazione verilog di un testbench da usare solo in simulazione
-\end{itemize}
-In \textit{verilog\_multiplier} e \textit{double\_multiplier}
-\begin{itemize}
-    \item Sono definiti come ``wire'' tutti i segnali collegati alle porte di input mentre come ``reg'' tutti quelli collegati alle porte di output.
-    \item Sono definiti come ``reg'' tutti i segnali interni di communicazione.
+    \item Sono definiti come ``wire'' tutti i segnali collegati alle porte di input mentre come ``reg'' tutti i registri collegati alle porte di output e quelli intermedi.
     \item Gli stati e \textit{op1\_type, op2\_type, res\_type} sono stati definiti come ``parameter''.
 \end{itemize}
-In \textit{vhdl\_multiplier:}
+In \textbf{vhdl\_multiplier:}
 \begin{itemize}
     \item Sono usate le librerie ``IEEE.STD\_LOGIC\_1164.ALL'' per abilitare i tipi std\_logic e ``use IEEE.NUMERIC\_STD.ALL'' per usare funzioni aritmetiche con valori signed e unsigned
     \item Sono definiti come ``signal'' tutti i segnali collegati alle porte di input e output.
-    \item Sono definiti come ``signal'' tutti i segnali interni di communicazione.
+    \item Sono definiti come ``signal'' tutti i segnali interni di communicazione per la FSM.
     \item Sono definite come ``variable'' \textit{sign1, sign2, esp1, esp2, esp\_tmp, mant1, mant2, mant\_tmp, op1\_type, op2\_type} perchè utilizzati solo all'interno del processo ``datapath''.
     \item Gli stati e \textit{op1\_type, op2\_type, res\_type} sono stati definiti all'interno del \textit{package} rispettivamente come ``MULT\_STATE'' e ``MULT\_TYPE''.
     \item L'architettura utilizzata segue lo stile ``behavioral'', cioè quello più ``program-like'' in quanto più semplice e chiaro per descrivere una FSMD con due processi.
 \end{itemize}
-
 
 
 \subsection{Implementazione RTL con SystemC}
@@ -241,32 +216,32 @@ Si creano i seguenti files e directory:
     \item \textbf{include:} directory che contiene gli headers \textit{double\_multiplier\_RTL.hh}, \textit{multiplier\_RTL.hh}, \textit{testbench\_RTL.hh}. Qui sono definite tutte le porte, segnali, variabili ed enumerazioni dei vari componenti
     \item \textbf{testbench:} directory che contiene i files sorgenti \textit{double\_multiplier\_RTL.cc}, \textit{multiplier\_RTL.cc}, \textit{testbench\_RTL.cc} e \textit{main\_RTL.cc}.
 \end{itemize}
-In \textit{double\_multiplier\_RTL.hh}
+In \textbf{double\_multiplier\_RTL.hh}
 \begin{itemize}
     \item Sono definiti come ``sc\_signal'' tutti i segnali collegati alle porte di input e output.
-    \item Sono definiti come ``sc\_signal'' tutti i segnali interni di communicazione.
+    \item Sono definiti come ``sc\_signal'' tutti i segnali interni di communicazione per la FSM.
     \item Gli stati sono stati definiti come ``enumerazioni''.
 \end{itemize}
-In \textit{multiplier\_RTL.hh}
+In \textbf{multiplier\_RTL.hh}
 \begin{itemize}
     \item Sono definiti come ``sc\_signal'' tutti i segnali collegati alle porte di input e output.
-    \item Sono definiti come ``sc\_signal'' tutti i segnali interni di communicazione.
+    \item Sono definiti come ``sc\_signal'' tutti i segnali interni di communicazione per la FSM.
     \item Sono definite come variabili di SystemC \textit{sign1, sign2, esp1, esp2, esp\_tmp, mant1, mant2, mant\_tmp, op1\_type, op2\_type} perchè utilizzati solo all'interno del processo ``datapath''.
     \item Gli stati e \textit{op1\_type, op2\_type, res\_type} sono stati definiti come ``enumerazioni''.
 \end{itemize}
 A differenza di verilog e VHDL, in SystemC è necessario un file ``main'' che contenga il metodo \textit{sc\_main} e che permetta di collegare il componente da testare con il testbench. In esso si utilizza \textit{sc\_create\_vcd\_trace\_file} per salvare le tracce necessarie a lanciare una simulazione con tools come gtkwave.
 
 
-\section{Risultati}
-Il testbench verilog, \textit{Figure \ref{fig:SIM1}}, aspetta un po di tempo, perchè altrimenti si verificherebbero problemi dovuti allo startup della FPGA nella simulazione post-sintesi, e poi esegue due volte il \textit{double\_multiplier}, prima con due coppie di operandi che danno come risultato dei numeri normali, e poi con due coppie di operandi che danno come risultati dei casi speciali. \\
+\section{Testbench}
+Il \textbf{testbench in Verilog}, [Figura \ref{fig:SIM1}], aspetta un po di tempo, perchè altrimenti si verificherebbero problemi dovuti allo startup della FPGA nella simulazione post-sintesi, e poi esegue due volte il \textit{double\_multiplier}, prima con due coppie di operandi che danno come risultato dei numeri normali, e poi con due coppie di operandi che danno come risultati dei casi speciali. \\\\
 
-Il testbench in SystemC mette a disposizione tre thread da attivare togliendo i commenti nel costruttore del ``TestbenchModule'':
+
+Il \textbf{testbench in SystemC} mette a disposizione tre thread da attivare togliendo i commenti nel costruttore del ``TestbenchModule'':
 \begin{itemize}
-    \item \textbf{targeted\_test:} che analogamente a quello in Verilog, testa due volte il \textit{double\_multiplier}. \textit{Figure \ref{fig:SIM2}}.
-    \item \textbf{rnd\_test:} che prova \textit{TESTS\_NUM} moltiplicazioni generate casualmente tra un intervallo modificabile. \textit{Figure \ref{fig:SIM3}}.
-    \item \textbf{run\_all:} che prova tutte le possibili combinazioni cioè \(2^{32} * 2^{32}\). Si può limitare il numero di combinazioni evitando di contare il bit del segno, in quanto il calcolo è un semplice xor. Poi si possono escludere tutti i numeri denormalizzati. Ma anche così il tempo necessario a completarlo è troppo elevato per la mia macchina.
+    \item \textbf{targeted\_test:} analogo a quello in Verilog. [Figura \ref{fig:SIM2}].
+    \item \textbf{rnd\_test:} che prova \textit{TESTS\_NUM} moltiplicazioni generate casualmente tra un intervallo modificabile. [Figura \ref{fig:SIM3}].
+    \item \textbf{run\_all:} che prova tutte le possibili combinazioni cioè \(2^{32} * 2^{32}\). Si può limitare il numero di combinazioni evitando di contare il bit del segno, in quanto il calcolo è un semplice xor. Poi si possono escludere tutti i numeri denormalizzati. In ogni caso risulta troppo pesante per essere eseguito.
 \end{itemize}
-Con la sintesi si sono ottenuti i seguenti risultati:
 
 
 
@@ -284,11 +259,9 @@ Con la sintesi si sono ottenuti i seguenti risultati:
 
 
 
-
-Questa sezione può contenere anche riflessioni personali sui risultati ottenuti. Importante: tutte le affermazioni devono essere supportate da numeri\footnote{Richard Feynman on Scientific Method (1964) -\\ https://www.youtube.com/watch?v=OL6-x0modwY}.
+\section{risultati}
 
 \section{Conclusioni}
-Le conclusioni dovrebbero riassumere in poche righe  tutto ciò che è stato fatto. Un paio di righe descrivono i risultati osservati, in modo da introdurre poi la conclusione ``vera e propria''. Nel caso del corso, la ``lezione da portare a casa'' sarà quello che si è imparato svolgendo l'elaborato.
 
 
 \bibliographystyle{IEEEtran}

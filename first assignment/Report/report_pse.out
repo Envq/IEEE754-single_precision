@@ -7,10 +7,10 @@
 \BOOKMARK [2][-]{subsection.3.1}{Vincoli ed Architettura}{section.3}% 7
 \BOOKMARK [2][-]{subsection.3.2}{multiplier}{section.3}% 8
 \BOOKMARK [2][-]{subsection.3.3}{double\137multiplier}{section.3}% 9
-\BOOKMARK [2][-]{subsection.3.4}{Implementazione RTL}{section.3}% 10
-\BOOKMARK [2][-]{subsection.3.5}{Implementazione RTL con Verilog e VHDL}{section.3}% 11
-\BOOKMARK [2][-]{subsection.3.6}{Implementazione RTL con SystemC}{section.3}% 12
-\BOOKMARK [1][-]{section.4}{Risultati}{}% 13
-\BOOKMARK [1][-]{section.5}{Conclusioni}{}% 14
+\BOOKMARK [2][-]{subsection.3.4}{Implementazione RTL con Verilog e VHDL}{section.3}% 10
+\BOOKMARK [2][-]{subsection.3.5}{Implementazione RTL con SystemC}{section.3}% 11
+\BOOKMARK [1][-]{section.4}{Testbench}{}% 12
+\BOOKMARK [1][-]{section.5}{risultati}{}% 13
+\BOOKMARK [1][-]{section.6}{Conclusioni}{}% 14
 \BOOKMARK [1][-]{section*.1}{Riferimenti bibliografici}{}% 15
 \BOOKMARK [1][-]{section*.2}{Appendice}{}% 16
