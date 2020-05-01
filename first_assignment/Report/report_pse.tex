@@ -114,7 +114,7 @@ Questo componente esegue la moltiplicazione tra numeri floating point a precisio
     \item \textbf{op2} (32 bit input): secondo operando.
     \item \textbf{clk} (1 bit input): segnale di clock.
     \item \textbf{rst} (1 bit input): segnale di reset. Riporta il sistema allo stato iniziale.
-    \item \textbf{ready} (1 bit input): segnale che permette al sistema di uscire dallo stato iniziale. Nello specifico indica che il prossimo ciclo di clock ci sarà il primo operando in \textit{op1} e il ciclo di clock successivo in \textit{op2}. (?)
+    \item \textbf{ready} (1 bit input): segnale che permette al sistema di uscire dallo stato iniziale. Nello specifico indica che \textit{op1} e \textit{op2} contengono i valori dei due operatori.
     \item \textbf{done} (1 bit output): segnale che indica che il valore su \textit{res} è il risultato.
     \item \textbf{res} (32 bit output): risultato.
 \end{itemize}
@@ -232,28 +232,35 @@ Il \textbf{testbench in Verilog}, [Figura \ref{fig:SIM1}], aspetta un po di temp
 
 Il \textbf{testbench in SystemC} mette a disposizione tre thread da attivare togliendo i commenti nel costruttore del ``TestbenchModule'':
 \begin{itemize}
-    \item \textbf{targeted\_test:} analogo a quello in Verilog. [Figura \ref{fig:SIM2}].
-    \item \textbf{rnd\_test:} che prova \textit{TESTS\_NUM} moltiplicazioni generate casualmente tra un intervallo modificabile. [Figura \ref{fig:SIM3}].
+    \item \textbf{targeted\_test:} test analogo a quello in Verilog. [Figura \ref{fig:SIM2}].
+    \item \textbf{rnd\_test:} test che prova \textit{TESTS\_NUM} moltiplicazioni generate casualmente tra un intervallo modificabile. [Figura \ref{fig:SIM3}].
     \item \textbf{run\_all:} che prova tutte le possibili combinazioni cioè \(2^{32} * 2^{32}\). Si può limitare il numero di combinazioni evitando di contare il bit del segno, in quanto il calcolo è un semplice xor. Poi si possono escludere tutti i numeri denormalizzati. In ogni caso risulta troppo pesante per essere eseguito.
 \end{itemize}
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 \section{risultati}
+
+\subsection{Simulazione Multiplier}
+Per testare il corretto funzionamento di multiplier è stato usato lo script tlc mostrato in figura \ref{fig:SCRIPT}. Sono stati provati alcuni numeri a caso e i casi limite 0, NaN, $/infty$ e sono stati confrontati i valori finali e gli stati intermedi delle versioni in VHDL [Figura \ref{fig:SIM_MULT_VHDL}] e Verilog [Figura \ref{fig:SIM_MULT_VERILOG}] per garantirne la consistenza.
+\\Per eseguire il multiplier bisogna attivare il reset e una volta che \textit{op1} e \textit{op2} contengono i valori si deve attiva anche il \textit{ready}. A questo punto il multiplier eseguira le elaborazioni indipendentemente dai valori di input, salvo per \textit{reset} che riperterà il tutto nello stato iniziale.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \section{Conclusioni}
 
@@ -275,6 +282,51 @@ Il \textbf{testbench in SystemC} mette a disposizione tre thread da attivare tog
     \caption{EFSM del double\_multiplier}
     \label{fig:EFSM_double_multiplier}
 \end{figure*}
+
+
+\begin{figure*}[bt]
+    \centering
+    \includegraphics[width=0.4\textwidth]{figures/sim_mult_script}
+    \caption{Script TLC utilizzato per il test del comportamento del multiplier}
+    \label{fig:SCRIPT}
+\end{figure*}
+
+\begin{figure*}[bt]
+    \centering
+    \includegraphics[width=\textwidth]{figures/sim_mult_verilog}
+    \caption{Simulazione multiplier in VHDL con più zoom}
+    \label{fig:SIM_MULT_VHDL_ZOOM}
+\end{figure*}
+
+\begin{figure*}[bt]
+    \centering
+    \includegraphics[width=\textwidth]{figures/sim_mult_verilog}
+    \caption{Simulazione multiplier in VHDL}
+    \label{fig:SIM_MULT_VHDL}
+\end{figure*}
+
+\begin{figure*}[bt]
+    \centering
+    \includegraphics[width=\textwidth]{figures/sim_mult_verilog}
+    \caption{Simulazione multiplier in Verilog}
+    \label{fig:SIM_MULT_VERILOG}
+\end{figure*}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \begin{figure*}[bt]
     \centering

@@ -1,6 +1,9 @@
 #!/usr/bin/tclsh
 
-# source ~/vivado_projects/PROJECT_PSE/first\ assignament/Solutions/RTL/VHDL_verilog/stimuli/multiplier.tcl
+# source ~/vivado_projects/PROJECT_PSE/first_assignment/Solutions/RTL/VHDL_verilog/stimuli/multiplier.tcl
+
+# open_wave_config ~/vivado_projects/double_multiplier/vhdl_multiplier_behav.wcfg
+# open_wave_config ~/vivado_projects/double_multiplier/verilog_multiplier_behav.wcfg
 
 restart
 
@@ -16,25 +19,24 @@ add_force rst 0;
 add_force ready 1;
 add_force op1 00111111100000000000000000000000; #1.0
 add_force op2 00111111101100110011001100110011; #1.4
-#add_force op2 00000000000000000000000000000000; #0.0
 
 run $PERIOD;
 add_force ready 0;
-add_force op1 01000000000000000000000000000000; #2.0
-#add_force op2 01000000001000000000000000000000; #2.5
-add_force op2 11111111100000000000000000000000; #-inf
 
 
-for { set a 0}  {$a < 12} {incr a} {
+for { set a 0}  {$a < 13} {incr a} {
     run $PERIOD;
 }
 
 add_force ready 1;
+add_force op1 01000000000000000000000000000000; #2.0
+add_force op2 11111111100000000000000000000000; #-inf
+
 run $PERIOD;
 add_force ready 0;
 
 
-for { set a 0}  {$a < 12} {incr a} {
+for { set a 0}  {$a < 7} {incr a} {
     run $PERIOD;
 }
 

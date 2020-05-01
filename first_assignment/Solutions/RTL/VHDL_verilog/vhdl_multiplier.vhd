@@ -72,7 +72,7 @@ begin
                 if (norm_again = '1') then
                     NEXT_STATE <= ST_NORM2;
                 else
-                    NEXT_STATE <= ST_FINISH;
+                    NEXT_STATE <= ST_OVERF;
                 end if;
         
             when ST_NORM2 =>
