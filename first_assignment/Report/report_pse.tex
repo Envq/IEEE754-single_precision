@@ -76,7 +76,7 @@ Qui è riportato l'algoritmo usato per la moltiplicazione fra floating point. Gu
 
 \section{Metodologia applicata}
 Il primo passo è stato la realizzazione della EFSM di \textit{multiplier} e \textit{double\_multiplier} che ha portato ad aquisire una visisione generale.
-\\Dopo si è passati all'implementazione a livello RT con Vivado\cite{Vivado} del \textit{multiplier} sia in Verilog che in VHDL. Un primo test è stato fatto con TLC-script osservando gli output a determinati input.
+\\Dopo si è passati all'implementazione a livello RT con Vivado\cite{Vivado} del \textit{multiplier} sia in Verilog che in VHDL. Un primo test è stato fatto con TCL-script osservando gli output a determinati input.
 \\Consolidati questi moduli è stato poi possibile realizzato in Verilog il \textit{double\_multiplier} che prende i due componenti e li usa per calcolare due moltiplicazioni. A questo punto è stato realizzato un test più accurato in verilog controllando tutti i casi particalari per poi passare alla sintesi.
 \\È anche stato rifatto tutto in SystemC dove si è potuto fare un testbench più fine grazie alla potenza del c++.
 \\Infine si è provato a fare l'high level syntesis da un semplice codice c++ per confrontare i risultati ottenuti.
@@ -241,13 +241,14 @@ Il \textbf{testbench in SystemC} mette a disposizione tre thread da attivare tog
 
 \section{risultati}
 
-\subsection{Simulazione Multiplier}
-Per testare il corretto funzionamento di multiplier è stato usato lo script tlc mostrato in figura \ref{fig:SCRIPT}. Sono stati provati alcuni numeri a caso e i casi limite 0, NaN, $/infty$ e sono stati confrontati i valori finali e gli stati intermedi delle versioni in VHDL [Figura \ref{fig:SIM_MULT_VHDL}] e Verilog [Figura \ref{fig:SIM_MULT_VERILOG}] per garantirne la consistenza.
-\\Per eseguire il multiplier bisogna attivare il reset e una volta che \textit{op1} e \textit{op2} contengono i valori si deve attiva anche il \textit{ready}. A questo punto il multiplier eseguira le elaborazioni indipendentemente dai valori di input, salvo per \textit{reset} che riperterà il tutto nello stato iniziale.
+\subsection{Simulazioni con script TCL}
+Per testare il corretto funzionamento dei componenti è stata fatta la simulazione con gli script in figura \ref{fig:SCRIPT_MULT} e figura \ref{fig:SCRIPT_DOUBLE}. Lo scopo di questi test è verificare il corretto funzionamento dei componenti avendo a disposizione tutti i segnali interni e stati.
+\\In particolare modificando il codice sono stati controllati casi particolari come la reazione del sistema al variare inaspettato degli operandi o di \textit{ready}, operazioni con operatori speciali e il comportamento con la richiesta di una nuova elaborazione.
+\\Un altro controllo fatto è il verificare che l'esecuzione del multiplier Verilog sia analoga a quella del multiplier VHDL.
+\\Le varie simulazioni sono riportate nelle figure \ref{fig:SIM_MULT_VERILOG} \ref{fig:SIM_MULT_VHDL} \ref{fig:SIM_DOUBLE_MULT}.
 
-
-
-
+\subsection{Simulazione con testbench in Verilog}
+I test precedenti servivano ad assistere la progettazione, questo invece a verificare la correttezza del sistema. Sono infatti testati tutti i casi particolari e valori scelti arbitrariamente.
 
 
 
@@ -284,32 +285,55 @@ Per testare il corretto funzionamento di multiplier è stato usato lo script tlc
 \end{figure*}
 
 
+
 \begin{figure*}[bt]
     \centering
-    \includegraphics[width=0.4\textwidth]{figures/sim_mult_script}
-    \caption{Script TLC utilizzato per il test del comportamento del multiplier}
-    \label{fig:SCRIPT}
+    \includegraphics[width=0.3\textwidth]{figures/sim_mult_script}
+    \caption{Script TCL utilizzato per il test del comportamento del multiplier}
+    \label{fig:SCRIPT_MULT}
 \end{figure*}
 
 \begin{figure*}[bt]
     \centering
     \includegraphics[width=\textwidth]{figures/sim_mult_verilog}
-    \caption{Simulazione multiplier in VHDL con più zoom}
+    \caption{Simulazione multiplier in VHDL con script TCL con più zoom}
     \label{fig:SIM_MULT_VHDL_ZOOM}
 \end{figure*}
 
 \begin{figure*}[bt]
     \centering
     \includegraphics[width=\textwidth]{figures/sim_mult_verilog}
-    \caption{Simulazione multiplier in VHDL}
+    \caption{Simulazione multiplier in VHDL con script TCL}
     \label{fig:SIM_MULT_VHDL}
 \end{figure*}
 
 \begin{figure*}[bt]
     \centering
     \includegraphics[width=\textwidth]{figures/sim_mult_verilog}
-    \caption{Simulazione multiplier in Verilog}
+    \caption{Simulazione multiplier in Verilog con script TCL}
     \label{fig:SIM_MULT_VERILOG}
+\end{figure*}
+
+
+\begin{figure*}[bt]
+    \centering
+    \includegraphics[width=0.3\textwidth]{figures/sim_double_script}
+    \caption{Script TCL utilizzato per il test del comportamento del double\_multiplier}
+    \label{fig:SCRIPT_DOUBLE}
+\end{figure*}
+
+\begin{figure*}[bt]
+    \centering
+    \includegraphics[width=\textwidth]{figures/sim_double_mult}
+    \caption{Simulazione double\_multiplier in Verilog con script TCL}
+    \label{fig:SIM_DOUBLE_MULT}
+\end{figure*}
+
+\begin{figure*}[bt]
+    \centering
+    \includegraphics[width=\textwidth]{figures/sim_double_mult_zoom}
+    \caption{Simulazione double\_multiplier in Verilog con script TCL con più zoom}
+    \label{fig:SIM_DOUBLE_MULT_ZOOM}
 \end{figure*}
 
 

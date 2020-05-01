@@ -1,9 +1,11 @@
 #!/usr/bin/tclsh
 
+
 # source ~/vivado_projects/PROJECT_PSE/first_assignment/Solutions/RTL/VHDL_verilog/stimuli/multiplier.tcl
 
 # open_wave_config ~/vivado_projects/double_multiplier/vhdl_multiplier_behav.wcfg
 # open_wave_config ~/vivado_projects/double_multiplier/verilog_multiplier_behav.wcfg
+
 
 restart
 
@@ -39,4 +41,3 @@ add_force ready 0;
 for { set a 0}  {$a < 7} {incr a} {
     run $PERIOD;
 }
-
