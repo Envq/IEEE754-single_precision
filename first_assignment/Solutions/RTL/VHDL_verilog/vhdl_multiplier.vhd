@@ -250,7 +250,7 @@ begin
                             res(30 downto 0) <= "1111111100000000000000000000000";
                         
                         when T_NAN =>
-                            res(30 downto 0) <= "1111111111111111111111111111111";
+                            res(30 downto 0) <= "1111111110000000000000000000000";
                         
                         when T_NUM =>
                             res(30 downto 23) <= esp_tmp(7 downto 0);   --store esp

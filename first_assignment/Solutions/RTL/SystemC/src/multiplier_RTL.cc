@@ -240,7 +240,7 @@ void MultiplierModule::datapath() {
                 break;
 
             case T_NAN:
-                res_tmp << "1111111111111111111111111111111";
+                res_tmp << "1111111110000000000000000000000";
                 res.write(res_tmp.str().c_str());
                 break;
 

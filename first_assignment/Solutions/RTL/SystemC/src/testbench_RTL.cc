@@ -28,8 +28,8 @@ std::string inc_binary_string(const std::string &val_str) {
 //*********************
 
 TestbenchModule::TestbenchModule(sc_module_name name) {
-    // SC_THREAD(targeted_test);
-    SC_THREAD(rnd_test);
+    SC_THREAD(targeted_test);
+    // SC_THREAD(rnd_test);
     // SC_THREAD(run_all);
     sensitive << clk.pos();
 
@@ -50,96 +50,134 @@ void TestbenchModule::clk_gen() {
 
 
 void TestbenchModule::targeted_test() {
-    // Variables
-    std::string bits1_1, bits2_1, bits1_2, bits2_2;
+    int NUM_TEST = 12;
+    unsigned int fails = 0;
+    std::string mem[] = {
+        // Test1
+        "11111111100000000000000000000000",  //-inf
+        "01000000000000000000000000000000",  // 2.0
+
+        // Test2
+        "00111111101000000000000000000000",  // 1.25
+        "00000000000000000000000000000000",  // 0.0
+
+        // Test3
+        "11111111100000000000000000000000",  //-inf
+        "00000000000000000000000000000000",  // 0.0
+
+        // Test4
+        "01111111100000000000000000000000",  //+inf
+        "01111111100000000000000000000000",  //+inf
+
+        // Test5
+        "01000001100000100000000000000000",  // 16.25
+        "01000001000100000000000000000000",  // 9.0
+
+        // Test6
+        "01000001101100000000000000000000",  // 22.0
+        "11000000101000000000000000000000",  //-5.0
+
+        // Test7
+        "01000000010110011001100110011010",  // 3.400000095367431640625
+        "01000000010110011001100110011010",  // 3.400000095367431640625
+
+        // Test8
+        "01000010101001111010100011110110",  // 83.8300018310546875
+        "00111110000011110101110000101001",  // 0.14000000059604644775390625
+
+        // Test9
+        "01000010111101110111100011110010",  // 123.7362213134765625
+        "00111010101000010011011111110100",  // 0.0012300000526010990142822265625
+
+        // Test10
+        "01000010100100011100110011001101",  // 72.90000152587890625
+        "01000001000100000000000000000000",  // 9.0
+
+        // Test11
+        "01001001011101000010010000000000",  // 1000000.0
+        "01001001010110010000001110001110",  // 888888.875
+
+        // Test12
+        "01000010100100011100110011001101",  // 72.9
+        "01000001000100000000000000000000"   // 9.0
+    };
+
+    // Variables;
+    std::string op1_A, op2_A, res_A, res_correct_A;
+    std::string op1_B, op2_B, res_B, res_correct_B;
 
     // Init
     wait();
     ready.write(sc_logic(0));
     rst.write(sc_logic(0));
-
-    // Wait for startup FPGA
-    for (size_t i = 0; i < 1; i++) {
-        wait();
-    }
+    int i = 0;
 
     // Reset
+    wait();
     rst.write(sc_logic(1));
     wait();
     rst.write(sc_logic(0));
-    wait();
 
 
-    // 01000000010110011001100110011010; //3.400000095367431640625
-    // 01000000010110011001100110011010; //3.400000095367431640625
-    // 01000001001110001111010111000011; //11.56000041961669921875
-    // 01000001001110001111010111000011
+    while (i < NUM_TEST * 2) {
+        op1_A = mem[i];
+        op2_A = mem[i + 1];
+        op1_B = mem[i + 2];
+        op2_B = mem[i + 3];
 
-    // Test10  //010 inf
-    // 01000010100100011100110011001101; //72.90000152587890625
-    // 01000001000100000000000000000000; //9.0
-    // 01000100001001000000011001100111; //656.10003662109375
-    //    01000100001001000000011001100111
-
-    // Exec1
-    ready.write(sc_logic(1));
-    bits1_1 = "01000000010110011001100110011010";  // 100.2
-    bits2_1 = "01000000010110011001100110011010";  //-0.0
-    op1.write(bits1_1.c_str());
-    op2.write(bits2_1.c_str());
-    wait();
-    bits1_2 = "01000010100100011100110011001101";  //-inf;
-    bits2_2 = "01000001000100000000000000000000";  // 2437.716
-    op1.write(bits1_2.c_str());
-    op2.write(bits2_2.c_str());
-    ready.write(sc_logic(0));
-    while (done.read() == sc_logic(0))
         wait();
-    std::cout << "Mult1: " << binary_to_float(bits1_1) << " * "
-              << binary_to_float(bits2_1) << " = "
-              << binary_to_float(res.read().to_string()) << std::endl
-              << "res:     " << res.read() << std::endl
-              << "correct: "
-              << float_to_binary(binary_to_float(bits1_1) *
-                                 binary_to_float(bits2_1))
-              << std::endl
-              << std::endl;
-    wait();
-    std::cout << "Mult2: " << binary_to_float(bits1_2) << " * "
-              << binary_to_float(bits2_2) << " = "
-              << binary_to_float(res.read().to_string()) << std::endl
-              << "res:     " << res.read() << std::endl
-              << "correct: "
-              << float_to_binary(binary_to_float(bits1_2) *
-                                 binary_to_float(bits2_2))
-              << std::endl
-              << std::endl;
-
-    // Exec2
-    wait();
-    ready.write(sc_logic(1));
-    bits1_1 = "01000010110010000110011001100110";  // 100.2
-    bits2_1 = "01111111111111111111111111111111";  // NAN
-    op1.write(bits1_1.c_str());
-    op2.write(bits2_1.c_str());
-    wait();
-    bits1_2 = "11111111100000000000000000000000";  //-inf;
-    bits2_2 = "10000000000000000000000000000000";  //-0.0
-    op1.write(bits1_2.c_str());
-    op2.write(bits2_2.c_str());
-    ready.write(sc_logic(0));
-    while (done.read() == sc_logic(0))
+        ready.write(sc_logic(1));
+        op1.write(op1_A.c_str());
+        op2.write(op2_A.c_str());
         wait();
-    std::cout << "Mult1: " << binary_to_float(bits1_1) << " * "
-              << binary_to_float(bits2_1) << " = "
-              << binary_to_float(res.read().to_string()) << "[" << res.read()
-              << "]" << std::endl;
-    wait();
-    std::cout << "Mult2: " << binary_to_float(bits1_2) << " * "
-              << binary_to_float(bits2_2) << " = "
-              << binary_to_float(res.read().to_string()) << "[" << res.read()
-              << "]" << std::endl
-              << std::endl;
+        op1.write(op1_B.c_str());
+        op2.write(op2_B.c_str());
+        wait();
+        ready.write(sc_logic(0));
+
+        while (done.read() == sc_logic(0))
+            wait();
+
+        res_A = res.read().to_string();
+        res_correct_A =
+            float_to_binary(binary_to_float(op1_A) * binary_to_float(op2_A));
+        std::cout << "Test " << 1 + i / 2 << " :"
+                  << "\n    " << binary_to_float(op1_A) << " * "
+                  << binary_to_float(op2_A) << " = " << binary_to_float(res_A)
+                  << "\n    RES:     [" << res_A << "]"
+                  << "\n    CORRECT: [" << res_correct_A << "]" << std::endl;
+
+        if (res_A == res_correct_A) {
+            std::cout << "==> OK\n" << std::endl;
+        } else {
+            std::cout << "==> FAILED\n" << std::endl;
+            fails++;
+        }
+
+        wait();
+        res_B = res.read().to_string();
+        res_correct_B =
+            float_to_binary(binary_to_float(op1_B) * binary_to_float(op2_B));
+        std::cout << "Test " << 2 + i / 2 << " :"
+                  << "\n    " << binary_to_float(op1_B) << " * "
+                  << binary_to_float(op2_B) << " = " << binary_to_float(res_B)
+                  << "\n    RES:     [" << res_B << "]"
+                  << "\n    CORRECT: [" << res_correct_B << "]" << std::endl;
+
+        if (res_B == res_correct_B) {
+            std::cout << "==> OK\n" << std::endl;
+        } else {
+            std::cout << "==> FAILED\n" << std::endl;
+            fails++;
+        }
+
+        i += 4;
+    }
+
+
+    std::cout << std::endl << "Tests: " << NUM_TEST << std::endl;
+    std::cout << "Fails: " << fails << std::endl;
+    std::cout << "Success: " << NUM_TEST - fails << std::endl;
 
     sc_stop();
 }
@@ -152,7 +190,8 @@ void TestbenchModule::rnd_test() {
     std::minstd_rand generator1(seed());
     std::ranlux48_base generator2(seed());
     std::uniform_real_distribution<float> random_float(
-        sqrt(std::numeric_limits<float>::min()), sqrt(std::numeric_limits<float>::max()));
+        sqrt(std::numeric_limits<float>::min()),
+        sqrt(std::numeric_limits<float>::max()));
 
     // Variables
     const unsigned int TESTS_NUM = 10000;
@@ -163,10 +202,14 @@ void TestbenchModule::rnd_test() {
     float num1_1, num2_1, num1_2, num2_2;
     std::string res1, res2;
 
-    // Reset
-    wait();
+    // Init
     wait();
     ready.write(sc_logic(0));
+    rst.write(sc_logic(0));
+
+
+    // Reset
+    wait();
     rst.write(sc_logic(1));
     wait();
     rst.write(sc_logic(0));
