@@ -19,12 +19,11 @@
 
 
 \section{Introduzione}
-Il progetto consiste nella realizzaione in hardware di un sistema che esegue due moltiplicazioni in virgola mobile a precisione singola (quindi 32 bit) in parello secondo lo standard IEEE754. Esso deve essere sintetizzabile sulla scheda FPGA ``xc7z020clg400-1'' che possiede solo 125 porte, quindi si potranno avere a disposizione solo 64 bit per gli input e 32 per l'output. Di conseguenza bisogna serializzare input e output e usare il protocollo di handshake per gestire la comunicazione fra i vari componenti.
-\\Il moltiplicatore sarà realizzato sia in Verilog che VHDL al fine di comprendere meglio le differenze e i pro e contro dei due linguaggi. L'intero sistema sarà poi tradotto anche in SystemC per fare un confronto anche con quel tipo di progettazione. Infine si analizzeranno i risultati e li si confronteranno con l'high level syntesis del codice in c++.
-\\L'approccio utilizzato è bottom-up, cioè partendo dal moltiplicatore per poi arrivare al top level. L'implementazione è preceduta dall'analisi dei requisiti e la stesura della EFSM. La stesura dell'EFSM è la parte più importante perchè qui viene tradotto l'algoritmo, descritto il flusso e scelti i vari segnali e registri necessari. Una buona EFSM permette di evitare di scrivere varie righe di codice per poi accorgersi in simulazione che qualcosa non funziona.
-\\Il progetto è piccolo quindi ci si aspetta che occupi una minima parte della FPGA e che la versione RTL sia 
-\\Ci si aspetta che la versione RTL sia significativamente più performante di quella con l'high level syntesis, motivo per cui ha senso usare questo tipo di approccio quando non si hanno stretti vincoli di tempo da rispettare per realizzare il progetto.
-\\Ci si aspetta anche che occupi una minima parte della FPGA in quanto è un progetto molto piccolo.
+Il progetto consiste nella realizzaione in hardware di un sistema, che esegue attraverso il protocollo di handshake, utilizza due moltiplicatori in virgola mobile a precisione singola, secondo lo standard IEEE754, per eseguire due moltiplicazioni in parello. Esso deve essere sintetizzabile sulla scheda FPGA ``xc7z020clg400-1'' che possedendo solo 125 porte, obbliga a serializzare input e output.
+\\Il livello superiore del sistema, chiamato \textbf{double\_multiplier}, è stato realizzato in Verilog e contiene al suo interno un moltiplicatore in Verilog, \textbf{verilog\_multiplier}, e uno in VHDL, \textbf{vhdl\_multiplier}. I moltiplicatori sono stati scritti in linguaggi diversi al fine di confrontare i due linguaggi e capirne pro e contro. L'intero sistema è stato poi tradotto in SystemC per fare un confronto anche con quel tipo di progettazione e infine si sono analizzati i risultati confrontati con quelli dell'high level syntesis del codice in c++.
+\\L'approccio utilizzato è bottom-up, cioè partendo dal moltiplicatore per poi arrivare al top level. L'implementazione è preceduta dall'analisi dei requisiti e la stesura della EFSM cioè la parte più importante in quanto è dove viene tradotto l'algoritmo, descritto il flusso e scelti i vari segnali e registri necessari. Una buona EFSM permette di evitare di scrivere varie righe di codice per poi accorgersi in simulazione che qualcosa non funziona.
+\\Il progetto è piccolo quindi ci si aspetta che occupi una minima parte della FPGA.
+\\Ci si aspetta anche che la versione RTL sia significativamente più performante di quella con l'high level syntesis, motivo per cui ha senso usare questo tipo di approccio quando non si hanno stretti vincoli di tempo da rispettare per realizzare il progetto.
 
 
 \section{Background}
@@ -130,7 +129,7 @@ Gli altri segnali/registri intermedi utilizzati sono:
     \item \textbf{sign1, sign2, esp1, esp2, mant1, mant2}: rappresentano le componenti dei due operandi.
 \end{itemize}
 
-L'algoritmo della moltiplicazione è descritto grazie alla EFSM [Figura \ref{fig:EFSM_multiplier}] la quale è formata 14 stati:
+L'algoritmo della moltiplicazione è descritto grazie alla EFSM [Figura \ref{fig:EFSM_MULT}] la quale è formata 14 stati:
 \begin{itemize}
     \item \textbf{ST\_START:} pone \textit{done} e \textit{norm\_again} a 0 ed estre le informazioni di segno, esponente e mantissa dei due operandi. Si rimane qui finchè \textit{ready} vale 0 altrimensi si passa a \textit{ST\_EVAL1}. Se in qualsiasi stato si riceve \textit{reset} uguale a 1 allora si passa a questo stato.
     \item \textbf{ST\_EVAL1 e ST\_EVAL2:} ricava rispettivamente il tipo di op1 e op2 fra \textit{T\_ZER, T\_INF, T\_NAN e T\_NUM}
@@ -171,7 +170,7 @@ Gli altri segnali/registri intermedi utilizzati sono:
     \item \textbf{op1\_tmp1, op2\_tmp1, op1\_tmp2, op2\_tmp2:} (32 bit) che servono a memorizzare temporaneamente gli operandi che arrivano nei vari cicli di clock. (?)
 \end{itemize}
 
-L'algoritmo è descritto grazie alla EFSM [Figura \ref{fig:EFSM_double_multiplier}] la quale è formata 8 stati:
+L'algoritmo è descritto grazie alla EFSM [Figura \ref{fig:EFSM_DM}] la quale è formata 8 stati:
 \begin{itemize}
     \item \textbf{ST\_START:} pone \textit{done}, \textit{ready1} e \textit{ready2} uguali a 0 e inizializza \textit{op1\_tmp1} e \textit{op2\_tmp1} rispettivamenete con i valori di \textit{op1} e \textit{op2} i quali serviranno per il primo moltiplicatore. Si rimane qui finchè \textit{ready} vale 0 altrimensi si passa a \textit{ST\_RUN1}. Se in qualsiasi stato si riceve \textit{reset} uguale a 1 allora si passa a questo stato e si pone \textit{rst} uguale a 1 entrambi i \textit{rst} dei multiplier.
     \item \textbf{ST\_RUN1:} pone \textit{ready1} uguale a 1, attivando quindi il primo moltiplicatore, e inizializza \textit{op1\_tmp2} e \textit{op2\_tmp2} rispettivamenete con i valori di \textit{op1} e \textit{op2} i quali serviranno per il secondo moltiplicatore.
@@ -234,13 +233,13 @@ A differenza di verilog e VHDL, in SystemC è necessario un file ``main'' che co
 
 
 \section{Testbench}
-Il \textbf{testbench in Verilog}, [Figura \ref{fig:SIM1}], aspetta un po di tempo, perchè altrimenti si verificherebbero problemi dovuti allo startup della FPGA nella simulazione post-sintesi, e poi esegue due volte il \textit{double\_multiplier}, prima con due coppie di operandi che danno come risultato dei numeri normali, e poi con due coppie di operandi che danno come risultati dei casi speciali. \\\\
+Il \textbf{testbench in Verilog}, [Figura ref{fig:SIM1}], aspetta un po di tempo, perchè altrimenti si verificherebbero problemi dovuti allo startup della FPGA nella simulazione post-sintesi, e poi esegue due volte il \textit{double\_multiplier}, prima con due coppie di operandi che danno come risultato dei numeri normali, e poi con due coppie di operandi che danno come risultati dei casi speciali. \\\\
 
 
 Il \textbf{testbench in SystemC} mette a disposizione tre thread da attivare togliendo i commenti nel costruttore del ``TestbenchModule'':
 \begin{itemize}
-    \item \textbf{targeted\_test:} test analogo a quello in Verilog. [Figura \ref{fig:SIM2}].
-    \item \textbf{rnd\_test:} test che prova \textit{TESTS\_NUM} moltiplicazioni generate casualmente tra un intervallo modificabile. [Figura \ref{fig:SIM3}].
+    \item \textbf{targeted\_test:} test analogo a quello in Verilog. [Figura ref{fig:SIM2}].
+    \item \textbf{rnd\_test:} test che prova \textit{TESTS\_NUM} moltiplicazioni generate casualmente tra un intervallo modificabile. [Figura ref{fig:SIM3}].
     \item \textbf{run\_all:} che prova tutte le possibili combinazioni cioè \(2^{32} * 2^{32}\). Si può limitare il numero di combinazioni evitando di contare il bit del segno, in quanto il calcolo è un semplice xor. Poi si possono escludere tutti i numeri denormalizzati. In ogni caso risulta troppo pesante per essere eseguito.
 \end{itemize}
 
@@ -249,10 +248,10 @@ Il \textbf{testbench in SystemC} mette a disposizione tre thread da attivare tog
 \section{risultati}
 
 \subsection{Simulazioni con script TCL}
-Per testare il corretto funzionamento dei componenti è stata fatta la simulazione con gli script in figura \ref{fig:SCRIPT_MULT} e figura \ref{fig:SCRIPT_DOUBLE}. Lo scopo di questi test è verificare il corretto funzionamento dei componenti avendo a disposizione tutti i segnali interni e stati.
-\\In particolare modificando il codice sono stati controllati casi particolari come la reazione del sistema al variare inaspettato degli operandi o di \textit{ready}, operazioni con operatori speciali e il comportamento con la richiesta di una nuova elaborazione.
-\\Un altro controllo fatto è il verificare che l'esecuzione del multiplier Verilog sia analoga a quella del multiplier VHDL.
-\\Le varie simulazioni sono riportate nelle figure \ref{fig:SIM_MULT_VERILOG} \ref{fig:SIM_MULT_VHDL} \ref{fig:SIM_DOUBLE_MULT}.
+% Per testare il corretto funzionamento dei componenti è stata fatta la simulazione con gli script in figura ref{fig:SCRIPT_MULT} e figura ref{fig:SCRIPT_DOUBLE}. Lo scopo di questi test è verificare il corretto funzionamento dei componenti avendo a disposizione tutti i segnali interni e stati.
+% \\In particolare modificando il codice sono stati controllati casi particolari come la reazione del sistema al variare inaspettato degli operandi o di \textit{ready}, operazioni con operatori speciali e il comportamento con la richiesta di una nuova elaborazione.
+% \\Un altro controllo fatto è il verificare che l'esecuzione del multiplier Verilog sia analoga a quella del multiplier VHDL.
+% \\Le varie simulazioni sono riportate nelle figure \ref{fig:SIM_MULT_VERILOG} \ref{fig:SIM_MULT_VHDL} \ref{fig:SIM_DM}.
 
 \subsection{Simulazione con testbench in Verilog}
 I test precedenti servivano ad assistere la progettazione, questo invece a verificare la correttezza del sistema. Sono infatti testati tutti i casi particolari e valori scelti arbitrariamente.
@@ -279,37 +278,28 @@ I test precedenti servivano ad assistere la progettazione, questo invece a verif
 
 \begin{figure*}[bt]
     \centering
-    \includegraphics[width=\textwidth]{figures/EFSM-multiplier}
+    \includegraphics[width=\textwidth]{figures/EFSM_mult}
     \caption{EFSM del multiplier}
-    \label{fig:EFSM_multiplier}
+    \label{fig:EFSM_MULT}
 \end{figure*}
 
 \begin{figure*}[bt]
     \centering
-    \includegraphics[width=\textwidth]{figures/EFSM-top_level}
+    \includegraphics[width=\textwidth]{figures/EFSM_dm}
     \caption{EFSM del double\_multiplier}
-    \label{fig:EFSM_double_multiplier}
-\end{figure*}
-
-
-
-\begin{figure*}[bt]
-    \centering
-    \includegraphics[width=0.3\textwidth]{figures/sim_mult_script}
-    \caption{Script TCL utilizzato per il test del comportamento del multiplier}
-    \label{fig:SCRIPT_MULT}
+    \label{fig:EFSM_DM}
 \end{figure*}
 
 \begin{figure*}[bt]
     \centering
-    \includegraphics[width=\textwidth]{figures/sim_mult_verilog}
+    \includegraphics[width=\textwidth]{figures/sim_mult_vhdl_zoom}
     \caption{Simulazione multiplier in VHDL con script TCL con più zoom}
     \label{fig:SIM_MULT_VHDL_ZOOM}
 \end{figure*}
 
 \begin{figure*}[bt]
     \centering
-    \includegraphics[width=\textwidth]{figures/sim_mult_verilog}
+    \includegraphics[width=\textwidth]{figures/sim_mult_vhdl}
     \caption{Simulazione multiplier in VHDL con script TCL}
     \label{fig:SIM_MULT_VHDL}
 \end{figure*}
@@ -321,63 +311,33 @@ I test precedenti servivano ad assistere la progettazione, questo invece a verif
     \label{fig:SIM_MULT_VERILOG}
 \end{figure*}
 
-
 \begin{figure*}[bt]
     \centering
-    \includegraphics[width=0.3\textwidth]{figures/sim_double_script}
-    \caption{Script TCL utilizzato per il test del comportamento del double\_multiplier}
-    \label{fig:SCRIPT_DOUBLE}
-\end{figure*}
-
-\begin{figure*}[bt]
-    \centering
-    \includegraphics[width=\textwidth]{figures/sim_double_mult}
+    \includegraphics[width=\textwidth]{figures/sim_dm}
     \caption{Simulazione double\_multiplier in Verilog con script TCL}
-    \label{fig:SIM_DOUBLE_MULT}
+    \label{fig:SIM_DM}
 \end{figure*}
 
 \begin{figure*}[bt]
     \centering
-    \includegraphics[width=\textwidth]{figures/sim_double_mult_zoom}
-    \caption{Simulazione double\_multiplier in Verilog con script TCL con più zoom}
-    \label{fig:SIM_DOUBLE_MULT_ZOOM}
-\end{figure*}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\begin{figure*}[bt]
-    \centering
-    \includegraphics[width=\textwidth]{figures/simulazione1}
-    \caption{Simulazione in Verilog}
-    \label{fig:SIM1}
+    \includegraphics[width=\textwidth]{figures/sim_testbench}
+    \caption{Simulazione double\_multiplier in Verilog con testbench}
+    \label{fig:SIM_TESTBENCH}
 \end{figure*}
 
 \begin{figure*}[bt]
     \centering
-    \includegraphics[width=\textwidth]{figures/simulazione2}
-    \caption{Simulazione in SystemC con targeted\_test}
-    \label{fig:SIM2}
+    \includegraphics[width=\textwidth]{figures/sim_systemc_target}
+    \caption{Simulazione double\_multiplier in SystemC con ``targeted test''}
+    \label{fig:SIM_SC_TARGET}
 \end{figure*}
 
 \begin{figure*}[bt]
     \centering
-    \includegraphics[width=\textwidth]{figures/simulazione3}
-    \caption{Simulazione in SystemC con rnd\_test}
-    \label{fig:SIM3}
+    \includegraphics[width=\textwidth]{figures/sim_systemc_rnd}
+    \caption{Simulazione double\_multiplier in SystemC con ``random test''}
+    \label{fig:SIM_SC_RND}
 \end{figure*}
+
 
 \end{document}
