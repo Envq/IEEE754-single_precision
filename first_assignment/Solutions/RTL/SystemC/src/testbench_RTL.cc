@@ -69,15 +69,27 @@ void TestbenchModule::targeted_test() {
     rst.write(sc_logic(0));
     wait();
 
+
+    // 01000000010110011001100110011010; //3.400000095367431640625
+    // 01000000010110011001100110011010; //3.400000095367431640625
+    // 01000001001110001111010111000011; //11.56000041961669921875
+    // 01000001001110001111010111000011
+
+    // Test10  //010 inf
+    // 01000010100100011100110011001101; //72.90000152587890625
+    // 01000001000100000000000000000000; //9.0
+    // 01000100001001000000011001100111; //656.10003662109375
+    //    01000100001001000000011001100111
+
     // Exec1
     ready.write(sc_logic(1));
-    bits1_1 = "01000010110010000110011001100110";  // 100.2
-    bits2_1 = "10000000000000000000000000000000";  //-0.0
+    bits1_1 = "01000000010110011001100110011010";  // 100.2
+    bits2_1 = "01000000010110011001100110011010";  //-0.0
     op1.write(bits1_1.c_str());
     op2.write(bits2_1.c_str());
     wait();
-    bits1_2 = "11111111100000000000000000000000";  //-inf;
-    bits2_2 = "01000101000110000101101101110101";  // 2437.716
+    bits1_2 = "01000010100100011100110011001101";  //-inf;
+    bits2_2 = "01000001000100000000000000000000";  // 2437.716
     op1.write(bits1_2.c_str());
     op2.write(bits2_2.c_str());
     ready.write(sc_logic(0));
@@ -85,13 +97,22 @@ void TestbenchModule::targeted_test() {
         wait();
     std::cout << "Mult1: " << binary_to_float(bits1_1) << " * "
               << binary_to_float(bits2_1) << " = "
-              << binary_to_float(res.read().to_string()) << "[" << res.read()
-              << "]" << std::endl;
+              << binary_to_float(res.read().to_string()) << std::endl
+              << "res:     " << res.read() << std::endl
+              << "correct: "
+              << float_to_binary(binary_to_float(bits1_1) *
+                                 binary_to_float(bits2_1))
+              << std::endl
+              << std::endl;
     wait();
     std::cout << "Mult2: " << binary_to_float(bits1_2) << " * "
               << binary_to_float(bits2_2) << " = "
-              << binary_to_float(res.read().to_string()) << "[" << res.read()
-              << "]" << std::endl
+              << binary_to_float(res.read().to_string()) << std::endl
+              << "res:     " << res.read() << std::endl
+              << "correct: "
+              << float_to_binary(binary_to_float(bits1_2) *
+                                 binary_to_float(bits2_2))
+              << std::endl
               << std::endl;
 
     // Exec2
@@ -131,7 +152,7 @@ void TestbenchModule::rnd_test() {
     std::minstd_rand generator1(seed());
     std::ranlux48_base generator2(seed());
     std::uniform_real_distribution<float> random_float(
-        0, sqrt(std::numeric_limits<float>::max()));
+        sqrt(std::numeric_limits<float>::min()), sqrt(std::numeric_limits<float>::max()));
 
     // Variables
     const unsigned int TESTS_NUM = 10000;

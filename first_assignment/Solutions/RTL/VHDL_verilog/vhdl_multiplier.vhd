@@ -89,6 +89,7 @@ begin
         end case;
     end process FSM;
 
+
     DATAPATH: process(clk, rst)
         variable sign1, sign2 :         std_logic;
         variable esp1, esp2 :           std_logic_vector(9 downto 0);
@@ -118,7 +119,7 @@ begin
         elsif clk'event and clk='1' then        
             STATE <= NEXT_STATE;
             
-            case STATE is
+            case NEXT_STATE is
                 -- Reset register
                 when ST_START =>
                     -- Reset signals
@@ -214,7 +215,7 @@ begin
                 
                 -- Round result
                 when ST_ROUND =>
-                    if (mant_tmp(23) = '1' OR (mant_tmp(22 downto 0) = "01111111111111111111111")) then
+                    if (mant_tmp(23) = '1') then
                         norm_again <= '1';
                     else
                         norm_again <= '0';

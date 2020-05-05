@@ -114,7 +114,7 @@ void MultiplierModule::datapath() {
     } else if (clk.read() == 1) {
         STATE = NEXT_STATE;
 
-        switch (STATE) {
+        switch (NEXT_STATE) {
         case ST_START:
             done.write(sc_logic(0));
             norm_again.write(sc_logic(0));
@@ -201,7 +201,7 @@ void MultiplierModule::datapath() {
             break;
 
         case ST_ROUND:
-            if (mant_tmp[23] == 1 || mant_tmp.range(22, 0) == 4194303) {
+            if (mant_tmp[23] == 1) {
                 norm_again.write(sc_logic(1));
             } else {
                 norm_again.write(sc_logic(0));

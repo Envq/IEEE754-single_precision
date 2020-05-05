@@ -2,11 +2,12 @@
 
 module verilog_multiplier(clk, rst, ready, op1, op2, res, done);
     // Interface
-    input clk, rst;
-    input ready;
-    input[31:0] op1, op2;
+    input wire clk, rst;
+    input wire ready;
+    input wire [31:0] op1, op2;
     output reg [31:0] res;
-    output reg done;    
+    output reg done;
+    
     
     // states
     parameter ST_START=0, ST_EVAL1=1, ST_EVAL2=2, ST_EVAL3=3, ST_CHECK1=4, ST_ELAB=5, ST_UNDERF=6, ST_CHECK2=7, ST_NORM1=8, ST_ROUND=9, ST_CHECK3=10, ST_NORM2=11, ST_OVERF=12, ST_FINISH=13;
@@ -22,7 +23,6 @@ module verilog_multiplier(clk, rst, ready, op1, op2, res, done);
     reg[9:0] esp_tmp;
     reg[47:0] mant_tmp;
     reg norm_again;
-    
 
 
 // FSM
@@ -127,7 +127,7 @@ begin
 end 
 else begin
         STATE <= NEXT_STATE;                 //Update STATE
-        case (STATE)
+        case (NEXT_STATE)
             // Reset register
             ST_START: begin
                 // Reset signals
@@ -158,7 +158,7 @@ else begin
             end
             
             // Special case op2 check
-            ST_EVAL2: begin            
+            ST_EVAL2: begin      
                 if (esp2[7:0] == 8'b11111111)
                     if (mant2[22:0] == 23'b00000000000000000000000)
                         op2_type <= T_INF;
@@ -222,7 +222,7 @@ else begin
             
             // Round result
             ST_ROUND: begin
-                if (mant_tmp[23] == 1'b1 || (mant_tmp[22:0] == 23'b01111111111111111111111))
+                if (mant_tmp[23] == 1'b1)
                     norm_again <= 1'b1;
                 else
                     norm_again <= 1'b0;
@@ -286,6 +286,5 @@ else begin
         endcase
     end    
 end
-    
 
 endmodule

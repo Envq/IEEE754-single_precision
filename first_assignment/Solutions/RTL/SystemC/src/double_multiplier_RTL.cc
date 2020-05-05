@@ -9,8 +9,8 @@ DoubleMultiplierModule::DoubleMultiplierModule(
     mult1->clk(clk);
     mult1->rst(rst);
     mult1->ready(ready1);
-    mult1->op1(op1_tmp1);
-    mult1->op2(op2_tmp1);
+    mult1->op1(op1_tmp);
+    mult1->op2(op2_tmp);
     mult1->done(done1);
     mult1->res(res1);
 
@@ -18,8 +18,8 @@ DoubleMultiplierModule::DoubleMultiplierModule(
     mult2->clk(clk);
     mult2->rst(rst);
     mult2->ready(ready2);
-    mult2->op1(op1_tmp2);
-    mult2->op2(op2_tmp2);
+    mult2->op1(op1);
+    mult2->op2(op2);
     mult2->done(done2);
     mult2->res(res2);
 
@@ -38,17 +38,13 @@ void DoubleMultiplierModule::fsm() {
     switch (STATE) {
     case ST_START:
         if (ready.read() == 1) {
-            NEXT_STATE = ST_RUN1;
+            NEXT_STATE = ST_RUN;
         } else {
             NEXT_STATE = STATE;
         }
         break;
 
-    case ST_RUN1:
-        NEXT_STATE = ST_RUN2;
-        break;
-
-    case ST_RUN2:
+    case ST_RUN:
         NEXT_STATE = ST_WAIT;
         break;
 
@@ -104,28 +100,27 @@ void DoubleMultiplierModule::datapath() {
 
     } else if (clk.read() == 1) {
         STATE = NEXT_STATE;
+        done.write(sc_logic(0));
+        ready1.write(sc_logic(0));
+        ready2.write(sc_logic(0));
+        res = "00000000000000000000000000000000";
 
         switch (STATE) {
         case ST_START:
             done.write(sc_logic(0));
             ready1.write(sc_logic(0));
             ready2.write(sc_logic(0));
-            op1_tmp1.write(op1.read());
-            op2_tmp1.write(op2.read());
-            break;
-
-        case ST_RUN1:
-            ready1.write(sc_logic(1));
-            op1_tmp2.write(op1.read());
-            op2_tmp2.write(op2.read());
+            op1_tmp.write(op1.read());
+            op2_tmp.write(op2.read());
             break;
         
-        case ST_RUN2:
-            ready1.write(sc_logic(0));
+        case ST_RUN:
+            ready1.write(sc_logic(1));
             ready2.write(sc_logic(1));
             break;
 
         case ST_WAIT:
+            ready1.write(sc_logic(0));
             ready2.write(sc_logic(0));
             break;
 

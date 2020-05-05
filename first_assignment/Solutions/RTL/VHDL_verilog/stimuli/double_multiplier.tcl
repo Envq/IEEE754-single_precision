@@ -1,14 +1,15 @@
 #!/usr/bin/tclsh
 
 
-# source ~/vivado_projects/PROJECT_PSE/first_assignment/Solutions/RTL/VHDL_verilog/stimuli/double_multiplier.tcl
+# source vivado_projects/PROJECT_PSE/first_assignment/Solutions/RTL/VHDL_verilog/stimuli/double_multiplier.tcl
 
-# open_wave_config ~/vivado_projects/double_multiplier/double_multiplier_behav.wcfg
+# open_wave_config vivado_projects/PROJECT_PSE/first_assignment/Solutions/RTL/VHDL_verilog/waves/double_multiplier_behav.wcfg
 
 
 restart
 
 set PERIOD 100ns
+set HALF_PERIOD 50ns
 add_force clk {1 0ns} {0 50ns} -repeat_every $PERIOD
 
 run $PERIOD;
@@ -16,34 +17,20 @@ add_force rst 1;
 
 run $PERIOD;
 add_force rst 0;
-add_force ready 1;
+
+run $HALF_PERIOD;
 add_force op1 01000000000000000000000000000000; #2.0
 add_force op2 01000000001000000000000000000000; #2.5
-
-run $PERIOD;
-add_force op1 00111111101000000000000000000000; #1.25
-add_force op2 00111111100000000000000000000000; #1.0
-
-run $PERIOD;
-add_force ready 0;
-
-for { set a 0}  {$a < 18} {incr a} {
-    run $PERIOD;
-}
-
-
-run $PERIOD;
+run $HALF_PERIOD;
 add_force ready 1;
-add_force op1 01000000000000000000000000000000; #2.0
-add_force op2 00000000000000000000000000000000; #0.0
 
-run $PERIOD;
-add_force op1 11111111100000000000000000000000; #-inf
-add_force op2 00111111100000000000000000000000; #1.0
+run $HALF_PERIOD;
+add_force op1 00111111101000000000000000000000; #1.25
+add_force op2 11111111100000000000000000000000; #-inf
 
-run $PERIOD;
+run $HALF_PERIOD;
 add_force ready 0;
 
-for { set a 0}  {$a < 18} {incr a} {
+for { set a 0}  {$a < 17} {incr a} {
     run $PERIOD;
 }
