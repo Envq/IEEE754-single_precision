@@ -13,31 +13,32 @@
 \maketitle
 
 
+
 \begin{abstract}
     Questo documento mostra la realizzazione di un moltiplicatore in virgola mobile a precisione singola realizzato in VHDL, Verilog e SystemC ed un componente che permetta di eseguire due moltiplicazioni in parallelo. Il tutto è accompagnato da testbench, sintesi dei componenti VHDL e verilog ed un confronto con l'High-level-Synthesis di un moltiplicatore scritto in c++.
 \end{abstract}
 
 
+
 \section{Introduzione}
-Il progetto consiste nella realizzaione in hardware di un sistema, che esegue attraverso il protocollo di handshake, utilizza due moltiplicatori in virgola mobile a precisione singola, secondo lo standard IEEE754, per eseguire due moltiplicazioni in parello. Esso deve essere sintetizzabile sulla scheda FPGA ``xc7z020clg400-1'' che possedendo solo 125 porte, obbliga a serializzare input e output.
-\\Il livello superiore del sistema, chiamato \textbf{double\_multiplier}, è stato realizzato in Verilog e contiene al suo interno un moltiplicatore in Verilog, \textbf{verilog\_multiplier}, e uno in VHDL, \textbf{vhdl\_multiplier}. I moltiplicatori sono stati scritti in linguaggi diversi al fine di confrontare i due linguaggi e capirne pro e contro. L'intero sistema è stato poi tradotto in SystemC per fare un confronto anche con quel tipo di progettazione e infine si sono analizzati i risultati confrontati con quelli dell'high level syntesis del codice in c++.
-\\L'approccio utilizzato è bottom-up, cioè partendo dal moltiplicatore per poi arrivare al top level. L'implementazione è preceduta dall'analisi dei requisiti e la stesura della EFSM cioè la parte più importante in quanto è dove viene tradotto l'algoritmo, descritto il flusso e scelti i vari segnali e registri necessari. Una buona EFSM permette di evitare di scrivere varie righe di codice per poi accorgersi in simulazione che qualcosa non funziona.
-\\Il progetto è piccolo quindi ci si aspetta che occupi una minima parte della FPGA.
-\\Ci si aspetta anche che la versione RTL sia significativamente più performante di quella con l'high level syntesis, motivo per cui ha senso usare questo tipo di approccio quando non si hanno stretti vincoli di tempo da rispettare per realizzare il progetto.
+Il progetto consiste nella realizzazione in hardware di un sistema, che attraverso il protocollo di handshake, utilizza due moltiplicatori in virgola mobile a precisione singola, secondo lo standard IEEE754, per eseguire due moltiplicazioni in parello. Esso deve essere sintetizzabile sulla scheda FPGA ``xc7z020clg400-1'' che possedendo solo 125 porte I/O, obbliga a serializzare input e output.
+\\Il sistema è stato realizzato in diversi linguaggi al fine di vedere le differenze tra i vari linguaggi utilizzabili per descrivere hardware e capirne i pro e contro. I risultati sono stati poi analizzati e confrontati con quelli ottenuti dall'high level syntesis del codice in c++.
+\\L'approccio utilizzato è bottom-up, cioè si è partiti dal moltiplicatore per poi arrivare al top level. L'implementazione è preceduta dall'analisi dei requisiti e dalla stesura della EFSM, cioè la parte più importante in quanto è dove viene tradotto l'algoritmo, descritto il flusso e scelti i vari segnali e registri necessari. Una buona EFSM permette di evitare di scrivere varie righe di codice per poi accorgersi in simulazione che qualcosa non funziona.
+\\Ci si aspetta che la versione RTL sia significativamente più performante di quella con l'high level syntesis e che il sistema occupi una minima parte della FPGA in quanto molto piccolo.
+
 
 
 \section{Background}
 
 \subsection{Progettazione hardware}
 Per la realizzazione di componenti hardware si possono utilizzare diverse tecniche e linguaggi.
-Un primo approccio è descrivere i componenti a livello RT utilizzando linguaggi di descrizione hardware (HDL) come VHDL e Verilog.
-Un HDL è un linguaggio specializzato per la descrizione della struttura e del comportamento di circuiti elettronici, in particolare circuiti logici digitali, e la loro analisi e simulazione. Permette inoltre la sintesi di una descrizione HDL in una netlist (una specifica di componenti elettronici fisici e il modo in cui sono collegati insieme), che può quindi essere posizionata e instradata per produrre l'insieme di maschere utilizzate per creare un circuito integrato\cite{HDL}.
-\\Un secondo approccio è descrivere le funzionalità del componente con linguaggi più ad alto livello come C, C++ o SystemC\cite{SystemC} e fare High Level Syntesis (HLS) per ottenere una descrizione dell'hardware a livello RT\cite{HLS}.
-\\Entrambi gli approcci hanno vantaggi e svantaggi. In particolare HLS riduce i tempi, ma la descrizione hardware generata sarà meno ottimizzata rispetto a quella che si potrebbe ottenere usando HDL.
+\\Un primo approccio è descrivere i componenti a livello RT utilizzando linguaggi di descrizione hardware (\textbf{HDL}) come VHDL e Verilog. Un HDL è un linguaggio specializzato per la descrizione della struttura e del comportamento di circuiti elettronici, in particolare circuiti logici digitali, e la loro analisi e simulazione. Permette inoltre la sintesi di una descrizione HDL in una netlist (una specifica di componenti elettronici fisici e il modo in cui sono collegati insieme), che può quindi essere posizionata e instradata per produrre l'insieme di maschere utilizzate per creare un circuito integrato\cite{HDL}.
+\\Un secondo approccio è descrivere le funzionalità del componente con linguaggi più ad alto livello come C, C++ o SystemC\cite{SystemC} e fare High Level Syntesis (\textbf{HLS}) per ottenere una descrizione dell'hardware a livello RT\cite{HLS}.
+\\Entrambi gli approcci hanno vantaggi e svantaggi. In particolare HLS riduce i tempi, ma la descrizione hardware generata sarà meno ottimizzata rispetto a quella che si potrebbe ottenere usando un HDL.
 
 
 \subsection{IEEE 754 single-precision binary floating-point format}
-Questo standard definisce il formato per la rappresentazione dei numeri in virgola mobile (compreso $\pm 0$ e i numeri denormalizzati; gli infiniti e i NaN, "not a number"), ed un set di operazioni effettuabili su questi. 
+Questo standard definisce il \textbf{formato} per la rappresentazione dei numeri in virgola mobile (compreso $\pm 0$ e i numeri denormalizzati; gli infiniti e i NaN, "not a number"), ed un set di operazioni effettuabili su questi. 
 \\In particolare la versione a precisione singola descrive il numero con 32 bit: 1 bit per segno (sign), 8 bit per l'esponente (esp) e 23 bit per la mantissa (mant)\cite{IEEE754}.
 \begin{figure}[!htb]
     \centering
@@ -45,15 +46,15 @@ Questo standard definisce il formato per la rappresentazione dei numeri in virgo
     \caption{IEEE 754 single precision}
     \label{fig:IEEE754}
 \end{figure}
-\\Per la codifica in numero binario:
+\\Per la \textbf{codifica} in numero binario:
 \begin{itemize}
     \item Dal segno si ricava il bit più significativo (1 se negativato 0 altrimenti).
     \item Si converte il numero in binario.
-    \item Si sposta la virgola a sinistra fino ad avere un numero nella forma $1,... \cdot 2^{E}$.
-    \item La mantissa è la parte a destra della virgola, riempita con zeri a destra fino a riempire i 23 bit.
-    \item L'esponente è $127+E$ dove E è l'esponente ricavato dallo shift.
+    \item Si sposta la virgola a sinistra fino ad avere un numero nella forma $1,... \cdot 2^{E}$ dove \textit{E} è il numero di spostamenti.
+    \item La mantissa è la parte a destra della virgola, con zeri a destra fino a riempire i 23 bit.
+    \item L'esponente esp è uguale a $127+E$ dove 127 è il \textit{bias} di questo standard.
 \end{itemize}
-Per la decodifica del numero binario: $$(-1)^{sign}\cdot 2^{(esp-127)} \cdot (1 + \sum_{i=1}^{23}b_{23-i}\cdot 2^{-i})$$
+Per la \textbf{decodifica} del numero binario: $$(-1)^{sign}\cdot 2^{(esp-127)} \cdot (1 + \sum_{i=1}^{23}b_{23-i}\cdot 2^{-i})$$
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.6\linewidth]{figures/ieee754_special_case.png}
@@ -63,7 +64,7 @@ Per la decodifica del numero binario: $$(-1)^{sign}\cdot 2^{(esp-127)} \cdot (1 
 
 
 \subsection{Moltiplicazione di due numeri floating-point}
-Qui è riportato l'algoritmo usato per la moltiplicazione fra floating point. Guardare qui per ulteriori dettagli\cite{IEEE754Mult}.
+Qui è riportato un algoritmo utilizzabile per la moltiplicazione fra floating point. Guardare qui per ulteriori dettagli\cite{IEEE754Mult}.
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.6\linewidth]{figures/ieee_multiplication.png}
@@ -74,22 +75,47 @@ Qui è riportato l'algoritmo usato per la moltiplicazione fra floating point. Gu
 
 
 \section{Metodologia applicata}
-Il primo passo è stato la realizzazione della EFSM di \textit{multiplier} e \textit{double\_multiplier} che ha portato ad aquisire una visisione generale.
-\\Dopo si è passati all'implementazione a livello RT con Vivado\cite{Vivado} del \textit{multiplier} sia in Verilog che in VHDL. Un primo test è stato fatto con TCL-script osservando gli output a determinati input.
-\\Consolidati questi moduli è stato poi possibile realizzato in Verilog il \textit{double\_multiplier} che prende i due componenti e li usa per calcolare due moltiplicazioni. A questo punto è stato realizzato un test più accurato in verilog controllando tutti i casi particalari per poi passare alla sintesi.
-\\È anche stato rifatto tutto in SystemC dove si è potuto fare un testbench più fine grazie alla potenza del c++.
-\\Infine si è provato a fare l'high level syntesis da un semplice codice c++ per confrontare i risultati ottenuti.
+
+\subsection{Struttura progetto}
+\begin{itemize}
+    \item \textbf{cpp/}
+    \begin{itemize}
+        \item \textbf{multiplier.cpp} file dove è presente una funzione che esegue la moltiplicazione in c++.
+    \end{itemize}
+    \item \textbf{SystemC/} contiene il progetto del sistema scritto interamente in 
+    SystemC. La struttura è approfondita qui \ref{section:SystemC}.
+    \item \textbf{VHDL\_verilog/}
+    \begin{itemize}
+        \item \textbf{stimuli/} contiene gli script TCL usati per dei test.
+        \item \textbf{waves/} contiene le configurazioni grafiche per visualizzare le simulazioni come negli screenshot.
+        \item \textbf{constrains/} contiene i vincoli per la sintesi.
+        \item \textbf{double\_multiplier} file Verilog del top level del sistema
+        \item \textbf{verilog\_multiplier} file Verilog del moltiplicatore IEEE754
+        \item \textbf{vhdl\_multiplier} file VHDL del moltiplicatore VHDL
+        \item \textbf{testbench} file Verilog contenente il testbench
+    \end{itemize}
+\end{itemize}
+
+
+\subsection{Procedimento}
+Il primo passo è stato la realizzazione della EFSM di \textit{multiplier} e \textit{double\_multiplier} che ha portato ad aquisire una visione generale del sistema.
+\\Poi si è passati all'implementazione a livello RT con Vivado\cite{Vivado} del \textit{multiplier} in Verilog e VHDL. La loro correttezza è stata testata subito grazie ad uno script TCL osservando gli output a determinati input.
+\\Consolidati questi moduli è stato poi possibile realizzare in Verilog il \textit{double\_multiplier} che prende i due componenti e li usa per calcolare due moltiplicazioni. Anch'esso è stato testato con uno script TCL.
+\\Completato il sistema è stato fatto un testbench in Verilog per verificare che i moltiplicatori si comportassero allo stesso modo e che reagissero correttamente a casi particolari e numeri arbitrari.
+\\In seguito è stato riscritto tutto in SystemC dove si è potuto fare un testbench più fine grazie alla potenza del c++. In particolare sono stati confrontati i valori ottenuti dal sistema con quelli derivati dal risultato convertito in binario della moltiplicazione degli stessi numeri convertiti in float.
+\\Infine è stata fatta l'high level syntesis da un semplice codice c++ per confrontare i risultati ottenuti.
 
 
 \subsection{Vincoli ed Architettura}
-Il progetto a diversi vincoli:
+Il progetto presenta diversi vincoli:
 \begin{itemize}
     \item Il multiplier deve essere scritto in VHDL, verilog e systemC.
     \item Il double\_multiplier deve essere scritto in systemC e un linguaggio a scelta tra VHDL e verilog.
     \item Gli operandi e il risultato devono essere a 32 bit.
     \item I due componenti devono essere sintetizzabili sulla FPGA ``xc7z020clg400-1'' la quale ha a disposizione solo 125 porte.
 \end{itemize}
-Per far fronte al limite delle porte logiche è stato utilizzato il protocollo di handshake. Vengono quindi utilizzati gli stessi 32 bit per il risultato e altri 64 bit per le due coppie di operandi. Al primo ciclo di clock, con il flag ``ready'' uguale a 1, verranno trasmessi i primi due operandi e al ciclo successivo gli altri due. Dopodichè si aspetterà il complementanto delle moltiplicazioni, segnalato col flag ``done'' uguale a 1, per poi trasmettere il primo risultato, e il secondo al ciclo di clock successivo.
+Per far fronte al limite delle porte logiche è stato necessario serializzare input e output. Vengono quindi utilizzati gli stessi 32 bit per il risultato e altri 64 bit per le due coppie di operandi.
+\\Grazie al protocollo di \textit{handshake} si sono sincronizzati i vari componenti. Quando il flag \textit{ready} diventa uguale a 1, vengono usati i valori di \textit{op1} e \textit{op2} a quel ciclo di clock per il primo moltiplicatore e quelli del ciclo di clock successivo per il secondo moltiplicatore. Non appena entrambi i moltiplicatori finiranno, il flag \textit{done} del sistema diventerà uguale a 1 e allo stesso ciclo di clock \textit{res} conterrà il risultato della prima moltiplicazione e al ciclo di clock successivo quello della seconda.
 \\L'architettura con VHDL e Verilog è mostrata in figura \ref{fig:Architettura}. Quella per SystemC è analoga. 
 \\I segnali intermedi sono stati omessi da questa figura, ma vengono descritti nelle sezioni successive.
 \begin{figure}[!htb]
@@ -100,8 +126,8 @@ Per far fronte al limite delle porte logiche è stato utilizzato il protocollo d
 \end{figure}
 La FSMD è realizzata con due processi:
 \begin{itemize}
-    \item \textbf{fsm:} processo asincrono attivato con la variazione di qualche segnale interno. Esso ha il compito di calcolare e aggiornare lo stato prossimo.
-    \item \textbf{datapath:} processo sincrono che ha il compito di aggiornare lo stato attuale, elaborare gli output. Esso viene anche attivato dal fronte di salita del reset al fine di riportare lo stato a quello iniziale.
+    \item \textbf{fsm:} processo asincrono col compito di calcolare e aggiornare lo stato prossimo.
+    \item \textbf{datapath:} processo sincrono che ha il compito di aggiornare lo stato attuale ed elaborare gli output. Esso viene però attivato asincronamente dal fronte di salita del reset al fine di riportare lo stato a quello iniziale.
 \end{itemize}
 
 
@@ -200,7 +226,7 @@ In \textbf{vhdl\_multiplier:}
 \end{itemize}
 
 
-\subsection{Implementazione RTL con SystemC}
+\subsection{Implementazione RTL con SystemC \label{section:SystemC}}
 Si creano i seguenti files e directory:
 \begin{itemize}
     \item \textbf{Makefile:} tool per la compilazione automatica del progetto. Richiede che la variabile d'ambiente SYSTEMC\_HOME contenga il path alla libreria di SystemC.

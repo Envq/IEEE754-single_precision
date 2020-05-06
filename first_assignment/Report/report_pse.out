@@ -4,15 +4,17 @@
 \BOOKMARK [2][-]{subsection.2.2}{IEEE 754 single-precision binary floating-point format}{section.2}% 4
 \BOOKMARK [2][-]{subsection.2.3}{Moltiplicazione di due numeri floating-point}{section.2}% 5
 \BOOKMARK [1][-]{section.3}{Metodologia applicata}{}% 6
-\BOOKMARK [2][-]{subsection.3.1}{Vincoli ed Architettura}{section.3}% 7
-\BOOKMARK [2][-]{subsection.3.2}{multiplier}{section.3}% 8
-\BOOKMARK [2][-]{subsection.3.3}{double\137multiplier}{section.3}% 9
-\BOOKMARK [2][-]{subsection.3.4}{Implementazione RTL con Verilog e VHDL}{section.3}% 10
-\BOOKMARK [2][-]{subsection.3.5}{Implementazione RTL con SystemC}{section.3}% 11
-\BOOKMARK [1][-]{section.4}{Testbench}{}% 12
-\BOOKMARK [1][-]{section.5}{risultati}{}% 13
-\BOOKMARK [2][-]{subsection.5.1}{Simulazioni con script TCL}{section.5}% 14
-\BOOKMARK [2][-]{subsection.5.2}{Simulazione con testbench in Verilog}{section.5}% 15
-\BOOKMARK [1][-]{section.6}{Conclusioni}{}% 16
-\BOOKMARK [1][-]{section*.1}{Riferimenti bibliografici}{}% 17
-\BOOKMARK [1][-]{section*.2}{Appendice}{}% 18
+\BOOKMARK [2][-]{subsection.3.1}{Struttura progetto}{section.3}% 7
+\BOOKMARK [2][-]{subsection.3.2}{Procedimento}{section.3}% 8
+\BOOKMARK [2][-]{subsection.3.3}{Vincoli ed Architettura}{section.3}% 9
+\BOOKMARK [2][-]{subsection.3.4}{multiplier}{section.3}% 10
+\BOOKMARK [2][-]{subsection.3.5}{double\137multiplier}{section.3}% 11
+\BOOKMARK [2][-]{subsection.3.6}{Implementazione RTL con Verilog e VHDL}{section.3}% 12
+\BOOKMARK [2][-]{subsection.3.7}{Implementazione RTL con SystemC }{section.3}% 13
+\BOOKMARK [1][-]{section.4}{Testbench}{}% 14
+\BOOKMARK [1][-]{section.5}{risultati}{}% 15
+\BOOKMARK [2][-]{subsection.5.1}{Simulazioni con script TCL}{section.5}% 16
+\BOOKMARK [2][-]{subsection.5.2}{Simulazione con testbench in Verilog}{section.5}% 17
+\BOOKMARK [1][-]{section.6}{Conclusioni}{}% 18
+\BOOKMARK [1][-]{section*.1}{Riferimenti bibliografici}{}% 19
+\BOOKMARK [1][-]{section*.2}{Appendice}{}% 20
