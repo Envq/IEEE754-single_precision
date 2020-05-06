@@ -132,7 +132,8 @@ La FSMD è realizzata con due processi:
 
 
 \subsection{multiplier}
-Questo componente esegue la moltiplicazione tra numeri floating point a precisione singola.
+Questo componente esegue la moltiplicazione tra numeri floating point a precisione singola. 
+\\È stato supposto che gli operandi passati non siano denormalizzati, ma in caso sarebbe facilmente estendibile aggiungendo qualche stato e un segnale di errore in uscita.
 \\L'interfaccia è mostrata in figura \ref{fig:Architettura} ed è la stessa per tutte le implementazioni VHDL, Verilog e SystemC: 
 \begin{itemize}
     \item \textbf{op1} (32 bit input): primo operando.
@@ -146,54 +147,55 @@ Questo componente esegue la moltiplicazione tra numeri floating point a precisio
     
 Gli altri segnali/registri intermedi utilizzati sono:
 \begin{itemize}
-    \item \textbf{norm\_again} (1 bit): indica che il numero ha bisogno di essere ulteriormente normalizzato.
-    \item \textbf{res\_type} (2 bit): indicare il tipo del risultato. Solo nel caso in cui sia un numero si procede all'elaborazione, mentre negli altri casi si passa direttamente allo stato finale. Il caso del numero denormalizzato è gestito come se fosse normalizzato.
+    \item \textbf{norm\_again} (1 bit): indica che la mantissa ha bisogno di essere ulteriormente normalizzata.
+    \item \textbf{res\_type} (2 bit): indica il tipo del risultato. Solo nel caso in cui sia un numero si procede all'elaborazione, mentre negli altri casi si passa direttamente allo stato finale.
     \item \textbf{STATE e NEXT\_STATE} (4 bit): rappresentano lo stato attuale e lo stato prossimo.
-    \item \textbf{op1\_type e op2\_type} (2 bit): per indicare il tipo degli operandi ovvero 0, NaN, $\infty$ oppure un numero. Solo se sono entrambi sono dei numeri res\_type sarà un numero.
+    \item \textbf{op1\_type e op2\_type} (2 bit): indicano il tipo degli operandi ovvero 0, NaN, $\infty$ oppure un numero.
     \item \textbf{esp\_tmp} (10 bit): permette di eseguire le operazioni per ricavare l'esponente finale senza perdere informazioni.
     \item \textbf{mant\_tmp} (48 bit): permette di eseguire le operazioni per ricavare la mantissa finale senza perdere informazioni.
-    \item \textbf{sign1, sign2, esp1, esp2, mant1, mant2}: rappresentano le componenti dei due operandi.
+    \item \textbf{sign1, sign2, esp1, esp2, mant1, mant2}: rappresentano le componenti dei due operandi. \textit{mant1} e \textit{mant2} sono a 24 bit perchè aggiunguno $1.$ alla mantissa che nella rappresentazione IEE754 è omesso.
 \end{itemize}
 
 L'algoritmo della moltiplicazione è descritto grazie alla EFSM [Figura \ref{fig:EFSM_MULT}] la quale è formata 14 stati:
 \begin{itemize}
-    \item \textbf{ST\_START:} pone \textit{done} e \textit{norm\_again} a 0 ed estre le informazioni di segno, esponente e mantissa dei due operandi. Si rimane qui finchè \textit{ready} vale 0 altrimensi si passa a \textit{ST\_EVAL1}. Se in qualsiasi stato si riceve \textit{reset} uguale a 1 allora si passa a questo stato.
-    \item \textbf{ST\_EVAL1 e ST\_EVAL2:} ricava rispettivamente il tipo di op1 e op2 fra \textit{T\_ZER, T\_INF, T\_NAN e T\_NUM}
-    \item \textbf{ST\_EVAL3:} ricava il tipo del risultato in base al tipo di op1 e op2.
-    \item \textbf{ST\_CHECK1:} controlla se \textit{res\_type} è uguale a T\_NUM e in tal caso passa a \textit{ST\_ELAB} altrimenti a \textit{ST\_FINISH}.
-    \item \textbf{ST\_ELAB:} esegue la somma tra i due esponenti e la sottrazione di 127 in quanto entrambi, per lo standard, sono incrementati di 127: $(esp+127) = (esp1+127)+(esp2+127)-127$. Per compiere la somma è necessario usare una variabile \textit{esp\_tmp} di 10 bit perchè altrimenti con 8 bit si andrebbe in overflow con valori che dopo la sottrazione sarebbero rappresentabili con 8 bit e quindi validi. Viene poi eseguita anche la moltiplicazione delle due mantisse, che essendo a 23 bit più un bit che vale sempre 1, necessita di una variabile \textit{mant\_tmp} di almeno 48 bit
-    \item \textbf{ST\_UNDERF:} controlla se \textit{esp\_tmp} è in uno stato di underflow, ovvero guardando se il bit \textit{esp\_tmp[9]}, che nel complemento a 2 indica il segno, è 1. Infatti i valori disponibili per l'esponente vanno da 0 a 255. Il controllo dell'overflow viene fatto in seguito all'arrotondamento per evitare di farlo due volte.
-    \item \textbf{ST\_CHECK2:} passa allo stato \textit{ST\_FINISH} se \textit{res\_type} è diverso da \textit{T\_NUM}, perchè diventato \textit{T\_ZER} per l'underflow.
-    \item \textbf{ST\_NORM1:} compie la normalizzazione della mantissa che deve sempre essere della forma \textit{1.bits}. Essendo la virgola posta tra il 46esimo bit e il 45esimo, si verificano due casi: Se il 47esimo bit vale 1 bisogna incrementare l'esponente, altrimenti il valore è già corretto, ma viene effettuato uno shift a sinistra per trattare allo stesso modo i due casi durante l'arrotondamento.
-    \item \textbf{ST\_ROUND:} effettua l'eventuale arrotondamento dovuto al fatto che il valore della mantissa è attualmente a 48 bit, ma bisogna portarlo a 24 bit. L'arrotondamento è fatto per eccesso, quindi si incrementera \textit{mant\_tmp[47:24]} solo se \textit{mant\_tmp[23:00]} è $\geq$ a ``01..1''. L'arrotondamento effettivo verrà fatto nello stato \textit{ST\_NORM2}, qui ci si limita a porre \textit{norm\_again} uguale a 1 per poterci andare.
-    \item \textit{\textbf{ST\_CHECK3:}} passa allo stato \textit{ST\_NORM2} se \textit{norm} è uguale a 1 oppure allo stato \textit{ST\_OVERF} se \textit{norm} è uguale a 0.
-    \item \textbf{ST\_NORM2:} effettua il vero arrotondamento della mantissa. Bisogna tenere conto del caso in cui sia della forma ``1..1'' e che quindi con l'incremento vada a ``0..0'' e  venga incrementato l'esponente.
-    \item \textbf{ST\_OVERF:} verifica se l'esponente del risultato è in uno stato di overflow, ovvero guardando se il bit \textit{esp\_tmp[8]} vale 1 ovvero se corrisponde ad un valore maggiore di 255.
-    \item \textbf{ST\_FINISH:} pone \textit{done} uguale 1 e ricava \textit{res[31]}, ovvero il segno del risultato facendo lo XOR fra i segni degli operandi. In base al valore di \textit{res\_type} si ricavano gli altri bits e si torna allo stato iniziale.
+    \item \textbf{ST\_START:} stato di partenza. Qui vengono resettati i segnali a zero e inizializzati i registri/variabili contenenti le informazioni di segno, esponente e mantissa degli operanti attuali. In caso di segnale di reset si torna in questo stato. In caso il segnale \textit{ready} vada a 1 si passa a \textit{ST\_EVAL1}.
+    \item \textbf{ST\_EVAL1:} qui viene ricavato \textit{op1\_type} cioè se \textit{op1} è 0, $\infty$, NaN o un numero. Poi si passa a \textit{ST\_EVAL2}.
+    \item \textbf{ST\_EVAL2:} qui viene ricavato \textit{op2\_type} cioè se \textit{op2} è 0, $\infty$, NaN o un numero. Poi si passa a \textit{ST\_EVAL3}.
+    \item \textbf{ST\_EVAL3:} qui viene ricavato \textit{res\_type} cioè se \textit{res} è 0, $\infty$, NaN o un numero. Poi si passa a \textit{ST\_CHECK1}.
+    \item \textbf{ST\_CHECK1:} se \textit{res} è un numero si continua con l'elaborazione andando in \textit{ST\_ELAB} altrimenti il risultato è noto e si passa a \textit{ST\_FINISH}. 
+    \item \textbf{ST\_ELAB:} qui si ricava l'esponente temporaneo di \textit{res} sommando gli esponenti degli operandi e sottraendo il bias. Esso è a 10bit anzichè 8bit per permettere di compiere l'operazione senza perdere informazioni. Viene ricavato anche la mantissa temporanea che sarà di 48bit per contenere la moltiplicazione delle mantesse dei due operandi. Poi si passa a \textit{ST\_UNDERF}.
+    \item \textbf{ST\_UNDERF:} qui si controlla se il bit più significativo di \textit{esp\_tmp} è 1. Essendo codificato in complemento a 2, il fatto che sia 1 implica che è un numero negativo e quindi si è verificato un underflow e \textit{res\_type} sarà 0.
+    \item \textbf{ST\_CHECK2:} se \textit{res} non è zero si continua con l'elaborazione andando in \textit{ST\_NORM1} altrimenti il risultato è noto e si passa a \textit{ST\_FINISH}. 
+    \item \textbf{ST\_NORM1:} qui si effettua la normalizzazione della mantissa. Se il bit più significativo è 1 allora vuol dire la mantissa ha due cifre a sinistra della virgola e quindi deve essere normalizzata cioè riporta alla forma in cui c'è solo un 1 a sinistra. Per normalizzare basta incrementare l'esponente e considera la virgola spostata a sinistra. Nel caso in cui il bit più significativo sia 0 si fa uno shift a sinistra al fine di avere la virgola a destra del bit più significativo. Poi si passa a \textit{ST\_ROUND}.
+    \item \textbf{ST\_ROUND:} qui si controlla se c'è bisogno di arrotondare la mantissa, che da 48bit dovrà passare a 23bit, e in caso affermativo si pone a 1 \textit{norm\_again}. Si è deciso di arrotondare solo se il 23esimo bit, cioè quello a destra del punto di taglio, vale 1. Poi si passa a \textit{ST\_CHECK3}.
+    \item \textbf{ST\_CHECK3:} se \textit{norm\_again} vale 1 si passa a \textit{ST\_NORM2} altrimenti a \textit{ST\_OVERF}. 
+    \item \textbf{ST\_NORM2:} qui avviene l'incremento della mantissa a causa dell'arrotondamento. Nel caso in cui la mantissa fosse formata da tutti 1 l'incremento la riporterebbe a tutti 0 e l'esponente andrebbe incrementato. Poi si passa a \textit{ST\_OVERF}.
+    \item \textbf{ST\_OVERF:} qui avviene il controllo dell'overflow guardando se il secondo bit più significativo di \textit{esp\_tmp} vale 1 e in caso affermativo \textit{res\_type} sarà $\infty$. Infine si passa a \textit{ST\_FINISH}.
+    \item \textbf{ST\_FINISH:} qui si ricava il segno del risultato facendo lo XOR fra quello degli operandi, mentre si ricava il resto in base al valore di \textit{res\_type}. Infine si imposta \textit{done} a 1 e si torna in \textit{ST\_START}.
 \end{itemize}
 
 
 \subsection{double\_multiplier}
 Questo componente esegue due moltiplicazioni tra numeri floating point a precisione singola.
-\\La scelta di realizzarlo in verilog è stata del tutto arbitraria.
+\\La scelta di realizzarlo in Verilog è stata del tutto arbitraria.
 \\L'interfaccia è mostrata in figura \ref{fig:Architettura} ed è la stessa sia per l'implementazione Verilog che quella SystemC:
 \begin{itemize}
     \item \textbf{op1} (32 bit input): primo operando.
     \item \textbf{op2} (32 bit input): secondo operando.
     \item \textbf{clk} (1 bit input): segnale di clock.
     \item \textbf{rst} (1 bit input): segnale di reset. Riporta il sistema allo stato iniziale.
-    \item \textbf{ready} (1 bit input): segnale che permette al sistema di uscire dallo stato iniziale. Nello specifico indica che in questo ciclo di clok \textit{op1} e \textit{op2} contengono gli operandi della prima moltiplicazione e nel ciclo di clock successivo ci saranno gli altri. (?)
+    \item \textbf{ready} (1 bit input): segnale che permette al sistema di uscire dallo stato iniziale. Nello specifico indica che in questo ciclo di clok \textit{op1} e \textit{op2} contengono gli operandi della prima moltiplicazione e nel ciclo di clock successivo ci saranno quelli per la seconda moltiplicazione.
     \item \textbf{done} (1 bit output): segnale che indica che il valore su \textit{res} è il risultato.
     \item \textbf{res} (32 bit output): risultato.
 \end{itemize}
     
 Gli altri segnali/registri intermedi utilizzati sono:
 \begin{itemize}
-    \item \textbf{ready1:} (1 bit) segnale che pone il \textit{ready} del primo multiplier (quello in Verilog) a 1.
-    \item \textbf{ready2:} (1 bit) segnale che pone il \textit{ready} del secondo multiplier (quello in VHDL) a 1.
-    \item \textbf{done1:} (1 bit) segnale che indica che il valore su \textit{res1} è il risultato della prima moltiplicazione.
-    \item \textbf{done2:} (1 bit) segnale che indica che il valore su \textit{res2} è il risultato della seconda moltiplicazione.
-    \item \textbf{op1\_tmp1, op2\_tmp1, op1\_tmp2, op2\_tmp2:} (32 bit) che servono a memorizzare temporaneamente gli operandi che arrivano nei vari cicli di clock. (?)
+    \item \textbf{ready1} (1 bit) segnale che pone il \textit{ready} del primo multiplier (quello in Verilog) a 1.
+    \item \textbf{ready2} (1 bit) segnale che pone il \textit{ready} del secondo multiplier (quello in VHDL) a 1.
+    \item \textbf{done1} (1 bit) segnale che indica che il valore su \textit{res1} è il risultato della prima moltiplicazione.
+    \item \textbf{done2} (1 bit) segnale che indica che il valore su \textit{res2} è il risultato della seconda moltiplicazione.
+    \item \textbf{op1\_tmp, op2\_tmp} (32 bit) che servono a memorizzare temporaneamente gli operandi per la prima moltiplicazione.
 \end{itemize}
 
 L'algoritmo è descritto grazie alla EFSM [Figura \ref{fig:EFSM_DM}] la quale è formata 8 stati:
