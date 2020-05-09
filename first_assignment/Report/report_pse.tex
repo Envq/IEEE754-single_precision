@@ -278,17 +278,20 @@ Dopo aver realizzato un componente questo è stato subito testato con un semplic
 \\Un altro controllo fatto è il verificare che l'esecuzione del multiplier Verilog sia analoga a quella del multiplier VHDL.
 \\Le varie simulazioni sono riportate nelle figure \ref{fig:SIM_MULT_VHDL} \ref{fig:SIM_MULT_VERILOG} \ref{fig:SIM_DM}.
 
+
 \subsection{Simulazione con testbench in Verilog}
 I test con gli script TCL sono serviti principalmente ad assistere l'implementazione, questo invece a verificare la correttezza del sistema. Sono stati testati i casi particolari e un po' di valori scelti arbitrariamente e confrontati col risultato che ci si aspettava. Questo risultato è stato ottenunto grazie al testbench in SystemC.
 \\In figura \ref{fig:SIM_TESTBENCH} si può guardare la simulazione.
+
 
 \subsection{Simulazione con testbench in SystemC}
 Grazie al c++ è stato possibile realizzare dei testbench più accurati. 
 \\Sono stati provati gli stessi valori del testbench in Verilog i quali però sono stati confrontati con il risultato convertito in binario della moltiplicazione degli operandi converti in float [Figura \ref{fig:SIM_SC_TARGET}].
 \\Poi è stato fatto un testbench più sofisticato che genera un numero di valori arbitrario e confronta i risultati ottenuti dal dispositivo e dalla moltiplicazione in c++ [Figura \ref{fig:SIM_SC_RND}].
+\\SystemC è stato particolarmente comodo per testare il sistema grazie alla possibilità di guardare i valori di tutti i segnali evitando quindi di modificare le interfaccie o controllare i componenti separatamente come con gli script TCL.
 
 
-
+\subsection{Sintesi}
 
 
 

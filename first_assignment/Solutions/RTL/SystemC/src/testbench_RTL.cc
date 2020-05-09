@@ -28,8 +28,8 @@ std::string inc_binary_string(const std::string &val_str) {
 //*********************
 
 TestbenchModule::TestbenchModule(sc_module_name name) {
-    // SC_THREAD(targeted_test);
-    SC_THREAD(rnd_test);
+    SC_THREAD(targeted_test);
+    // SC_THREAD(rnd_test);
     // SC_THREAD(run_all);
     sensitive << clk.pos();
 
@@ -94,12 +94,12 @@ void TestbenchModule::targeted_test() {
         "01000001000100000000000000000000",  // 9.0
 
         // Test11
-        "01001001011101000010010000000000",  // 1000000.0
-        "01001001010110010000001110001110",  // 888888.875
+        "01000010111101110111100011110010",  // 
+        "00111010101000010011011111110100",  // 
 
         // Test12
-        "01000010100100011100110011001101",  // 72.9
-        "01000001000100000000000000000000"   // 9.0
+        "01000000011111111111111111111110",  // 
+        "01000000000000000000000000000001"   // 
     };
 
     // Variables;
@@ -143,9 +143,9 @@ void TestbenchModule::targeted_test() {
             float_to_binary(binary_to_float(op1_A) * binary_to_float(op2_A));
         std::cout << "Test " << 1 + i / 2 << " :"
                   << "\n    " << binary_to_float(op1_A) << " * "
-                  << binary_to_float(op2_A) << " = " << binary_to_float(res_A)
-                  << "\n    RES:     [" << res_A << "]"
-                  << "\n    CORRECT: [" << res_correct_A << "]" << std::endl;
+                  << binary_to_float(op2_A)
+                  << "\n    RES:     [" << res_A << "] == " << binary_to_float(res_A)
+                  << "\n    CORRECT: [" << res_correct_A << "] == " << binary_to_float(res_correct_A) << std::endl;
 
         if (res_A == res_correct_A) {
             std::cout << "==> OK\n" << std::endl;
@@ -160,9 +160,9 @@ void TestbenchModule::targeted_test() {
             float_to_binary(binary_to_float(op1_B) * binary_to_float(op2_B));
         std::cout << "Test " << 2 + i / 2 << " :"
                   << "\n    " << binary_to_float(op1_B) << " * "
-                  << binary_to_float(op2_B) << " = " << binary_to_float(res_B)
-                  << "\n    RES:     [" << res_B << "]"
-                  << "\n    CORRECT: [" << res_correct_B << "]" << std::endl;
+                  << binary_to_float(op2_B)
+                  << "\n    RES:     [" << res_B << "] == " << binary_to_float(res_B)
+                  << "\n    CORRECT: [" << res_correct_B << "] == " << binary_to_float(res_correct_B) << std::endl;
 
         if (res_B == res_correct_B) {
             std::cout << "==> OK\n" << std::endl;
@@ -178,6 +178,10 @@ void TestbenchModule::targeted_test() {
     std::cout << std::endl << "Tests: " << NUM_TEST << std::endl;
     std::cout << "Fails: " << fails << std::endl;
     std::cout << "Success: " << NUM_TEST - fails << std::endl;
+
+
+    std::cout << float_to_binary(std::numeric_limits<float>::min()) << std::endl;
+    std::cout << std::numeric_limits<float>::min() << std::endl;
 
     sc_stop();
 }

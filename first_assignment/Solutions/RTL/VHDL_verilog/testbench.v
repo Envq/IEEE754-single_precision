@@ -6,20 +6,24 @@ module testbench();
     reg[31:0] op1, op2;
     wire[31:0] res;
     wire done;
-    parameter PERIOD = 10;//7.598;
+    parameter PERIOD = 20;
     parameter NUM_TEST = 20;
     reg [31:0] mem [0:NUM_TEST*3-1]; 
     integer i;
+    
+    wire[2:0] STATE, NEXT_STATE;
 
 
-double_multipler top_level(
+double_multiplier dut(
     .clk (clk),
     .rst (rst),
     .ready (ready),
     .op1 (op1),
     .op2 (op2),
     .res (res),
-    .done (done)
+    .done (done),
+    .STATE (STATE),
+    .NEXT_STATE (NEXT_STATE)
 );
 
 
@@ -65,24 +69,24 @@ initial begin
     mem[23] = 32'b00000000000000000000000000000000; //0.0
     
     //Test9 Verilog
-    mem[24] = 32'b11111111100000000000000000000000; //-inf
+    mem[24] = 32'b11111111100000000000000000000000; //inf
     mem[25] = 32'b00000000000000000000000000000000; //0.0
-    mem[26] = 32'b11111111110000000000000000000000; //-nan
+    mem[26] = 32'b11111111110000000000000000000000; //nan quiet
     
     //Test10 VHDL
-    mem[27] = 32'b11111111100000000000000000000000; //-inf
+    mem[27] = 32'b11111111100000000000000000000000; //inf
     mem[28] = 32'b00000000000000000000000000000000; //0.0
-    mem[29] = 32'b11111111110000000000000000000000; //-nan
+    mem[29] = 32'b11111111110000000000000000000000; //nan quiet
     
     //Test11 Verilog
-    mem[30] = 32'b01111111100000000000000000000000; //+inf
-    mem[31] = 32'b01111111100000000000000000000000; //+inf
-    mem[32] = 32'b01111111100000000000000000000000; //+inf
+    mem[30] = 32'b11111111100000000000000000000110; //nan signal
+    mem[31] = 32'b00111111101000000000000000000000; //1.25
+    mem[32] = 32'b11111111100000000000000000000110; //nan signal
     
     //Test12 VHDL
-    mem[33] = 32'b01111111100000000000000000000000; //+inf
-    mem[34] = 32'b01111111100000000000000000000000; //+inf
-    mem[35] = 32'b01111111100000000000000000000000; //+inf
+    mem[33] = 32'b11111111100000000000000000000110; //nan signal
+    mem[34] = 32'b00111111101000000000000000000000; //1.25
+    mem[35] = 32'b11111111100000000000000000000110; //nan signal
     
     //Test13 Verilog
     mem[36] = 32'b01000010111101110111100011110010; //123.7362213134765625
@@ -125,36 +129,40 @@ initial begin
     mem[59] = 32'b01000100001001000000011001100111; //656.1
 end
 
-       
 
 always #(PERIOD/2) clk  <= !clk; // Set clock
+
 initial 
-begin
-    //Init
+begin    
+    // Init
     clk <= 1'b1;
     ready <= 1'b0;
     rst <= 1'b0;
     i <= 0;
     
+    // Wait for startup FPGA
+    #(PERIOD*20);
+    
     // Reset
     #PERIOD;
     rst <= 1'b1;
+    #(PERIOD/2);
     #PERIOD;
-    rst <= 1'b0;
+    rst <= 1'b0;    
     
-    
-        // Test
+    // Test2
     while (i < NUM_TEST * 3) begin        
         #PERIOD;
         ready <= 1'b1;
+        #PERIOD;
+        ready <= 1'b0;
         op1 <= mem[i];
         op2 <= mem[i+1];
         #PERIOD;
         op1 <= mem[i+3];
         op2 <= mem[i+4];
         #PERIOD;
-        ready <= 1'b0;
-        @(posedge done) #PERIOD;
+        @(posedge done) #(PERIOD/2);
         if (res == mem[i+2])
             $display("TEST VERILOG %d OK", 1+i/3);
         else
@@ -166,9 +174,7 @@ begin
             $display("TEST VHDL    %d FAILED -> res= %b", 2+i/3, res);        
         i = i + 6;
     end
-
 end
-
 
 
 endmodule
