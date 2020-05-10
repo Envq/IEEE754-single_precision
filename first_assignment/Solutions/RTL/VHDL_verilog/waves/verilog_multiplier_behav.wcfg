@@ -12,14 +12,14 @@
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="1487001fs"></ZoomEndTime>
-      <Cursor1Time time="350000fs"></Cursor1Time>
+      <ZoomEndTime time="2304001fs"></ZoomEndTime>
+      <Cursor1Time time="1400000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="177"></NameColumnWidth>
-      <ValueColumnWidth column_width="85"></ValueColumnWidth>
+      <NameColumnWidth column_width="173"></NameColumnWidth>
+      <ValueColumnWidth column_width="258"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="20" />
+   <WVObjectSize size="22" />
    <wvobject type="logic" fp_name="/verilog_multiplier/clk">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -117,6 +117,11 @@
    <wvobject type="array" fp_name="/verilog_multiplier/esp1">
       <obj_property name="ElementShortName">esp1[7:0]</obj_property>
       <obj_property name="ObjectShortName">esp1[7:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/verilog_multiplier/esp1">
+      <obj_property name="ElementShortName">esp1[7:0]</obj_property>
+      <obj_property name="ObjectShortName">esp1[7:0]</obj_property>
       <obj_property name="Radix">BINARYRADIX</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/verilog_multiplier/mant1">
@@ -128,6 +133,13 @@
       <obj_property name="ElementShortName">sign2</obj_property>
       <obj_property name="ObjectShortName">sign2</obj_property>
       <obj_property name="CustomSignalColor">#00FF7F</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/verilog_multiplier/esp2">
+      <obj_property name="ElementShortName">esp2[7:0]</obj_property>
+      <obj_property name="ObjectShortName">esp2[7:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="CustomSignalColor">#E0FFFF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/verilog_multiplier/esp2">
@@ -147,7 +159,7 @@
    <wvobject type="array" fp_name="/verilog_multiplier/esp_tmp">
       <obj_property name="ElementShortName">esp_tmp[9:0]</obj_property>
       <obj_property name="ObjectShortName">esp_tmp[9:0]</obj_property>
-      <obj_property name="Radix">BINARYRADIX</obj_property>
+      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
       <obj_property name="CustomSignalColor">#008080</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
