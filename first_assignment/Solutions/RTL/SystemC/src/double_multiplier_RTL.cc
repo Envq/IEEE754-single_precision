@@ -5,16 +5,16 @@ DoubleMultiplierModule::DoubleMultiplierModule(
     const sc_module_name &module_name)
     : sc_module(module_name), clk("clk"), rst("rst"), ready("ready"),
       op1("op1"), op2("op2"), done("done"), res("res") {
-    mult1 = new MultiplierModule("multiplier1");
+    mult1 = new MultiplierModule("mult1");
     mult1->clk(clk);
     mult1->rst(rst);
     mult1->ready(ready1);
-    mult1->op1(op1_tmp);
-    mult1->op2(op2_tmp);
+    mult1->op1(op1);
+    mult1->op2(op2);
     mult1->done(done1);
     mult1->res(res1);
 
-    mult2 = new MultiplierModule("multiplier2");
+    mult2 = new MultiplierModule("mult2");
     mult2->clk(clk);
     mult2->rst(rst);
     mult2->ready(ready2);
@@ -37,47 +37,46 @@ DoubleMultiplierModule::~DoubleMultiplierModule() {
 void DoubleMultiplierModule::fsm() {
     switch (STATE) {
     case ST_START:
-        if (ready.read() == 1) {
-            NEXT_STATE = ST_RUN;
-        } else {
+        if (ready.read() == 1)
+            NEXT_STATE = ST_RUN1;
+        else
             NEXT_STATE = STATE;
-        }
         break;
 
-    case ST_RUN:
+    case ST_RUN1:
+        NEXT_STATE = ST_RUN2;
+        break;
+
+    case ST_RUN2:
         NEXT_STATE = ST_WAIT;
         break;
 
     case ST_WAIT:
         if (done1.read() == 1) {
-            if (done2.read() == 1) {
+            if (done2.read() == 1)
                 NEXT_STATE = ST_RET1;
-            } else {
+            else
                 NEXT_STATE = ST_WAIT2;
-            }
         } else {
-            if (done2.read() == 1) {
+            if (done2.read() == 1)
                 NEXT_STATE = ST_WAIT1;
-            } else {
+            else
                 NEXT_STATE = STATE;
-            }
         }
         break;
 
     case ST_WAIT1:
-        if (done1.read() == 1) {
+        if (done1.read() == 1)
             NEXT_STATE = ST_RET1;
-        } else {
+        else
             NEXT_STATE = STATE;
-        }
         break;
 
     case ST_WAIT2:
-        if (done2.read() == 1) {
+        if (done2.read() == 1)
             NEXT_STATE = ST_RET1;
-        } else {
+        else
             NEXT_STATE = STATE;
-        }
         break;
 
     case ST_RET1:
@@ -100,38 +99,41 @@ void DoubleMultiplierModule::datapath() {
 
     } else if (clk.read() == 1) {
         STATE = NEXT_STATE;
-        done.write(sc_logic(0));
-        ready1.write(sc_logic(0));
-        ready2.write(sc_logic(0));
-        res = "00000000000000000000000000000000";
+        done.write(sc_logic_0);
+        res.write(0);
+        ready1.write(sc_logic_0);
+        ready2.write(sc_logic_0);
 
-        switch (STATE) {
+        switch (NEXT_STATE) {
         case ST_START:
-            done.write(sc_logic(0));
-            ready1.write(sc_logic(0));
-            ready2.write(sc_logic(0));
-            op1_tmp.write(op1.read());
-            op2_tmp.write(op2.read());
+            done.write(sc_logic_0);
+            ready1.write(sc_logic_0);
+            ready2.write(sc_logic_0);
             break;
-        
-        case ST_RUN:
-            ready1.write(sc_logic(1));
-            ready2.write(sc_logic(1));
+
+        case ST_RUN1:
+            ready1.write(sc_logic_1);
+            break;
+
+        case ST_RUN2:
+            ready2.write(sc_logic_1);
             break;
 
         case ST_WAIT:
-            ready1.write(sc_logic(0));
-            ready2.write(sc_logic(0));
+            ready1.write(sc_logic_0);
+            ready2.write(sc_logic_0);
             break;
 
         case ST_WAIT1:
+            // Do nothing
             break;
 
         case ST_WAIT2:
+            // Do nothing
             break;
 
         case ST_RET1:
-            done.write(sc_logic(1));
+            done.write(sc_logic_1);
             res.write(res1.read());
             break;
 
@@ -140,6 +142,7 @@ void DoubleMultiplierModule::datapath() {
             break;
 
         default:
+            // Do nothing
             break;
         }
     }

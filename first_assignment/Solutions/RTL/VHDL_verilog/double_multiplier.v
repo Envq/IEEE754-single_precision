@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module double_multiplier(clk, rst, ready, op1, op2, res, done, STATE, NEXT_STATE);
+module double_multiplier(clk, rst, ready, op1, op2, res, done);
     // Interface
     input clk, rst;
     input ready;
@@ -10,7 +10,7 @@ module double_multiplier(clk, rst, ready, op1, op2, res, done, STATE, NEXT_STATE
     
     // Statements
     parameter ST_START=0, ST_RUN1=1, ST_RUN2=2, ST_WAIT=3, ST_WAIT1=4, ST_WAIT2=5, ST_RET1=6, ST_RET2=7;
-    output reg[2:0] STATE, NEXT_STATE;
+    reg[2:0] STATE, NEXT_STATE;
     reg ready1, ready2;
     wire[31:0] res1, res2;
     wire done1, done2;    

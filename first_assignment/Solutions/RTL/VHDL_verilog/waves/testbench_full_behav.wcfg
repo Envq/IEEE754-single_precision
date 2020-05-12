@@ -3,178 +3,171 @@
    <wave_state>
    </wave_state>
    <db_ref_list>
-      <db_ref path="verilog_multiplier_behav.wdb" id="1">
+      <db_ref path="testbench_behav.wdb" id="1">
          <top_modules>
             <top_module name="glbl" />
-            <top_module name="verilog_multiplier" />
+            <top_module name="testbench" />
          </top_modules>
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="4230001fs"></ZoomEndTime>
-      <Cursor1Time time="1950000fs"></Cursor1Time>
+      <ZoomStartTime time="433480fs"></ZoomStartTime>
+      <ZoomEndTime time="673481fs"></ZoomEndTime>
+      <Cursor1Time time="500000fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="173"></NameColumnWidth>
-      <ValueColumnWidth column_width="165"></ValueColumnWidth>
+      <NameColumnWidth column_width="138"></NameColumnWidth>
+      <ValueColumnWidth column_width="202"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="23" />
-   <wvobject type="logic" fp_name="/verilog_multiplier/clk">
+   <WVObjectSize size="24" />
+   <wvobject type="logic" fp_name="/testbench/clk">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/verilog_multiplier/rst">
+   <wvobject type="logic" fp_name="/testbench/rst">
       <obj_property name="ElementShortName">rst</obj_property>
       <obj_property name="ObjectShortName">rst</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/verilog_multiplier/ready">
+   <wvobject type="logic" fp_name="/testbench/ready">
       <obj_property name="ElementShortName">ready</obj_property>
       <obj_property name="ObjectShortName">ready</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/op1">
+   <wvobject type="array" fp_name="/testbench/op1">
       <obj_property name="ElementShortName">op1[31:0]</obj_property>
       <obj_property name="ObjectShortName">op1[31:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
       <obj_property name="Radix">REALRADIX</obj_property>
       <obj_property name="radix_realType">FLOATINGPOINTRADIX</obj_property>
       <obj_property name="radix_fractionWidth">24</obj_property>
       <obj_property name="radix_otherWidth">8</obj_property>
-      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/op2">
+   <wvobject type="array" fp_name="/testbench/op2">
       <obj_property name="ElementShortName">op2[31:0]</obj_property>
       <obj_property name="ObjectShortName">op2[31:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
       <obj_property name="Radix">REALRADIX</obj_property>
       <obj_property name="radix_realType">FLOATINGPOINTRADIX</obj_property>
       <obj_property name="radix_fractionWidth">24</obj_property>
       <obj_property name="radix_otherWidth">8</obj_property>
-      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/res">
+   <wvobject type="array" fp_name="/testbench/res">
       <obj_property name="ElementShortName">res[31:0]</obj_property>
       <obj_property name="ObjectShortName">res[31:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
       <obj_property name="Radix">REALRADIX</obj_property>
       <obj_property name="radix_realType">FLOATINGPOINTRADIX</obj_property>
       <obj_property name="radix_fractionWidth">24</obj_property>
       <obj_property name="radix_otherWidth">8</obj_property>
-      <obj_property name="CustomSignalColor">#FF00FF</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/verilog_multiplier/done">
+   <wvobject type="logic" fp_name="/testbench/done">
       <obj_property name="ElementShortName">done</obj_property>
       <obj_property name="ObjectShortName">done</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/STATE">
+   <wvobject type="array" fp_name="/testbench/PERIOD">
+      <obj_property name="ElementShortName">PERIOD[31:0]</obj_property>
+      <obj_property name="ObjectShortName">PERIOD[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/testbench/i">
+      <obj_property name="ElementShortName">i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">i[31:0]</obj_property>
+      <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/testbench/op1">
+      <obj_property name="ElementShortName">op1[31:0]</obj_property>
+      <obj_property name="ObjectShortName">op1[31:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FFA500</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+      <obj_property name="radix_realType">FLOATINGPOINTRADIX</obj_property>
+      <obj_property name="radix_fractionWidth">24</obj_property>
+      <obj_property name="radix_otherWidth">8</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/testbench/op2">
+      <obj_property name="ElementShortName">op2[31:0]</obj_property>
+      <obj_property name="ObjectShortName">op2[31:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FFA500</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+      <obj_property name="radix_realType">FLOATINGPOINTRADIX</obj_property>
+      <obj_property name="radix_fractionWidth">24</obj_property>
+      <obj_property name="radix_otherWidth">8</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/testbench/res">
+      <obj_property name="ElementShortName">res[31:0]</obj_property>
+      <obj_property name="ObjectShortName">res[31:0]</obj_property>
+      <obj_property name="CustomSignalColor">#FFA500</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+      <obj_property name="radix_realType">FLOATINGPOINTRADIX</obj_property>
+      <obj_property name="radix_fractionWidth">24</obj_property>
+      <obj_property name="radix_otherWidth">8</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/testbench/dut/ready1">
+      <obj_property name="ElementShortName">ready1</obj_property>
+      <obj_property name="ObjectShortName">ready1</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/testbench/dut/ready2">
+      <obj_property name="ElementShortName">ready2</obj_property>
+      <obj_property name="ObjectShortName">ready2</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/testbench/dut/mul1/STATE">
       <obj_property name="ElementShortName">STATE[4:0]</obj_property>
       <obj_property name="ObjectShortName">STATE[4:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      <obj_property name="CustomSignalColor">#800000</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/NEXT_STATE">
+   <wvobject type="array" fp_name="/testbench/dut/mul1/NEXT_STATE">
       <obj_property name="ElementShortName">NEXT_STATE[4:0]</obj_property>
       <obj_property name="ObjectShortName">NEXT_STATE[4:0]</obj_property>
       <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
-      <obj_property name="CustomSignalColor">#800000</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/op1">
-      <obj_property name="ElementShortName">op1[31:0]</obj_property>
-      <obj_property name="ObjectShortName">op1[31:0]</obj_property>
-      <obj_property name="Radix">BINARYRADIX</obj_property>
-      <obj_property name="radix_realType">FLOATINGPOINTRADIX</obj_property>
-      <obj_property name="radix_fractionWidth">24</obj_property>
-      <obj_property name="radix_otherWidth">8</obj_property>
-      <obj_property name="CustomSignalColor">#808000</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/op2">
-      <obj_property name="ElementShortName">op2[31:0]</obj_property>
-      <obj_property name="ObjectShortName">op2[31:0]</obj_property>
-      <obj_property name="Radix">BINARYRADIX</obj_property>
-      <obj_property name="radix_realType">FLOATINGPOINTRADIX</obj_property>
-      <obj_property name="radix_fractionWidth">24</obj_property>
-      <obj_property name="radix_otherWidth">8</obj_property>
-      <obj_property name="CustomSignalColor">#808000</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/res">
-      <obj_property name="ElementShortName">res[31:0]</obj_property>
-      <obj_property name="ObjectShortName">res[31:0]</obj_property>
-      <obj_property name="Radix">BINARYRADIX</obj_property>
-      <obj_property name="radix_realType">FLOATINGPOINTRADIX</obj_property>
-      <obj_property name="radix_fractionWidth">24</obj_property>
-      <obj_property name="radix_otherWidth">8</obj_property>
-      <obj_property name="CustomSignalColor">#808000</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/verilog_multiplier/sign1">
+   <wvobject type="logic" fp_name="/testbench/dut/mul1/sign1">
       <obj_property name="ElementShortName">sign1</obj_property>
       <obj_property name="ObjectShortName">sign1</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/esp1">
+   <wvobject type="array" fp_name="/testbench/dut/mul1/esp1">
       <obj_property name="ElementShortName">esp1[7:0]</obj_property>
       <obj_property name="ObjectShortName">esp1[7:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/esp1">
-      <obj_property name="ElementShortName">esp1[7:0]</obj_property>
-      <obj_property name="ObjectShortName">esp1[7:0]</obj_property>
-      <obj_property name="Radix">BINARYRADIX</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/mant1">
+   <wvobject type="array" fp_name="/testbench/dut/mul1/mant1">
       <obj_property name="ElementShortName">mant1[23:0]</obj_property>
       <obj_property name="ObjectShortName">mant1[23:0]</obj_property>
       <obj_property name="Radix">BINARYRADIX</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/verilog_multiplier/sign2">
+   <wvobject type="logic" fp_name="/testbench/dut/mul1/sign2">
       <obj_property name="ElementShortName">sign2</obj_property>
       <obj_property name="ObjectShortName">sign2</obj_property>
-      <obj_property name="CustomSignalColor">#00FF7F</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/esp2">
-      <obj_property name="ElementShortName">esp2[7:0]</obj_property>
-      <obj_property name="ObjectShortName">esp2[7:0]</obj_property>
-      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
       <obj_property name="CustomSignalColor">#E0FFFF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/esp2">
+   <wvobject type="array" fp_name="/testbench/dut/mul1/esp2">
       <obj_property name="ElementShortName">esp2[7:0]</obj_property>
       <obj_property name="ObjectShortName">esp2[7:0]</obj_property>
-      <obj_property name="Radix">BINARYRADIX</obj_property>
+      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
       <obj_property name="CustomSignalColor">#E0FFFF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/mant2">
+   <wvobject type="array" fp_name="/testbench/dut/mul1/mant2">
       <obj_property name="ElementShortName">mant2[23:0]</obj_property>
       <obj_property name="ObjectShortName">mant2[23:0]</obj_property>
       <obj_property name="Radix">BINARYRADIX</obj_property>
       <obj_property name="CustomSignalColor">#E0FFFF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/esp_tmp">
+   <wvobject type="array" fp_name="/testbench/dut/mul1/esp_tmp">
       <obj_property name="ElementShortName">esp_tmp[9:0]</obj_property>
       <obj_property name="ObjectShortName">esp_tmp[9:0]</obj_property>
       <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
-      <obj_property name="CustomSignalColor">#008080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/esp_tmp">
-      <obj_property name="ElementShortName">esp_tmp[9:0]</obj_property>
-      <obj_property name="ObjectShortName">esp_tmp[9:0]</obj_property>
-      <obj_property name="Radix">BINARYRADIX</obj_property>
-      <obj_property name="CustomSignalColor">#008080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/verilog_multiplier/mant_tmp">
+   <wvobject type="array" fp_name="/testbench/dut/mul1/mant_tmp">
       <obj_property name="ElementShortName">mant_tmp[47:0]</obj_property>
       <obj_property name="ObjectShortName">mant_tmp[47:0]</obj_property>
       <obj_property name="Radix">BINARYRADIX</obj_property>
-      <obj_property name="CustomSignalColor">#008080</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
 </wave_config>

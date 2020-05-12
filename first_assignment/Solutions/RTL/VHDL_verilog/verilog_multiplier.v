@@ -179,12 +179,15 @@ begin
     if (rst == 1'b1) begin                  // Reset all
         STATE <= ST_START;
         done <= 1'b0;
-        res <= 32'd0;                
-        mant_tmp <= 48'd0;
-        esp_tmp <= 24'd0;                  
+        res <= 32'd0;
+        
+        esp_tmp <= 24'd0;            
+        mant_tmp <= 48'd0;  
+                       
         sign1 <= 1'b0;             
         esp1 <= 10'd0;
-        mant1 <= 24'd0;        
+        mant1 <= 24'd0; 
+               
         sign2 <= 1'b0;             
         esp2 <= 10'd0;
         mant2 <= 24'd0;
@@ -194,10 +197,9 @@ else begin
         case (NEXT_STATE)
             // Reset register 
             ST_START: begin 
-                done <= 1'b0;
-                
-                mant_tmp <= 48'd0;
+                done <= 1'b0;                
                 esp_tmp <= 24'd0;
+                mant_tmp <= 48'd0;
                           
                 sign1 <= 1'b0;             
                 esp1 <= 10'd0;
@@ -232,14 +234,14 @@ else begin
             ST_SNAN2: begin
                 res[31] <= sign2;
                 res[30:23] <= esp2;
-                res[22:0] <= mant2;
+                res[22:0] <= mant2[22:0];
             end
             
             // Signal NAN from op1
             ST_SNAN1: begin
                 res[31] <= sign1;
                 res[30:23] <= esp1;
-                res[22:0] <= mant1;
+                res[22:0] <= mant1[22:0];
             end
             
             // ZERO
@@ -259,8 +261,8 @@ else begin
             // both input are SUBNORM
             ST_ADJ3: begin
                 mant1[23] = 1'b0;
-                mant2[23] = 1'b0;
                 esp1 = 10'd1;   //(-bias + 1)+127  because: from (-bias+1) to (esp-bias)
+                mant2[23] = 1'b0;
                 esp2 = 10'd1;   //(-bias + 1)+127  because: from (-bias+1) to (esp-bias)
             end
             
@@ -306,7 +308,7 @@ else begin
             
             // Subnorm
             ST_SUBNORM: begin
-                mant_tmp <= mant_tmp >> 10'd1; //from (esp-bias) to (-bias+1) implicit
+                mant_tmp <= mant_tmp >> 1'd1; //from (esp-bias) to (-bias+1) implicit
             end
             
             // Rounding

@@ -3,8 +3,7 @@
         {
             "includePath": [
                 "~/libraries/systemc/include/**",
-                "~/pse_libraries/systemc/include/**",
-                "~/vivado_projects/PROJECT_PSE/Solutions/RTL/SystemC/include/**"
+                "~/vivado_projects/PROJECT_PSE/first_assignment/Solutions/RTL/SystemC/include/**"
             ],
             "name": "SYSTEMC",
             "intelliSenseMode": "gcc-x64",

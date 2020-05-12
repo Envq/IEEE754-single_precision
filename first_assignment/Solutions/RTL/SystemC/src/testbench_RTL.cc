@@ -4,8 +4,7 @@
 #include <random>
 
 
-
-//** auxiliary functions
+//### auxiliary functions ##################################
 float binary_to_float(const std::string &val_str) {
     uint32_t val = std::bitset<32>(val_str).to_ulong();
     return *reinterpret_cast<float *>(&val);
@@ -14,23 +13,103 @@ float binary_to_float(const std::string &val_str) {
 std::string float_to_binary(const float &value) {
     union {
         float input;
-        std::uint32_t output;
+        int output;
     } data;
 
     data.input = value;
     return std::bitset<sizeof(float) * 8>(data.output).to_string();
 }
+//##########################################################
 
-std::string inc_binary_string(const std::string &val_str) {
-    uint32_t val = std::bitset<32>(val_str).to_ulong();
-    return std::bitset<32>(++val).to_string();
-}
-//*********************
+
+// MEMORY
+const std::string mem[] = {
+    // Test 1
+    "00000000000000000000000000000000",  // 0.0
+    "11111111100000000000000000000000",  //-inf
+
+    // Test 2
+    "01111111100000000000000000000000",  //+inf
+    "00000000000000000000000000000000",  // 0.0
+
+    // Test 3
+    "01111111100000000000000000000110",  // nan signal
+    "00111111101000000000000000000000",  // 1.25
+
+    // Test 4
+    "00111111101000000000000000000000",  // 1.25
+    "11111111100000000000010000000110",  // nan signal
+
+    // Test 5
+    "00111111101000000000000000000000",  // 1.25
+    "00000000000000000000000000000000",  // 0.0
+
+    // Test 6
+    "10000000000000000000000000000000",  //-0.0
+    "00111111101000000000000000000000",  // 1.25
+
+    // Test 7
+    "11111111100000000000000000000000",  //-inf
+    "01000000000000000000000000000000",  // 2.0
+
+    // Test 8
+    "01000000000000000000000000000000",  // 2.0
+    "01111111100000000000000000000000",  // inf
+
+    // Test 9
+    "00000000010000000000000000000000",  // 5.87747175411e-39 (DENOM)
+    "00000000010000000000000000000000",  // 5.87747175411e-39 (DENOM)
+
+    // Test 10
+    "00111111110000000000000000000000",  // 1.5
+    "00000000010000000000000000000000",  // 5.87747175411e-39 (DENOM)
+
+    // Test 11
+    "00000000010000000000000000000000",  // 5.87747175411e-39 (DENOM)
+    "00111110110000000000000000000000",  // 0.375
+
+    // Test 12
+    "01100000000000000000000000000000",  // 36893488147419103232
+    "01100000000000000000000000000000",  // 36893488147419103232
+
+    // Test 13
+    "01000010111101110111100011110010",  // 123.7362213134765625
+    "00111010101000010011011111110100",  // 0.0012300000526010990142822265625
+
+    // Test 14
+    "01000010100100011100110011001101",  // 72.90000152587890625
+    "01000001000100000000000000000000",  // 9.0
+
+    // Test 15
+    "01000000011111111111111111111110",  // 3.999999523162841796875
+    "01000000000000000000000000000001",  // 2.0000002384185791015625
+
+    // Test 16
+    "01000001000000000000000000000000",  // 8.0
+    "00000000000000000000000000000001",  // 1.40129846432e-45 (DENOM)
+
+    // Test 17
+    "01000001100000000000000000000000",  // 16.0
+    "00000000010000000000000000000000",  // 5.87747175411e-39 (DENOM)
+
+    // Test 18
+    "00111100000000000000000000000000",  // 0.0078125
+    "00000011100000000000000000000000",  // 7.52316384526e-37
+
+    // Test 19
+    "01000001010110000000000000000000",  // 13.5
+    "00111111100000000000000000000000",  // 1.0
+
+    // Test 20
+    "01000000000000000000000000000000",  // 2.0
+    "01000000001000000000000000000000",  // 2.5
+};
+
 
 TestbenchModule::TestbenchModule(sc_module_name name) {
-    SC_THREAD(targeted_test);
-    // SC_THREAD(rnd_test);
-    // SC_THREAD(run_all);
+    // SC_THREAD(target_test);
+    // SC_THREAD(full_target_test);
+    SC_THREAD(rnd_test);
     sensitive << clk.pos();
 
     SC_THREAD(clk_gen);
@@ -38,6 +117,7 @@ TestbenchModule::TestbenchModule(sc_module_name name) {
 
 TestbenchModule::~TestbenchModule() {
 }
+
 
 void TestbenchModule::clk_gen() {
     while (true) {
@@ -49,58 +129,64 @@ void TestbenchModule::clk_gen() {
 }
 
 
-void TestbenchModule::targeted_test() {
-    int NUM_TEST = 12;
+void TestbenchModule::target_test() {
+    // Variables
+    std::string num1, num2, res_mult, res_correct;
+
+    // Settings
+    int numTest = 20;
+
+    // Init
+    wait();
+    ready.write(sc_logic_0);
+    rst.write(sc_logic_0);
+
+    // Reset
+    wait();
+    rst.write(sc_logic_1);
+    wait();
+    rst.write(sc_logic_0);
+
+    // Test
+    num1 = mem[(numTest * 2) - 2];
+    num2 = mem[(numTest * 2) - 1];
+    std::cout << "Test " << numTest << " :"
+              << "\n    " << binary_to_float(num1) << " * "
+              << binary_to_float(num2) << std::endl;
+
+    wait();
+    ready.write(sc_logic_1);
+    wait();
+    ready.write(sc_logic_0);
+    op1.write(num1.c_str());
+    op2.write(num2.c_str());
+    wait();
+    wait();
+
+    while (done.read() == sc_logic_0)
+        wait();
+
+    res_mult = res.read().to_string();
+    res_correct =
+        float_to_binary(binary_to_float(num1) * binary_to_float(num2));
+    std::cout << "    RES:     [" << res_mult
+              << "] == " << binary_to_float(res_mult) << "\n    CORRECT: ["
+              << res_correct << "] == " << binary_to_float(res_correct)
+              << std::endl;
+
+    if (res_mult == res_correct) {
+        std::cout << "==> OK\n" << std::endl;
+    } else {
+        std::cout << "==> FAILED\n" << std::endl;
+    }
+
+    sc_stop();
+}
+
+
+void TestbenchModule::full_target_test() {
+    int NUM_TEST = 20;
     unsigned int fails = 0;
-    std::string mem[] = {
-        // Test1
-        "11111111100000000000000000000000",  //-inf
-        "01000000000000000000000000000000",  // 2.0
-
-        // Test2
-        "00111111101000000000000000000000",  // 1.25
-        "00000000000000000000000000000000",  // 0.0
-
-        // Test3
-        "11111111100000000000000000000000",  //-inf
-        "00000000000000000000000000000000",  // 0.0
-
-        // Test4
-        "01111111100000000000000000000000",  //+inf
-        "01111111100000000000000000000000",  //+inf
-
-        // Test5
-        "01000001100000100000000000000000",  // 16.25
-        "01000001000100000000000000000000",  // 9.0
-
-        // Test6
-        "01000001101100000000000000000000",  // 22.0
-        "11000000101000000000000000000000",  //-5.0
-
-        // Test7
-        "01000000010110011001100110011010",  // 3.400000095367431640625
-        "01000000010110011001100110011010",  // 3.400000095367431640625
-
-        // Test8
-        "01000010101001111010100011110110",  // 83.8300018310546875
-        "00111110000011110101110000101001",  // 0.14000000059604644775390625
-
-        // Test9
-        "01000010111101110111100011110010",  // 123.7362213134765625
-        "00111010101000010011011111110100",  // 0.0012300000526010990142822265625
-
-        // Test10
-        "01000010100100011100110011001101",  // 72.90000152587890625
-        "01000001000100000000000000000000",  // 9.0
-
-        // Test11
-        "01111111110000000000000000000000",  // 
-        "01000001000100000000000000000000",  // 
-
-        // Test12
-        "01111111110000000000000000000010",  // 
-        "01000001000100000000000000000000"   // 
-    };
 
     // Variables;
     std::string op1_A, op2_A, res_A, res_correct_A;
@@ -108,17 +194,17 @@ void TestbenchModule::targeted_test() {
 
     // Init
     wait();
-    ready.write(sc_logic(0));
-    rst.write(sc_logic(0));
-    int i = 0;
+    ready.write(sc_logic_0);
+    rst.write(sc_logic_0);
 
     // Reset
     wait();
-    rst.write(sc_logic(1));
+    rst.write(sc_logic_1);
     wait();
-    rst.write(sc_logic(0));
+    rst.write(sc_logic_0);
 
-
+    // Test
+    int i = 0;
     while (i < NUM_TEST * 2) {
         op1_A = mem[i];
         op2_A = mem[i + 1];
@@ -126,16 +212,17 @@ void TestbenchModule::targeted_test() {
         op2_B = mem[i + 3];
 
         wait();
-        ready.write(sc_logic(1));
+        ready.write(sc_logic_1);
+        wait();
+        ready.write(sc_logic_0);
         op1.write(op1_A.c_str());
         op2.write(op2_A.c_str());
         wait();
         op1.write(op1_B.c_str());
         op2.write(op2_B.c_str());
         wait();
-        ready.write(sc_logic(0));
 
-        while (done.read() == sc_logic(0))
+        while (done.read() == sc_logic_0)
             wait();
 
         res_A = res.read().to_string();
@@ -143,9 +230,10 @@ void TestbenchModule::targeted_test() {
             float_to_binary(binary_to_float(op1_A) * binary_to_float(op2_A));
         std::cout << "Test " << 1 + i / 2 << " :"
                   << "\n    " << binary_to_float(op1_A) << " * "
-                  << binary_to_float(op2_A)
-                  << "\n    RES:     [" << res_A << "] == " << binary_to_float(res_A)
-                  << "\n    CORRECT: [" << res_correct_A << "] == " << binary_to_float(res_correct_A) << std::endl;
+                  << binary_to_float(op2_A) << "\n    RES:     [" << res_A
+                  << "] == " << binary_to_float(res_A) << "\n    CORRECT: ["
+                  << res_correct_A << "] == " << binary_to_float(res_correct_A)
+                  << std::endl;
 
         if (res_A == res_correct_A) {
             std::cout << "==> OK\n" << std::endl;
@@ -160,9 +248,10 @@ void TestbenchModule::targeted_test() {
             float_to_binary(binary_to_float(op1_B) * binary_to_float(op2_B));
         std::cout << "Test " << 2 + i / 2 << " :"
                   << "\n    " << binary_to_float(op1_B) << " * "
-                  << binary_to_float(op2_B)
-                  << "\n    RES:     [" << res_B << "] == " << binary_to_float(res_B)
-                  << "\n    CORRECT: [" << res_correct_B << "] == " << binary_to_float(res_correct_B) << std::endl;
+                  << binary_to_float(op2_B) << "\n    RES:     [" << res_B
+                  << "] == " << binary_to_float(res_B) << "\n    CORRECT: ["
+                  << res_correct_B << "] == " << binary_to_float(res_correct_B)
+                  << std::endl;
 
         if (res_B == res_correct_B) {
             std::cout << "==> OK\n" << std::endl;
@@ -174,14 +263,9 @@ void TestbenchModule::targeted_test() {
         i += 4;
     }
 
-
     std::cout << std::endl << "Tests: " << NUM_TEST << std::endl;
     std::cout << "Fails: " << fails << std::endl;
     std::cout << "Success: " << NUM_TEST - fails << std::endl;
-
-
-    std::cout << float_to_binary(std::numeric_limits<float>::min()) << std::endl;
-    std::cout << std::numeric_limits<float>::min() << std::endl;
 
     sc_stop();
 }
@@ -197,26 +281,27 @@ void TestbenchModule::rnd_test() {
         sqrt(std::numeric_limits<float>::min()),
         sqrt(std::numeric_limits<float>::max()));
 
-    // Variables
+    // Setttings
     const unsigned int TESTS_NUM = 100000;
     const bool PRINT_MULT = false;
     const float TIME_PERIOD = 2.0;  // sec
+
+    // Variables
     unsigned long time_counter = 0;
     unsigned int fails = 0;
-    float num1_1, num2_1, num1_2, num2_2;
+    float num1_A, num2_A, num1_B, num2_B;
     std::string res1, res2;
 
     // Init
     wait();
-    ready.write(sc_logic(0));
-    rst.write(sc_logic(0));
-
+    ready.write(sc_logic_0);
+    rst.write(sc_logic_0);
 
     // Reset
     wait();
-    rst.write(sc_logic(1));
+    rst.write(sc_logic_1);
     wait();
-    rst.write(sc_logic(0));
+    rst.write(sc_logic_0);
 
     clock_t start_time = std::clock();
     clock_t cicle_time = start_time;
@@ -224,50 +309,53 @@ void TestbenchModule::rnd_test() {
     for (size_t mult_counter = 0; mult_counter < (TESTS_NUM / 2);
          mult_counter++) {
         // Init
-        num1_1 = random_float(generator1);
-        num2_1 = random_float(generator1);
-        num1_2 = random_float(generator1);
-        num2_2 = random_float(generator1);
+        num1_A = random_float(generator1);
+        num2_A = random_float(generator1);
+        num1_B = random_float(generator1);
+        num2_B = random_float(generator1);
 
         // Exec
         wait();
-        ready.write(sc_logic(1));
-        op1.write(float_to_binary(num1_1).c_str());
-        op2.write(float_to_binary(num2_1).c_str());
+        ready.write(sc_logic_1);
         wait();
-        op1.write(float_to_binary(num1_2).c_str());
-        op2.write(float_to_binary(num2_2).c_str());
-        ready.write(sc_logic(0));
-        while (done.read() == sc_logic(0))
-            wait();
-        res1 = res.read().to_string();
+        ready.write(sc_logic_0);
+        op1.write(float_to_binary(num1_A).c_str());
+        op2.write(float_to_binary(num2_A).c_str());
         wait();
-        res2 = res.read().to_string();
+        op1.write(float_to_binary(num1_B).c_str());
+        op2.write(float_to_binary(num2_B).c_str());
+        wait();
 
-        if (res1 != float_to_binary(num1_1 * num2_1)) {
-            std::cout << "ERR: [" << num1_1 << " * " << num2_1 << "]"
+        while (done.read() == sc_logic_0)
+            wait();
+
+        res1 = res.read().to_string();
+        if (res1 != float_to_binary(num1_A * num2_A)) {
+            std::cout << "ERR: [" << num1_A << " * " << num2_A << "]"
                       << std::endl;
             std::cout << ">>> correct result: "
-                      << float_to_binary(num1_1 * num2_1) << std::endl;
+                      << float_to_binary(num1_A * num2_A) << std::endl;
             std::cout << ">>> current result: " << res1 << std::endl
                       << std::endl;
             fails++;
         } else if (PRINT_MULT) {
-            std::cout << "Mult1: " << num1_1 << " * " << num2_1 << " = "
+            std::cout << "Mult1: " << num1_A << " * " << num2_A << " = "
                       << binary_to_float(res1) << "[" << res1 << "]"
                       << std::endl;
         }
 
-        if (res2 != float_to_binary(num1_2 * num2_2)) {
-            std::cout << "ERR: [" << num1_2 << " * " << num2_2 << "]"
+        wait();
+        res2 = res.read().to_string();
+        if (res2 != float_to_binary(num1_B * num2_B)) {
+            std::cout << "ERR: [" << num1_B << " * " << num2_B << "]"
                       << std::endl;
             std::cout << ">>> correct result: "
-                      << float_to_binary(num1_2 * num2_2) << std::endl;
+                      << float_to_binary(num1_B * num2_B) << std::endl;
             std::cout << ">>> current result: " << res2 << std::endl
                       << std::endl;
             fails++;
         } else if (PRINT_MULT) {
-            std::cout << "Mult2: " << num1_2 << " * " << num2_2 << " = "
+            std::cout << "Mult2: " << num1_B << " * " << num2_B << " = "
                       << binary_to_float(res2) << "[" << res2 << "]"
                       << std::endl;
         }
@@ -287,98 +375,6 @@ void TestbenchModule::rnd_test() {
     std::cout << "Fails: " << fails << std::endl;
     std::cout << "Success: " << TESTS_NUM - fails << std::endl;
     std::cout << "Time elapsed: " << time_elapsed << std::endl;
-
-    sc_stop();
-}
-
-
-void TestbenchModule::full_test() {
-    // Variables
-    const float TIME_PERIOD = 60.0;  // sec
-    std::string max_num = "01111111100000000000000000000000";
-    unsigned long time_counter = 0;
-    unsigned long mult_counter = 0;
-    unsigned long fails = 0;
-    float num1_1, num2_1, num1_2, num2_2;
-    std::string bits1 = "00000000100000000000000000000000";
-    std::string bits2 = "00000000100000000000000000000000";
-    std::string res1, res2;
-
-    // Reset
-    wait();
-    wait();
-    ready.write(sc_logic(0));
-    rst.write(sc_logic(1));
-    wait();
-    rst.write(sc_logic(0));
-
-    clock_t start_time = std::clock();
-    clock_t cicle_time = start_time;
-
-    while (bits1 != max_num) {
-        while (bits2 != max_num) {
-            // Exec
-            wait();
-            ready.write(sc_logic(1));
-            op1.write(bits1.c_str());
-            op2.write(bits2.c_str());
-            num1_1 = binary_to_float(bits1);
-            num2_1 = binary_to_float(bits2);
-            bits2 = inc_binary_string(bits2);
-            wait();
-            op1.write(bits1.c_str());
-            op2.write(bits2.c_str());
-            num1_2 = binary_to_float(bits1);
-            num2_2 = binary_to_float(bits2);
-            bits2 = inc_binary_string(bits2);
-            ready.write(sc_logic(0));
-            while (done.read() == sc_logic(0))
-                wait();
-            res1 = res.read().to_string();
-            wait();
-            res2 = res.read().to_string();
-
-            if (res1 != float_to_binary(num1_1 * num2_1)) {
-                std::cout << "ERR: [" << num1_1 << " * " << num2_1 << "]"
-                          << std::endl;
-                std::cout << ">>> correct result: "
-                          << float_to_binary(num1_1 * num2_1) << std::endl;
-                std::cout << ">>> current result: " << res1 << std::endl
-                          << std::endl;
-                fails++;
-            }
-
-            if (res2 != float_to_binary(num1_2 * num2_2)) {
-                std::cout << "ERR: [" << num1_2 << " * " << num2_2 << "]"
-                          << std::endl;
-                std::cout << ">>> correct result: "
-                          << float_to_binary(num1_2 * num2_2) << std::endl;
-                std::cout << ">>> current result: " << res2 << std::endl
-                          << std::endl;
-                fails++;
-            }
-
-            mult_counter++;
-
-            if ((static_cast<float>(std::clock() - cicle_time) /
-                 CLOCKS_PER_SEC) > TIME_PERIOD) {
-                cicle_time = std::clock();
-                std::cout << ++time_counter << " of [" << TIME_PERIOD << " sec]"
-                          << " ==> " << mult_counter << " mult done."
-                          << std::endl;
-            }
-        }
-
-        bits1 = inc_binary_string(bits1);
-        bits2 = "00000000000000000000000000000000";
-    }
-    clock_t end_time = std::clock();
-    float time_elapsed =
-        static_cast<float>(end_time - start_time) / CLOCKS_PER_SEC;
-
-    std::cout << std::endl << "Tests: " << std::endl;
-    std::cout << "--Fails: " << fails << std::endl;
-    std::cout << "--Time elapsed: " << time_elapsed << std::endl;
 
     sc_stop();
 }

@@ -6,12 +6,10 @@ module testbench();
     reg[31:0] op1, op2;
     wire[31:0] res;
     wire done;
-    parameter PERIOD = 20;
-    parameter NUM_TEST = 18;
+    parameter PERIOD = 12;
+    parameter NUM_TEST = 20;
     reg [31:0] mem [0:NUM_TEST*3-1]; 
-    integer i, j;
-    
-    wire[2:0] STATE, NEXT_STATE;
+    integer i;
 
 
 double_multiplier dut(
@@ -21,9 +19,7 @@ double_multiplier dut(
     .op1 (op1),
     .op2 (op2),
     .res (res),
-    .done (done),
-    .STATE (STATE),
-    .NEXT_STATE (NEXT_STATE)
+    .done (done)
 );
 
 
@@ -45,8 +41,8 @@ initial begin
     
     // Test 4
     mem[9] = 32'b00111111101000000000000000000000; //1.25
-    mem[10] = 32'b01111111100000000000000000000110; //nan signal
-    mem[11] = 32'b01111111100000000000000000000110; //nan signal
+    mem[10] = 32'b11111111100000000000010000000110; //nan signal
+    mem[11] = 32'b11111111100000000000010000000110; //nan signal
     
     // Test 5
     mem[12] = 32'b00111111101000000000000000000000; //1.25
@@ -117,6 +113,16 @@ initial begin
     mem[51] = 32'b00111100000000000000000000000000; //0.0078125
     mem[52] = 32'b00000011100000000000000000000000; //7.52316384526e-37
     mem[53] = 32'b00000000010000000000000000000000; //5.87747175411e-39 (DENORM) 
+    
+    // Test 19
+    mem[54] = 32'b01000001010110000000000000000000; //13.5
+    mem[55] = 32'b00111111100000000000000000000000; //1.0
+    mem[56] = 32'b01000001010110000000000000000000; //13.5
+         
+    // Test 20
+    mem[57] = 32'b01000000000000000000000000000000; //2.0
+    mem[58] = 32'b01000000001000000000000000000000; //2.5
+    mem[59] = 32'b01000000101000000000000000000000; //5.0 
 end
 
 
@@ -128,8 +134,6 @@ begin
     clk <= 1'b1;
     ready <= 1'b0;
     rst <= 1'b0;
-    i <= 0;
-    j <= 0;
     
     // Wait for startup FPGA
     #(PERIOD*20);
@@ -143,6 +147,7 @@ begin
     // Test: Verilog vs VHDL
     $display("###############");
     $display("VERILOG vs VHDL");
+    i = 0;
     while (i < NUM_TEST * 3) begin  
         #(PERIOD/2);      
         #PERIOD;
@@ -162,36 +167,39 @@ begin
         if (res == mem[i+2])
             $display("TEST VHDL    %d OK", 1+i/3);
         else
-            $display("TEST VHDL    %d FAILED -> res= %b -> correct= %b", 1+i/3, res, mem[i+2]);        
+            $display("TEST VHDL    %d FAILED -> res= %b -> correct= %b", 1+i/3, res, mem[i+2]);    
+        #(PERIOD/2);    
         i = i + 3;
     end    
     
     // Test: Verilog and VHDL
     $display("###############");
     $display("VERILOG and VHDL");
-    while (j < NUM_TEST * 3) begin 
+    i = 0;
+    while (i < NUM_TEST * 3) begin 
         #(PERIOD/2);       
         #PERIOD;
         ready <= 1'b1;
         #PERIOD;
         ready <= 1'b0;
-        op1 <= mem[j];
-        op2 <= mem[j+1];
+        op1 <= mem[i];
+        op2 <= mem[i+1];
         #PERIOD;
-        op1 <= mem[j+3];
-        op2 <= mem[j+4];
+        op1 <= mem[i+3];
+        op2 <= mem[i+4];
         #PERIOD;
         @(posedge done) #(PERIOD/2);
-        if (res == mem[j+2])
-            $display("TEST VERILOG %d OK", 1+j/3);
+        if (res == mem[i+2])
+            $display("TEST VERILOG %d OK", 1+i/3);
         else
-            $display("TEST VERILOG %d FAILED -> res= %b", 1+j/3, res);
+            $display("TEST VERILOG %d FAILED -> res= %b", 1+i/3, res);
         #PERIOD;
-        if (res == mem[j+5])
-            $display("TEST VHDL    %d OK", 2+j/3);
+        if (res == mem[i+5])
+            $display("TEST VHDL    %d OK", 2+i/3);
         else
-            $display("TEST VHDL    %d FAILED -> res= %b", 2+j/3, res);        
-        j = j + 6;
+            $display("TEST VHDL    %d FAILED -> res= %b", 2+i/3, res);  
+        #(PERIOD/2);      
+        i = i + 6;
     end
 end
 

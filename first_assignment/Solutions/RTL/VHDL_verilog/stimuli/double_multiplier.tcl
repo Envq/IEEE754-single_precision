@@ -24,14 +24,14 @@ add_force ready 1;
 
 run $PERIOD;
 add_force ready 0;
+add_force op1 01000001010110000000000000000000; #13.5
+add_force op2 00111111100000000000000000000000; #1.0
+
+run $PERIOD;
 add_force op1 01000000000000000000000000000000; #2.0
 add_force op2 01000000001000000000000000000000; #2.5
 
-run $PERIOD;
-add_force op1 00111111101000000000000000000000; #1.25
-add_force op2 11111111100000000000000000000000; #-inf
 
-
-for { set a 0}  {$a < 7} {incr a} {
+for { set a 0}  {$a < 8} {incr a} {
     run $PERIOD;
 }
