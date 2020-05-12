@@ -4,8 +4,8 @@ module verilog_multiplier(clk, rst, ready, op1, op2, res, done);
     // Interface
     input wire clk, rst;
     input wire ready;
-    input wire [31:0] op1, op2;
-    output reg [31:0] res;
+    input wire[31:0] op1, op2;
+    output reg[31:0] res;
     output reg done;
     
     // states
@@ -13,15 +13,15 @@ module verilog_multiplier(clk, rst, ready, op1, op2, res, done);
     reg[4:0] STATE, NEXT_STATE;
     // op1 and op2 informations
     reg sign1, sign2;
-    reg[7:0] esp1, esp2;
+    reg[7:0] exp1, exp2;
     reg[23:0] mant1, mant2;
-    // res intermediate parts
-    reg[9:0] esp_tmp;
+    // intermediate parts
+    reg[9:0] exp_tmp;
     reg[47:0] mant_tmp;
 
 
 // FSM
-always @(STATE, ready, esp1, mant1, esp2, mant2, esp_tmp, mant_tmp)
+always @(STATE, ready, exp1, mant1, exp2, mant2, exp_tmp, mant_tmp)
 begin
     case (STATE)        
         ST_START: begin
@@ -32,29 +32,29 @@ begin
         end
         
         ST_INIT: begin        
-            if (((esp1 == 8'd0 && mant1[22:0] == 23'd0) && (esp2 == 8'd255 && mant2[22:0] == 23'd0)) || 
-               ((esp1 == 8'd255 && mant1[22:0] == 23'd0) && (esp2 == 8'd0 && mant2[22:0] == 23'd0)))
+            if (((exp1 == 8'd0 && mant1[22:0] == 23'd0) && (exp2 == 8'd255 && mant2[22:0] == 23'd0)) || 
+               ((exp1 == 8'd255 && mant1[22:0] == 23'd0) && (exp2 == 8'd0 && mant2[22:0] == 23'd0)))
                 NEXT_STATE <= ST_QNAN;
                 
-            else if (esp2 == 8'd255 && mant2[22:0] != 23'd0)
+            else if (exp2 == 8'd255 && mant2[22:0] != 23'd0)
                 NEXT_STATE <= ST_SNAN2;
                 
-            else if (esp1 == 8'd255 && mant1[22:0] != 23'd0)
+            else if (exp1 == 8'd255 && mant1[22:0] != 23'd0)
                 NEXT_STATE <= ST_SNAN1;
                 
-            else if ((esp1 == 8'd0 && mant1[22:0] == 23'd0) || (esp2 == 8'd0 && mant2[22:0] == 23'd0))
+            else if ((exp1 == 8'd0 && mant1[22:0] == 23'd0) || (exp2 == 8'd0 && mant2[22:0] == 23'd0))
                 NEXT_STATE <= ST_ZERO;
                 
-            else if ((esp1 == 8'd255 && mant1[22:0] == 23'd0) || (esp2 == 8'd255 && mant2[22:0] == 23'd0))
+            else if ((exp1 == 8'd255 && mant1[22:0] == 23'd0) || (exp2 == 8'd255 && mant2[22:0] == 23'd0))
                 NEXT_STATE <= ST_INF;
                 
-            else if ((esp1 == 8'd0 && mant1[22:0] != 23'd0) && (esp2 == 8'd0 && mant2[22:0] != 23'd0))
+            else if ((exp1 == 8'd0 && mant1[22:0] != 23'd0) && (exp2 == 8'd0 && mant2[22:0] != 23'd0))
                 NEXT_STATE <= ST_ADJ3;
                 
-            else if (esp2 == 8'd0 && mant2[22:0] != 23'd0)
+            else if (exp2 == 8'd0 && mant2[22:0] != 23'd0)
                 NEXT_STATE <= ST_ADJ2;
                 
-            else if (esp1 == 8'd0 && mant1[22:0] != 23'd0)
+            else if (exp1 == 8'd0 && mant1[22:0] != 23'd0)
                 NEXT_STATE <= ST_ADJ1;
             
             else
@@ -99,9 +99,6 @@ begin
                 
             else if (mant_tmp[46] == 1'b1)                          // mant_tmp == 01.x..
                 NEXT_STATE <= ST_CHECK;
-                
-            else if (mant_tmp[46] == 1'b1)                          // mant_tmp == 01.x..
-                NEXT_STATE <= ST_CHECK;
                         
             else                                                    // mant_tmp == 00.x.. && mant_tmp != 0
                 NEXT_STATE <= ST_SHIFTL;                            // num or subnorm or underflow
@@ -116,7 +113,7 @@ begin
         end
         
         ST_NORM: begin                
-            if ((esp_tmp[9] == 10'd1) || (esp_tmp == 10'd0))        // esp_tmp <= 0
+            if ((exp_tmp[9] == 10'd1) || (exp_tmp == 10'd0))        // exp_tmp <= 0
                 NEXT_STATE <= ST_CHECK;                             // case underflow or subnorm
                         
             else if (mant_tmp[46] == 10'd1)
@@ -127,22 +124,22 @@ begin
         end
         
         ST_CHECK: begin           
-            if (esp_tmp[9:8] == 2'b01)                                              // esp_tmp == 01..
+            if (exp_tmp[9:8] == 2'b01)                                              // exp_tmp == 01..
                 NEXT_STATE <= ST_INF;                                               // overflow
                 
-            else if (esp_tmp == 10'd0)                                              // esp_tmp == 0  
+            else if (exp_tmp == 10'd0)                                              // exp_tmp == 0  
                 NEXT_STATE <= ST_SUBNORM;                                           // subnorm
                 
-            else if ((esp_tmp[9:8] == 2'b00) && (mant_tmp[22] == 1'b0))             // esp_tmp == 00..  && esp_tmp != 0
+            else if ((exp_tmp[9:8] == 2'b00) && (mant_tmp[22] == 1'b0))             // exp_tmp == 00..  && exp_tmp != 0
                 NEXT_STATE <= ST_WRITE;                                             // ok
                 
-            else if ((esp_tmp[9:8] == 2'b00) && (mant_tmp[22] == 1'b1))             // esp_tmp == 00..  && esp_tmp != 0
+            else if ((exp_tmp[9:8] == 2'b00) && (mant_tmp[22] == 1'b1))             // exp_tmp == 00..  && exp_tmp != 0
                 NEXT_STATE <= ST_ROUND;                                             // need to round   
                 
-            else if (((esp_tmp + 10'd48) < 10'b1000000000))                         // esp_tmp == 1x.. && esp_tmp+48 >= 0
+            else if (((exp_tmp + 10'd48) < 10'b1000000000))                         // exp_tmp == 1x.. && exp_tmp+48 >= 0
                 NEXT_STATE <= ST_SHIFTR;                                            // create subnorm if possible
         
-            else                                                                    // esp_tmp == 1x.. && esp_tmp+48 < 0
+            else                                                                    // exp_tmp == 1x.. && exp_tmp+48 < 0
                 NEXT_STATE <= ST_ZERO;                                              // underflow
         end
         
@@ -181,15 +178,15 @@ begin
         done <= 1'b0;
         res <= 32'd0;
         
-        esp_tmp <= 24'd0;            
+        exp_tmp <= 24'd0;            
         mant_tmp <= 48'd0;  
                        
         sign1 <= 1'b0;             
-        esp1 <= 10'd0;
+        exp1 <= 10'd0;
         mant1 <= 24'd0; 
                
         sign2 <= 1'b0;             
-        esp2 <= 10'd0;
+        exp2 <= 10'd0;
         mant2 <= 24'd0;
 end 
 else begin
@@ -198,15 +195,15 @@ else begin
             // Reset register 
             ST_START: begin 
                 done <= 1'b0;                
-                esp_tmp <= 24'd0;
+                exp_tmp <= 24'd0;
                 mant_tmp <= 48'd0;
                           
                 sign1 <= 1'b0;             
-                esp1 <= 10'd0;
+                exp1 <= 10'd0;
                 mant1 <= 24'd0;
                 
                 sign2 <= 1'b0;             
-                esp2 <= 10'd0;
+                exp2 <= 10'd0;
                 mant2 <= 24'd0;
             end       
             
@@ -214,12 +211,14 @@ else begin
             ST_INIT: begin
                 // Get informations of op1
                 sign1 <= op1[31];             
-                esp1 <= op1[30:23];
-                mant1 <= {1'b1, op1[22:0]};
+                exp1 <= op1[30:23];
+                mant1[23] <= 1'b1;
+                mant1[22:0] <= op1[22:0];
                 // Get informations of op2
                 sign2 <= op2[31];             
-                esp2 <= op2[30:23];
-                mant2 <= {1'b1, op2[22:0]};
+                exp2 <= op2[30:23];
+                mant2[23] <= 1'b1;
+                mant2[22:0] <= op2[22:0];
             end
             
             // Quiet NAN from 0*inf
@@ -227,21 +226,23 @@ else begin
                 res[31] <= 1'b1;
                 res[30:23] <= 8'd255;
                 res[22] <= 1'b1;
-                res[21:0] <= 22'd0;
+                res[21:0] <= 8'd0;
             end
             
             // Signal NAN from op2
             ST_SNAN2: begin
                 res[31] <= sign2;
-                res[30:23] <= esp2;
-                res[22:0] <= mant2[22:0];
+                res[30:23] <= 8'd255;
+                res[22] <= 1'b1;
+                res[21:0] <= mant2[21:0];
             end
             
             // Signal NAN from op1
             ST_SNAN1: begin
                 res[31] <= sign1;
-                res[30:23] <= esp1;
-                res[22:0] <= mant1[22:0];
+                res[30:23] <= 8'd255;
+                res[22] <= 1'b1;
+                res[21:0] <= mant1[21:0];
             end
             
             // ZERO
@@ -261,39 +262,39 @@ else begin
             // both input are SUBNORM
             ST_ADJ3: begin
                 mant1[23] = 1'b0;
-                esp1 = 10'd1;   //(-bias + 1)+127  because: from (-bias+1) to (esp-bias)
+                exp1 = 10'd1;   //(-bias + 1)+127  because: from (-bias+1) to (exp-bias)
                 mant2[23] = 1'b0;
-                esp2 = 10'd1;   //(-bias + 1)+127  because: from (-bias+1) to (esp-bias)
+                exp2 = 10'd1;   //(-bias + 1)+127  because: from (-bias+1) to (exp-bias)
             end
             
             // op2 is SUBNORM
             ST_ADJ2: begin
                 mant2[23] = 1'b0;
-                esp2 = 10'd1;   //(-bias + 1)+127  because: from (-bias+1) to (esp-bias)
+                exp2 = 10'd1;   //(-bias + 1)+127  because: from (-bias+1) to (exp-bias)
             end
             
             // op1 is SUBNORM
             ST_ADJ1: begin
                 mant1[23] = 1'b0;
-                esp1 = 10'd1;   //(-bias + 1)+127
+                exp1 = 10'd1;   //(-bias + 1)+127
             end
             
-            // Process esp and mant parts
+            // Process exp and mant parts
             ST_ELAB: begin
-                esp_tmp <= esp1 + esp2 - 10'd127;
+                exp_tmp <= exp1 + exp2 - 10'd127;
                 mant_tmp <= mant1 * mant2;
             end
             
             // Norm (right) from 1x. 
             ST_SHIFTR: begin
                 mant_tmp <= mant_tmp >> 1'b1;
-                esp_tmp <= esp_tmp + 10'd1;
+                exp_tmp <= exp_tmp + 10'd1;
             end
             
             // Norm (left) from 00.
             ST_SHIFTL: begin
                 mant_tmp <= mant_tmp << 1'b1;
-                esp_tmp <= esp_tmp - 10'd1;
+                exp_tmp <= exp_tmp - 10'd1;
             end
             
             // Check if norm
@@ -308,7 +309,7 @@ else begin
             
             // Subnorm
             ST_SUBNORM: begin
-                mant_tmp <= mant_tmp >> 1'd1; //from (esp-bias) to (-bias+1) implicit
+                mant_tmp <= mant_tmp >> 1'd1; //from (exp-bias) to (-bias+1) implicit
             end
             
             // Rounding
@@ -319,7 +320,7 @@ else begin
             // Write res
             ST_WRITE: begin
                 res[31] = sign1 ^ sign2;
-                res[30:23] = esp_tmp[7:0];
+                res[30:23] = exp_tmp[7:0];
                 res[22:0] = mant_tmp[45:23];
             end
             

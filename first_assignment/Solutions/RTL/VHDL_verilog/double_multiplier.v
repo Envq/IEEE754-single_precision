@@ -26,7 +26,7 @@ verilog_multiplier mul1 (
     .done (done1)
 );
 
-verilog_multiplier mul2 (
+vhdl_multiplier mul2 (
     .clk (clk),
     .rst (rst),
     .ready (ready2),

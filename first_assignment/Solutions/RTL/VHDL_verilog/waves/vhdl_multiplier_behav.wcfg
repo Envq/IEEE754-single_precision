@@ -12,15 +12,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="882fs"></ZoomStartTime>
-      <ZoomEndTime time="3648883fs"></ZoomEndTime>
-      <Cursor1Time time="2600000fs"></Cursor1Time>
+      <ZoomStartTime time="0fs"></ZoomStartTime>
+      <ZoomEndTime time="1339001fs"></ZoomEndTime>
+      <Cursor1Time time="0fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="195"></NameColumnWidth>
-      <ValueColumnWidth column_width="132"></ValueColumnWidth>
+      <ValueColumnWidth column_width="127"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="14" />
+   <WVObjectSize size="20" />
    <wvobject type="logic" fp_name="/vhdl_multiplier/clk">
       <obj_property name="ElementShortName">clk</obj_property>
       <obj_property name="ObjectShortName">clk</obj_property>
@@ -83,13 +83,9 @@
       <obj_property name="ElementShortName">op2[31:0]</obj_property>
       <obj_property name="ObjectShortName">op2[31:0]</obj_property>
       <obj_property name="Radix">BINARYRADIX</obj_property>
-      <obj_property name="CustomSignalColor">#808000</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/vhdl_multiplier/res">
-      <obj_property name="ElementShortName">res[31:0]</obj_property>
-      <obj_property name="ObjectShortName">res[31:0]</obj_property>
-      <obj_property name="Radix">BINARYRADIX</obj_property>
+      <obj_property name="radix_realType">FLOATINGPOINTRADIX</obj_property>
+      <obj_property name="radix_fractionWidth">24</obj_property>
+      <obj_property name="radix_otherWidth">8</obj_property>
       <obj_property name="CustomSignalColor">#808000</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
@@ -97,15 +93,64 @@
       <obj_property name="ElementShortName">op1[31:0]</obj_property>
       <obj_property name="ObjectShortName">op1[31:0]</obj_property>
       <obj_property name="Radix">BINARYRADIX</obj_property>
+      <obj_property name="radix_realType">FLOATINGPOINTRADIX</obj_property>
+      <obj_property name="radix_fractionWidth">24</obj_property>
+      <obj_property name="radix_otherWidth">8</obj_property>
       <obj_property name="CustomSignalColor">#808000</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="other" fp_name="/vhdl_multiplier/res_type">
-      <obj_property name="ElementShortName">res_type</obj_property>
-      <obj_property name="ObjectShortName">res_type</obj_property>
+   <wvobject type="array" fp_name="/vhdl_multiplier/res">
+      <obj_property name="ElementShortName">res[31:0]</obj_property>
+      <obj_property name="ObjectShortName">res[31:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+      <obj_property name="radix_realType">FLOATINGPOINTRADIX</obj_property>
+      <obj_property name="radix_fractionWidth">24</obj_property>
+      <obj_property name="radix_otherWidth">8</obj_property>
+      <obj_property name="CustomSignalColor">#808000</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
-   <wvobject type="logic" fp_name="/vhdl_multiplier/norm_again">
-      <obj_property name="ElementShortName">norm_again</obj_property>
-      <obj_property name="ObjectShortName">norm_again</obj_property>
+   <wvobject type="logic" fp_name="/vhdl_multiplier/sign1">
+      <obj_property name="ElementShortName">sign1</obj_property>
+      <obj_property name="ObjectShortName">sign1</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/vhdl_multiplier/exp1">
+      <obj_property name="ElementShortName">exp1[7:0]</obj_property>
+      <obj_property name="ObjectShortName">exp1[7:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/vhdl_multiplier/mant1">
+      <obj_property name="ElementShortName">mant1[23:0]</obj_property>
+      <obj_property name="ObjectShortName">mant1[23:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/vhdl_multiplier/sign2">
+      <obj_property name="ElementShortName">sign2</obj_property>
+      <obj_property name="ObjectShortName">sign2</obj_property>
+      <obj_property name="CustomSignalColor">#E0FFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/vhdl_multiplier/exp2">
+      <obj_property name="ElementShortName">exp2[7:0]</obj_property>
+      <obj_property name="ObjectShortName">exp2[7:0]</obj_property>
+      <obj_property name="CustomSignalColor">#E0FFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/vhdl_multiplier/mant2">
+      <obj_property name="ElementShortName">mant2[23:0]</obj_property>
+      <obj_property name="ObjectShortName">mant2[23:0]</obj_property>
+      <obj_property name="CustomSignalColor">#E0FFFF</obj_property>
+      <obj_property name="UseCustomSignalColor">true</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/vhdl_multiplier/exp_tmp">
+      <obj_property name="ElementShortName">exp_tmp[9:0]</obj_property>
+      <obj_property name="ObjectShortName">exp_tmp[9:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/vhdl_multiplier/mant_tmp">
+      <obj_property name="ElementShortName">mant_tmp[47:0]</obj_property>
+      <obj_property name="ObjectShortName">mant_tmp[47:0]</obj_property>
+      <obj_property name="Radix">BINARYRADIX</obj_property>
    </wvobject>
 </wave_config>

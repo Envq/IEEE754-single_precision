@@ -40,9 +40,9 @@ class MultiplierModule : public sc_core::sc_module {
     // Signals
     sc_signal<int> STATE, NEXT_STATE;
     sc_signal<sc_logic> sign1, sign2;
-    sc_signal<sc_lv<8>> esp1, esp2;
+    sc_signal<sc_lv<8>> exp1, exp2;
     sc_signal<sc_lv<24>> mant1, mant2;
-    sc_signal<sc_lv<10>> esp_tmp;
+    sc_signal<sc_lv<10>> exp_tmp;
     sc_signal<sc_lv<48>> mant_tmp;
 
     SC_HAS_PROCESS(MultiplierModule);

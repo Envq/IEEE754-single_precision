@@ -54,11 +54,11 @@ int sc_main(int argc, char *argv[]) {
     sc_trace(fp, dm.mult1->NEXT_STATE, "mult1.NEXT_STATE(mult1)");
     sc_trace(fp, dm.mult1->sign1, "mult1.sign1(mult1)");
     sc_trace(fp, dm.mult1->sign2, "mult1.sign2(mult1)");
-    sc_trace(fp, dm.mult1->esp1, "mult1.esp1(mult1)");
-    sc_trace(fp, dm.mult1->esp2, "mult1.esp2(mult1)");
+    sc_trace(fp, dm.mult1->exp1, "mult1.exp1(mult1)");
+    sc_trace(fp, dm.mult1->exp2, "mult1.exp2(mult1)");
     sc_trace(fp, dm.mult1->mant1, "mult1.mant1(mult1)");
     sc_trace(fp, dm.mult1->mant2, "mult1.mant2(mult1)");
-    sc_trace(fp, dm.mult1->esp_tmp, "mult1.esp_tmp(mult1)");
+    sc_trace(fp, dm.mult1->exp_tmp, "mult1.exp_tmp(mult1)");
     sc_trace(fp, dm.mult1->mant_tmp, "mult1.mant_tmp(mult1)");
 
     // internal segnal of mult2:
@@ -66,11 +66,11 @@ int sc_main(int argc, char *argv[]) {
     sc_trace(fp, dm.mult2->NEXT_STATE, "mult2.NEXT_STATE(mult2)");
     sc_trace(fp, dm.mult2->sign1, "mult2.sign1(mult2)");
     sc_trace(fp, dm.mult2->sign2, "mult2.sign2(mult2)");
-    sc_trace(fp, dm.mult2->esp1, "mult2.esp1(mult2)");
-    sc_trace(fp, dm.mult2->esp2, "mult2.esp2(mult2)");
+    sc_trace(fp, dm.mult2->exp1, "mult2.exp1(mult2)");
+    sc_trace(fp, dm.mult2->exp2, "mult2.exp2(mult2)");
     sc_trace(fp, dm.mult2->mant1, "mult2.mant1(mult2)");
     sc_trace(fp, dm.mult2->mant2, "mult2.mant2(mult2)");
-    sc_trace(fp, dm.mult2->esp_tmp, "mult2.esp_tmp(mult2)");
+    sc_trace(fp, dm.mult2->exp_tmp, "mult2.exp_tmp(mult2)");
     sc_trace(fp, dm.mult2->mant_tmp, "mult2.mant_tmp(mult2)");
 
     sc_start();

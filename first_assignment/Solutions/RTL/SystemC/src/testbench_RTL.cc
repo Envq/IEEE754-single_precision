@@ -108,8 +108,8 @@ const std::string mem[] = {
 
 TestbenchModule::TestbenchModule(sc_module_name name) {
     // SC_THREAD(target_test);
-    // SC_THREAD(full_target_test);
-    SC_THREAD(rnd_test);
+    SC_THREAD(full_target_test);
+    // SC_THREAD(rnd_test);
     sensitive << clk.pos();
 
     SC_THREAD(clk_gen);

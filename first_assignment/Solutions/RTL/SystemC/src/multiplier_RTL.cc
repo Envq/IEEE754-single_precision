@@ -6,7 +6,7 @@ MultiplierModule::MultiplierModule(const sc_module_name &module_name)
       op1("op1"), op2("op2"), done("done"), res("res") {
 
     SC_METHOD(fsm);
-    sensitive << STATE << ready << esp1 << mant1 << esp2 << mant2 << esp_tmp
+    sensitive << STATE << ready << exp1 << mant1 << exp2 << mant2 << exp_tmp
               << mant_tmp;              
     SC_METHOD(datapath);
     sensitive << clk.pos() << rst.pos();
@@ -25,34 +25,34 @@ void MultiplierModule::fsm() {
         break;
 
     case ST_INIT:
-        if (((esp1.read() == 0 && mant1.read().range(22, 0) == 0) &&
-             (esp2.read() == 255 && mant2.read().range(22, 0) == 0)) ||
-            ((esp1.read() == 255 && mant1.read().range(22, 0) == 0) &&
-             (esp2.read() == 0 && mant2.read().range(22, 0) == 0)))
+        if (((exp1.read() == 0 && mant1.read().range(22, 0) == 0) &&
+             (exp2.read() == 255 && mant2.read().range(22, 0) == 0)) ||
+            ((exp1.read() == 255 && mant1.read().range(22, 0) == 0) &&
+             (exp2.read() == 0 && mant2.read().range(22, 0) == 0)))
             NEXT_STATE = ST_QNAN;
 
-        else if (esp2.read() == 255 && mant2.read().range(22, 0) != 0)
+        else if (exp2.read() == 255 && mant2.read().range(22, 0) != 0)
             NEXT_STATE = ST_SNAN2;
 
-        else if (esp1.read() == 255 && mant1.read().range(22, 0) != 0)
+        else if (exp1.read() == 255 && mant1.read().range(22, 0) != 0)
             NEXT_STATE = ST_SNAN1;
 
-        else if ((esp1.read() == 0 && mant1.read().range(22, 0) == 0) ||
-                 (esp2.read() == 0 && mant2.read().range(22, 0) == 0))
+        else if ((exp1.read() == 0 && mant1.read().range(22, 0) == 0) ||
+                 (exp2.read() == 0 && mant2.read().range(22, 0) == 0))
             NEXT_STATE = ST_ZERO;
 
-        else if ((esp1.read() == 255 && mant1.read().range(22, 0) == 0) ||
-                 (esp2.read() == 255 && mant2.read().range(22, 0) == 0))
+        else if ((exp1.read() == 255 && mant1.read().range(22, 0) == 0) ||
+                 (exp2.read() == 255 && mant2.read().range(22, 0) == 0))
             NEXT_STATE = ST_INF;
 
-        else if ((esp1.read() == 0 && mant1.read().range(22, 0) != 0) &&
-                 (esp2.read() == 0 && mant2.read().range(22, 0) != 0))
+        else if ((exp1.read() == 0 && mant1.read().range(22, 0) != 0) &&
+                 (exp2.read() == 0 && mant2.read().range(22, 0) != 0))
             NEXT_STATE = ST_ADJ3;
 
-        else if (esp2.read() == 0 && mant2.read().range(22, 0) != 0)
+        else if (exp2.read() == 0 && mant2.read().range(22, 0) != 0)
             NEXT_STATE = ST_ADJ2;
 
-        else if (esp1.read() == 0 && mant1.read().range(22, 0) != 0)
+        else if (exp1.read() == 0 && mant1.read().range(22, 0) != 0)
             NEXT_STATE = ST_ADJ1;
 
         else
@@ -114,7 +114,7 @@ void MultiplierModule::fsm() {
         break;
 
     case ST_NORM:
-        if ((esp_tmp.read()[9] == 1) || (esp_tmp.read() == 0))
+        if ((exp_tmp.read()[9] == 1) || (exp_tmp.read() == 0))
             NEXT_STATE = ST_CHECK;
 
         else if (mant_tmp.read()[46] == 1)
@@ -125,21 +125,21 @@ void MultiplierModule::fsm() {
         break;
 
     case ST_CHECK:
-        if (esp_tmp.read().range(9, 8) == "01")
+        if (exp_tmp.read().range(9, 8) == "01")
             NEXT_STATE = ST_INF;
 
-        else if (esp_tmp.read() == 0)
+        else if (exp_tmp.read() == 0)
             NEXT_STATE = ST_SUBNORM;
 
-        else if ((esp_tmp.read().range(9, 8) == "00") &&
+        else if ((exp_tmp.read().range(9, 8) == "00") &&
                  (mant_tmp.read()[22] == 0))
             NEXT_STATE = ST_WRITE;
 
-        else if ((esp_tmp.read().range(9, 8) == "00") &&
+        else if ((exp_tmp.read().range(9, 8) == "00") &&
                  (mant_tmp.read()[22] == 1))
             NEXT_STATE = ST_ROUND;
 
-        else if (((esp_tmp.read().to_int() + 48) >= 0))
+        else if (((exp_tmp.read().to_int() + 48) >= 0))
             NEXT_STATE = ST_SHIFTR;
 
         else
@@ -177,15 +177,15 @@ void MultiplierModule::datapath() {
         STATE = ST_START;
         done.write(sc_logic_0);
         res.write(0);
-        esp_tmp.write(0);
+        exp_tmp.write(0);
         mant_tmp.write(0);
 
         sign1.write(sc_logic_0);
-        esp1.write(0);
+        exp1.write(0);
         mant1.write(0);
 
         sign2.write(sc_logic_0);
-        esp2.write(0);
+        exp2.write(0);
         mant2.write(0);
 
     } else if (clk.read() == 1) {
@@ -194,25 +194,25 @@ void MultiplierModule::datapath() {
         switch (NEXT_STATE) {
         case ST_START:
             done.write(sc_logic_0);
-            esp_tmp.write(0);
+            exp_tmp.write(0);
             mant_tmp.write(0);
 
             sign1.write(sc_logic_0);
-            esp1.write(0);
+            exp1.write(0);
             mant1.write(0);
 
             sign2.write(sc_logic_0);
-            esp2.write(0);
+            exp2.write(0);
             mant2.write(0);
             break;
 
         case ST_INIT:
             sign1.write(op1.read()[31]);
-            esp1.write((sc_lv<31>(0), op1.read().range(30, 23)));
+            exp1.write((sc_lv<31>(0), op1.read().range(30, 23)));
             mant1.write((sc_logic_1, op1.read().range(22, 0)));
 
             sign2.write(op2.read()[31]);
-            esp2.write((sc_lv<31>(0), op2.read().range(30, 23)));
+            exp2.write((sc_lv<31>(0), op2.read().range(30, 23)));
             mant2.write((sc_logic_1, op2.read().range(22, 0)));
             break;
 
@@ -221,11 +221,11 @@ void MultiplierModule::datapath() {
             break;
 
         case ST_SNAN2:
-            res.write((sign2.read(), esp2.read(), sc_logic_1, mant2.read().range(21,0)));
+            res.write((sign2.read(), sc_lv<9>(511), mant2.read().range(21,0)));
             break;
 
         case ST_SNAN1:
-            res.write((sign1.read(), esp1.read(), sc_logic_1, mant1.read().range(21,0)));
+            res.write((sign1.read(), sc_lv<9>(511), mant1.read().range(21,0)));
             break;
 
         case ST_ZERO:            
@@ -238,34 +238,34 @@ void MultiplierModule::datapath() {
 
         case ST_ADJ3:
             mant1.write((sc_logic_0, mant2.read().range(22, 0)));
-            esp1.write("00000001");
+            exp1.write("00000001");
             mant2.write((sc_logic_0, mant2.read().range(22, 0)));
-            esp2.write("00000001");
+            exp2.write("00000001");
             break;
 
         case ST_ADJ2:
             mant2.write((sc_logic_0, mant2.read().range(22, 0)));
-            esp2.write("00000001");
+            exp2.write("00000001");
             break;
 
         case ST_ADJ1:
             mant1.write((sc_logic_0, mant2.read().range(22, 0)));
-            esp1.write("00000001");
+            exp1.write("00000001");
             break;
 
         case ST_ELAB:
-            esp_tmp.write(esp1.read().to_uint() + esp2.read().to_uint() - 127);
+            exp_tmp.write(exp1.read().to_uint() + exp2.read().to_uint() - 127);
             mant_tmp.write(mant1.read().to_uint64() * mant2.read().to_uint64());
             break;
 
         case ST_SHIFTR:
             mant_tmp.write(mant_tmp.read() >> 1);
-            esp_tmp.write(esp_tmp.read().to_int() + 1);
+            exp_tmp.write(exp_tmp.read().to_int() + 1);
             break;
 
         case ST_SHIFTL:
             mant_tmp.write(mant_tmp.read() << 1);
-            esp_tmp.write(esp_tmp.read().to_int() - 1);
+            exp_tmp.write(exp_tmp.read().to_int() - 1);
             break;
 
         case ST_NORM:
@@ -286,7 +286,7 @@ void MultiplierModule::datapath() {
             break;
 
         case ST_WRITE:
-            res.write(((sign1.read() xor sign2.read()), esp_tmp.read().range(7, 0),
+            res.write(((sign1.read() xor sign2.read()), exp_tmp.read().range(7, 0),
                        mant_tmp.read().range(45, 23)));
             break;
 
