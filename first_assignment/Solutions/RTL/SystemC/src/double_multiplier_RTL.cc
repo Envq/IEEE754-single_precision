@@ -96,13 +96,13 @@ void DoubleMultiplierModule::fsm() {
 void DoubleMultiplierModule::datapath() {
     if (rst.read() == 1) {
         STATE = ST_START;
-
-    } else if (clk.read() == 1) {
-        STATE = NEXT_STATE;
         done.write(sc_logic_0);
         res.write(0);
         ready1.write(sc_logic_0);
         ready2.write(sc_logic_0);
+
+    } else if (clk.read() == 1) {
+        STATE = NEXT_STATE;
 
         switch (NEXT_STATE) {
         case ST_START:

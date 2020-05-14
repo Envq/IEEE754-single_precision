@@ -22,9 +22,9 @@
 
 
 \section{Introduzione}
-Il progetto consiste nella realizzazione in hardware di un sistema, che attraverso il protocollo di handshake, utilizza due moltiplicatori in virgola mobile a precisione singola, secondo lo standard IEEE754, per eseguire due moltiplicazioni in parello. Esso deve essere sintetizzabile sulla scheda FPGA ``xc7z020clg400-1'' che possedendo solo 125 porte I/O, obbliga a serializzare input e output.
-\\Il sistema è stato realizzato in diversi linguaggi al fine di vedere le differenze tra i vari linguaggi utilizzabili per descrivere hardware e capirne i pro e contro. I risultati sono stati poi analizzati e confrontati con quelli ottenuti dall'high level syntesis del codice in c++.
-\\L'approccio utilizzato è bottom-up, cioè si è partiti dal moltiplicatore per poi arrivare al top level. L'implementazione è preceduta dall'analisi dei requisiti e dalla stesura della EFSM, cioè la parte più importante in quanto è dove viene tradotto l'algoritmo, descritto il flusso e scelti i vari segnali e registri necessari. Una buona EFSM permette di evitare di scrivere varie righe di codice per poi accorgersi in simulazione che qualcosa non funziona.
+Il progetto consiste nella realizzazione in hardware di un sistema che utilizzi due moltiplicatori in virgola mobile a precisione singola, secondo lo standard IEEE754, per eseguire due moltiplicazioni in parello. Esso deve essere sintetizzabile sulla FPGA ``xc7z020clg400-1'' che possedendo solo 125 porte I/O, obbliga a serializzare input e output.
+\\Il sistema è stato realizzato in diversi linguaggi al fine di scoprire le differenze tra i vari linguaggi utilizzabili per la descrizione del hardware e capirne i pro e contro. I risultati sono stati poi analizzati e confrontati con quelli ottenuti dall'high level syntesis del codice in c++.
+\\L'approccio utilizzato è bottom-up, cioè si è partiti dal moltiplicatore per poi arrivare al top level. L'implementazione è preceduta dall'analisi dei requisiti e dalla stesura della EFSM, cioè la parte più importante in quanto è dove viene tradotto l'algoritmo, descritto il flusso e scelti i vari segnali intermedi necessari. Una buona EFSM permette di evitare di scrivere varie righe di codice per poi accorgersi in simulazione che qualcosa non funziona.
 \\Ci si aspetta che la versione RTL sia significativamente più performante di quella con l'high level syntesis e che il sistema occupi una minima parte della FPGA in quanto molto piccolo.
 
 
@@ -65,7 +65,7 @@ Per la \textbf{decodifica} del numero binario normalizzato: $$(-1)^{sign}\cdot 2
 
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/codifica.png}
+    \includegraphics[width=0.9\linewidth]{figures/codifica}
     \caption{IEEE 754 casi possibili. (Steve Hollasch, Online \cite{IEEE754Online})}
     \label{fig:IEEE_ENCODING}
 \end{figure}
@@ -118,7 +118,7 @@ Per far fronte al limite delle porte logiche è stato necessario serializzare in
 \\I segnali intermedi sono stati omessi da questa figura, ma vengono descritti nelle sezioni successive.
 \begin{figure}[!htb]
     \centering
-    \includegraphics[width=0.8\linewidth]{figures/architettura.jpg}
+    \includegraphics[width=0.8\linewidth]{figures/architettura}
     \caption{Architettura RTL}
     \label{fig:Architettura}
 \end{figure}
@@ -248,22 +248,96 @@ In figura \ref{fig:SIM_TB_TIM} si può vedere un pezzo della ``post-implementati
 
 
 \subsection{Simulazione con testbench in SystemC}
-Grazie al c++ è stato possibile realizzare dei testbench più accurati.
-\\Sono stati provati gli stessi valori del testbench in Verilog i quali però sono stati confrontati con il risultato convertito in binario della moltiplicazione degli operandi converti in float [Figura \ref{fig:SIM_SC_TARGET}].
-\\Poi è stato fatto un testbench più sofisticato che genera un numero di valori arbitrario e confronta i risultati ottenuti dal dispositivo e dalla moltiplicazione in c++ [Figura \ref{fig:SIM_SC_RND}].
-\\SystemC è stato particolarmente comodo per testare il sistema grazie alla possibilità di guardare i valori di tutti i segnali evitando quindi di modificare le interfaccie o controllare i componenti separatamente come con gli script TCL.
+In questo tesbench sono state messe a disposizione tre tipi di test differenti.
+\\Il primo, mostrato in figura \ref{fig:SIM_SC_TARGET} ha lo scopo di testare semplicemente due input. Questo è stato utilizzato per ricavare il risultato in bit da utilizzare per il testbench in Verilog e analogamente allo script TCL, permette di controllare che il sistema percorra gli stati corretti.
+\\Il secondo, mostrato in figura \ref{fig:SIM_SC_FULL} è analogo al testbench in Verilog e testa tutti gli input selezionati appositamente e disposti in un array. Ha il compito di testare la correttezza del sistema con gli input ritenuti più significativi.
+\\Il terzo, mostrato in figura \ref{fig:SIM_SC_RND} ha lo scopo di dare una maggiore sicurezza sulla correttezza del sistema e in particolare trovare operandi che causano moltiplicazioni errate, dovute a casi non tenuti in considerazione durante la progettazione della EFSM. Questo test ha portato più volte ad una modifica del EFSM, in particolare a causa dei numeri subnormali (come numeri normalizzati che creano subnormali, subnormali che creano underflow, ecc).
+\\Come mostrato in figura \ref{fig:SIM_SC_ERROR} il test fallisce in alcuni casi a causa del metodo di arrotondamento utilizzato. Essendoci però più metodi di arrotondamento usabili nello standard, è stato deciso di lasciare quello utilizzato in quanto più semplice.
 
 
 \subsection{Sintesi}
+La sintesi è stata fatta per la scheda Pynq xc7z020clg400-1.
+\\In figura \ref{fig:UTIL_SYNT_VERILOG} e \ref{fig:UTIL_IMPL_VERILOG} si possono vedere i valori di utilizzo delle risorse post-syntesis e post-implementation del \textit{verilog\_multiplier}. L'unica differenza fra le due sono le 4 LTU in meno dopo l'implementazione. In figura \ref{fig:TIMING_VERILOG} si possono vedere i risultati di timing.
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/util_synt_verilog}
+    \caption{Valori di utilizzo risorse post syntesis del \textit{verilog\_multiplier}}
+    \label{fig:UTIL_SYNT_VERILOG}
+\end{figure}
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/util_impl_verilog}
+    \caption{valori di utilizzo risorse post implementation del \textit{verilog\_multiplier}}
+    \label{fig:UTIL_IMPL_VERILOG}
+\end{figure}
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/timing_verilog}
+    \caption{Valori di timing del \textit{verilog\_multiplier}}
+    \label{fig:TIMING_VERILOG}
+\end{figure}
 
+In figura \ref{fig:UTIL_SYNT_VHDL} e \ref{fig:UTIL_IMPL_VHDL} si possono vedere i valori di utilizzo delle risorse post-syntesis e post-implementation del \textit{vhdl\_multiplier}. L'unica differenza fra le due sono le 7 LTU in meno dopo l'implementazione. In figura \ref{fig:TIMING_VHDL} si possono vedere i risultati di timing.
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/util_synt_vhdl}
+    \caption{Valori di utilizzo risorse post syntesis del \textit{vhdl\_multiplier}}
+    \label{fig:UTIL_SYNT_VHDL}
+\end{figure}
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/util_impl_vhdl}
+    \caption{valori di utilizzo risorse post implementation del \textit{vhdl\_multiplier}}
+    \label{fig:UTIL_IMPL_VHDL}
+\end{figure}
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/timing_vhdl}
+    \caption{Valori di timing del \textit{vhdl\_multiplier}}
+    \label{fig:TIMING_VHDL}
+\end{figure}
 
+In figura \ref{fig:UTIL_SYNT_DM} e \ref{fig:UTIL_IMPL_DM} si possono vedere i valori di utilizzo delle risorse post-syntesis e post-implementation del \textit{vhdl\_multiplier}. L'unica differenza fra le due sono le 7 LTU in meno dopo l'implementazione. In figura \ref{fig:TIMING_DM} si possono vedere i risultati di timing.
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/util_synt_dm}
+    \caption{Valori di utilizzo risorse post syntesis del \textit{double\_multiplier}}
+    \label{fig:UTIL_SYNT_DM}
+\end{figure}
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/util_impl_dm}
+    \caption{valori di utilizzo risorse post implementation del \textit{double\_multiplier}}
+    \label{fig:UTIL_IMPL_DM}
+\end{figure}
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/timing_dm}
+    \caption{Valori di timing del \textit{double\_multiplier}}
+    \label{fig:TIMING_DM}
+\end{figure}
 
-
-
-
-
-
-
+Si nota subito come la versione VDHL dia risultati migliori sia a livello di spazio che di tempo rispetto a quella in Verilog, ciò fa capire che la scelta del linguaggio non è indifferente dal punto di vista delle performante.
+\\Il periodo di clock massimo raggiungibile prima che WNS diventi negativo (e che quindi vengano verificate violazioni) è 9ns, ma con questo valore la simulazione post-implementation del tempo da valori sbagliati. Per questo motivo è stato usato come periodo di clock minimo 10ns.
+\\In figura \ref{fig:DEVICE} è possibile guardare la parte utilizzata della FPGA con il sistema realizzato, che come ci si aspettava è molto ridotta. Infine in figura \ref{fig:POWER_SUMMARY} e \ref{fig:POWER_ONCHIP} si possono vedere i valori di potenza.
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/device_impl}
+    \caption{valori di utilizzo risorse post implementation del \textit{double\_multiplier}}
+    \label{fig:DEVICE}
+\end{figure}
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/power_summary}
+    \caption{Power summary}
+    \label{fig:POWER_SUMMARY}
+\end{figure}
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/power_onChip}
+    \caption{Power on-Chip}
+    \label{fig:POWER_ONCHIP}
+\end{figure}
 
 
 \section{Conclusioni}
@@ -337,19 +411,33 @@ Grazie al c++ è stato possibile realizzare dei testbench più accurati.
     \label{fig:SIM_TB_TIM_RES}
 \end{figure*}
 
-% \begin{figure*}[bt]
-%     \centering
-%     \includegraphics[width=\textwidth]{figures/sim_systemc_target}
-%     \caption{Simulazione double\_multiplier in SystemC con ``targeted test''}
-%     \label{fig:SIM_SC_TARGET}
-% \end{figure*}
+\begin{figure*}[bt]
+    \centering
+    \includegraphics[width=\textwidth]{figures/sc_target}
+    \caption{Simulazione double\_multiplier in SystemC con ``target test''}
+    \label{fig:SIM_SC_TARGET}
+\end{figure*}
 
-% \begin{figure*}[bt]
-%     \centering
-%     \includegraphics[width=\textwidth]{figures/sim_systemc_rnd}
-%     \caption{Simulazione double\_multiplier in SystemC con ``random test''}
-%     \label{fig:SIM_SC_RND}
-% \end{figure*}
+\begin{figure*}[bt]
+    \centering
+    \includegraphics[width=\textwidth]{figures/sc_full}
+    \caption{Simulazione double\_multiplier in SystemC con ``full target test''}
+    \label{fig:SIM_SC_FULL}
+\end{figure*}
+
+\begin{figure*}[bt]
+    \centering
+    \includegraphics[width=\textwidth]{figures/sc_rnd}
+    \caption{Simulazione double\_multiplier in SystemC con ``random test''}
+    \label{fig:SIM_SC_RND}
+\end{figure*}
+
+\begin{figure*}[bt]
+    \centering
+    \includegraphics[width=\textwidth]{figures/sc_error}
+    \caption{Simulazione double\_multiplier in SystemC con errore dovuto all'arrotondamento}
+    \label{fig:SIM_SC_ERROR}
+\end{figure*}
 
 
 \end{document}

@@ -103,6 +103,10 @@ const std::string mem[] = {
     // Test 20
     "01000000000000000000000000000000",  // 2.0
     "01000000001000000000000000000000",  // 2.5
+
+    // Test ERROR
+    // "01011111000010100001110011000000",  // 9.95204e+18
+    // "01011110100001110000000000000000",  // 4.86389e+18
 };
 
 
@@ -282,7 +286,7 @@ void TestbenchModule::rnd_test() {
         sqrt(std::numeric_limits<float>::max()));
 
     // Setttings
-    const unsigned int TESTS_NUM = 100000;
+    const unsigned int TESTS_NUM = 500000;
     const bool PRINT_MULT = false;
     const float TIME_PERIOD = 2.0;  // sec
 
@@ -336,7 +340,8 @@ void TestbenchModule::rnd_test() {
             std::cout << ">>> correct result: "
                       << float_to_binary(num1_A * num2_A) << std::endl;
             std::cout << ">>> current result: " << res1 << std::endl
-                      << std::endl;
+                      << ">>> op1: " << float_to_binary(num1_A) << std::endl
+                      << ">>> op2: " << float_to_binary(num2_A) << std::endl;
             fails++;
         } else if (PRINT_MULT) {
             std::cout << "Mult1: " << num1_A << " * " << num2_A << " = "
@@ -352,7 +357,8 @@ void TestbenchModule::rnd_test() {
             std::cout << ">>> correct result: "
                       << float_to_binary(num1_B * num2_B) << std::endl;
             std::cout << ">>> current result: " << res2 << std::endl
-                      << std::endl;
+                      << ">>> op1: " << float_to_binary(num1_B) << std::endl
+                      << ">>> op2: " << float_to_binary(num2_B) << std::endl;
             fails++;
         } else if (PRINT_MULT) {
             std::cout << "Mult2: " << num1_B << " * " << num2_B << " = "
