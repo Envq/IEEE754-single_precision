@@ -9,13 +9,11 @@
 \BOOKMARK [2][-]{subsection.3.4}{multiplier}{section.3}% 9
 \BOOKMARK [2][-]{subsection.3.5}{double\137multiplier}{section.3}% 10
 \BOOKMARK [2][-]{subsection.3.6}{testbench}{section.3}% 11
-\BOOKMARK [2][-]{subsection.3.7}{Implementazione RTL con Verilog e VHDL}{section.3}% 12
-\BOOKMARK [2][-]{subsection.3.8}{Implementazione RTL con SystemC }{section.3}% 13
-\BOOKMARK [1][-]{section.4}{risultati}{}% 14
-\BOOKMARK [2][-]{subsection.4.1}{Simulazioni con script TCL}{section.4}% 15
-\BOOKMARK [2][-]{subsection.4.2}{Simulazione con testbench in Verilog}{section.4}% 16
-\BOOKMARK [2][-]{subsection.4.3}{Simulazione con testbench in SystemC}{section.4}% 17
-\BOOKMARK [2][-]{subsection.4.4}{Sintesi}{section.4}% 18
-\BOOKMARK [1][-]{section.5}{Conclusioni}{}% 19
-\BOOKMARK [1][-]{section*.1}{Riferimenti bibliografici}{}% 20
-\BOOKMARK [1][-]{section*.2}{Appendice}{}% 21
+\BOOKMARK [1][-]{section.4}{risultati}{}% 12
+\BOOKMARK [2][-]{subsection.4.1}{Simulazioni con script TCL}{section.4}% 13
+\BOOKMARK [2][-]{subsection.4.2}{Simulazione con testbench in Verilog}{section.4}% 14
+\BOOKMARK [2][-]{subsection.4.3}{Simulazione con testbench in SystemC}{section.4}% 15
+\BOOKMARK [2][-]{subsection.4.4}{Sintesi}{section.4}% 16
+\BOOKMARK [1][-]{section.5}{Conclusioni}{}% 17
+\BOOKMARK [1][-]{section*.3}{Riferimenti bibliografici}{}% 18
+\BOOKMARK [1][-]{section*.4}{Appendice}{}% 19

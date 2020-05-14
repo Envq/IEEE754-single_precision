@@ -4,6 +4,7 @@
 \author{Enrico Sgarbanti - VR446095}
 
 \usepackage{graphicx}
+\usepackage{subfig}
 \usepackage{wrapfig}
 \usepackage{hyperref}
 \usepackage[italian]{babel}
@@ -55,10 +56,10 @@ Per la \textbf{decodifica} del numero binario normalizzato: $$(-1)^{sign}\cdot 2
     \item \textbf{zero:} è rappresentato mettendo tutti i bit di esponente e mantissa a 0.
     \item \textbf{infinito:} è rappresentato mettendo tutti i bit dell'esponente a 1 e quelli della mantissa a 0.
     \item \textbf{NaN:} presentano tutti i bit dell'esponente a 1, ma non hanno tutti i bit della mantissa a 0. Essi vengono utilizzati per rappresentare un valore che non rappresenta un numero reale. Esistono due categorie di NaN:
-    \begin{itemize}
-        \item \textbf{Quiet NaN:} esso ha il bit più significativo della mantissa a 1. Indica un valore indeterminato genarato da operazioni aritmetiche il cui risultato non è matematicamente definito.
-        \item \textbf{Signal NaN:} esso ha il bit più significativo della mantissa a 0. Indica un valore non valido. Può essere utilizzato per segnalare eccezioni causate da operazioni o per indicare variabili non inizializzate .
-    \end{itemize}
+          \begin{itemize}
+              \item \textbf{Quiet NaN:} esso ha il bit più significativo della mantissa a 1. Indica un valore indeterminato genarato da operazioni aritmetiche il cui risultato non è matematicamente definito.
+              \item \textbf{Signal NaN:} esso ha il bit più significativo della mantissa a 0. Indica un valore non valido. Può essere utilizzato per segnalare eccezioni causate da operazioni o per indicare variabili non inizializzate .
+          \end{itemize}
     \item \textbf{Numeri denormalizzati:} presentano tutti i bit dell'esponente a 0, ma non hanno tutti i bit della mantissa a 0. Essi sono decodificati in modo differente dai numeri normalizzati: $$(-1)^{sign}\cdot 2^{(-126)} \cdot (0 + \sum_{i=1}^{23}b_{23-i}\cdot 2^{-i})$$. Ovvero il bit omesso vale 0 anzichè 1 e l'esponente effettivo del numero vale sempre -126  \cite{IEEE754Online}.
 \end{itemize}
 
@@ -77,29 +78,29 @@ Per la \textbf{decodifica} del numero binario normalizzato: $$(-1)^{sign}\cdot 2
 \begin{itemize}
     \item \textbf{cpp/} contiene il file\textbf{multiplier.cpp} dove è presente una funzione che esegue la moltiplicazione in c++.
     \item \textbf{SystemC/}
-    \begin{itemize}        
-        \item \textbf{Makefile:} tool per la compilazione automatica del progetto. Richiede che la variabile d'ambiente SYSTEMC\_HOME contenga il path alla libreria di SystemC.
-        \item \textbf{include:} contiene gli headers del progetto. Qui sono definite tutte le porte, segnali ed enumerazioni dei vari componenti.
-        \item \textbf{src:} contiene i file sorgenti del progetto..
-        \item \textbf{bin:} contiene l'eseguibile \textbf{double\_multiplier\_RLT.x} (generato dopo la compilazione) e la simulazione \textbf{wave.vcd} (generato dopo l'esecuzione dell'eseguibile).
-        \item \textbf{obj:} contiene i file oggetto (generati dopo la compilazione).
-    \end{itemize}
+          \begin{itemize}
+              \item \textbf{Makefile:} tool per la compilazione automatica del progetto. Richiede che la variabile d'ambiente SYSTEMC\_HOME contenga il path alla libreria di SystemC.
+              \item \textbf{include:} contiene gli headers del progetto. Qui sono definite tutte le porte, segnali ed enumerazioni dei vari componenti.
+              \item \textbf{src:} contiene i file sorgenti del progetto..
+              \item \textbf{bin:} contiene l'eseguibile \textbf{double\_multiplier\_RLT.x} (generato dopo la compilazione) e la simulazione \textbf{wave.vcd} (generato dopo l'esecuzione dell'eseguibile).
+              \item \textbf{obj:} contiene i file oggetto (generati dopo la compilazione).
+          \end{itemize}
     \item \textbf{VHDL\_verilog/}
-    \begin{itemize}
-        \item \textbf{stimuli/} contiene gli script TCL usati per dei test.
-        \item \textbf{waves/} contiene i file per visualizzare le simulazioni come negli screenshot.
-        \item \textbf{constrains/} contiene i vincoli per la sintesi.
-        \item \textbf{double\_multiplier} file Verilog del top level del sistema.
-        \item \textbf{verilog\_multiplier} file Verilog del moltiplicatore IEEE754.
-        \item \textbf{vhdl\_multiplier} file VHDL del moltiplicatore IEEE754.
-        \item \textbf{testbench} file Verilog contenente il testbench.
-    \end{itemize}
+          \begin{itemize}
+              \item \textbf{stimuli/} contiene gli script TCL usati per dei test.
+              \item \textbf{waves/} contiene i file per visualizzare le simulazioni come negli screenshot.
+              \item \textbf{constrains/} contiene i vincoli per la sintesi.
+              \item \textbf{double\_multiplier} file Verilog del top level del sistema.
+              \item \textbf{verilog\_multiplier} file Verilog del moltiplicatore IEEE754.
+              \item \textbf{vhdl\_multiplier} file VHDL del moltiplicatore IEEE754.
+              \item \textbf{testbench} file Verilog contenente il testbench.
+          \end{itemize}
 \end{itemize}
 
 
 \subsection{Procedimento}
 Per prima cosa è stato studiato lo standard IEE754 ed è stato definito l'algoritmo ad alto livello per la moltiplicazione. Dopodichè è stata realizzata la EFSM di \textit{double\_multiplier} e \textit{double\_multiplier}.
-\\A questo punto si è passati all'implementazione partendo con un approccio bottom-up dal \textit{multiplier} per poi passare al \textit{double\_multiplier} e infine al \textit{testbnech} tutti scritti in Verilog. È stato scelto questo linguaggio per realizzare le varie componenti in quanto ritenuto più semplice da utilizzare e con una sintassi molto più chiara del VHDL. Ogni componente è stato testato con uno script TCL e in seguito con il testbench. Verificata la correttezza del sistema con due moltiplicatori Verilog si è passati a scrivere \textit{multiplier} anche in VHDL ed è stato aggiunto al testbench il confronto fra i valori ottenuti dai due componenti.
+\\A questo punto si è passati all'implementazione su Vivado\cite{Vivado} partendo con un approccio bottom-up dal \textit{multiplier} per poi passare al \textit{double\_multiplier} e infine al \textit{testbench} tutti scritti in Verilog. È stato scelto questo linguaggio per realizzare le varie componenti in quanto ritenuto più semplice da utilizzare e con una sintassi molto più chiara del VHDL. Ogni componente è stato testato con uno script TCL e in seguito con il testbench. Verificata la correttezza del sistema con due moltiplicatori Verilog si è passati a scrivere \textit{multiplier} anche in VHDL ed è stato aggiunto al testbench il confronto fra i valori ottenuti dai due componenti.
 \\In seguito è stato riscritto tutto in SystemC dove è stato fatto anche un testbench con numeri random.
 \\Infine è stata fatta l'high level syntesis da un semplice codice c++ per confrontare i risultati ottenuti.
 
@@ -113,7 +114,7 @@ Il progetto presenta diversi vincoli:
 \end{itemize}
 Per far fronte al limite delle porte logiche è stato necessario serializzare input e output. Vengono quindi utilizzati gli stessi 32 bit per il risultato e altri 64 bit per le due coppie di operandi.
 \\I vari componenti comunicano fra loro grazie al protocollo di \textit{handshake}. Con \textit{ready} uguale a 1 si attiva il componente, il quale quando avrà finito metterà \textit{done} uguale a 1.
-\\L'architettura con VHDL e Verilog è mostrata in figura \ref{fig:Architettura}. Quella per SystemC è analoga. 
+\\L'architettura con VHDL e Verilog è mostrata in figura \ref{fig:Architettura}. Quella per SystemC è analoga.
 \\I segnali intermedi sono stati omessi da questa figura, ma vengono descritti nelle sezioni successive.
 \begin{figure}[!htb]
     \centering
@@ -140,7 +141,7 @@ Questo componente esegue la moltiplicazione tra numeri floating point a precisio
     \item \textbf{done} (1 bit output): segnale che indica che il valore su \textit{res} è il risultato.
     \item \textbf{res} (32 bit output): risultato.
 \end{itemize}
-    
+
 Gli altri segnali intermedi utilizzati sono:
 \begin{itemize}\item \textbf{STATE e NEXT\_STATE} (4 bit): rappresentano lo stato attuale e lo stato prossimo.
     \item \textbf{esp\_tmp} (10 bit): permette di eseguire le operazioni per ricavare l'esponente finale senza perdere informazioni.
@@ -153,7 +154,7 @@ Gli altri segnali intermedi utilizzati sono:
 
 L'algoritmo della moltiplicazione è descritto grazie alla EFSM [Figura \ref{fig:EFSM_MULT}] la quale è formata 19 stati:
 \begin{itemize}
-    \item \textbf{ST\_START:} stato di partenza. Qui vengono resettati i segnali interni e gli output a zero. In caso di segnale \textit{reset} a 1 si torna in questo stato. In caso di segnale \textit{ready} a 1 si passa a \textit{ST\_INIT}.    
+    \item \textbf{ST\_START:} stato di partenza. Qui vengono resettati i segnali interni e gli output a zero. In caso di segnale \textit{reset} a 1 si torna in questo stato. In caso di segnale \textit{ready} a 1 si passa a \textit{ST\_INIT}.
     \item \textbf{ST\_INIT:} qui vengono estrapolate le informazioni degli operandi di segno, esponente e mantissa la quale presenta anche il bit 24 a 1 (quello omesso nei 32 bit). Qui avviene anche la valutazione dei casi speciali, ovvero la generazione di NaN, $\infty$, 0, numeri subnormali che porterà nei rispetti stati. In caso il numero sia normalizzato si va allo stato \textit{ST\_ELAB}.
     \item \textbf{ST\_SNAN1:} si arriva a questo stato se il primo operando è un Signal NaN. In concordanza col metodo di testing e con l'articolo \cite{IEEE754Note}: ``Un signal NaN può essere copiato senza problemi, ma qualsiasi altra operazione è invalida e deve essere intercettata o prodotto un Nan non signal''. Quindi viene riscritto su \textit{res} il valore di \textit{op1} con il bit più significativo della mantissa a 1. Poi si passa a \textit{ST\_FINISH}.
     \item \textbf{ST\_SNAN2:} si arriva a questo stato se il secondo operando è un Signal NaN. Analogamente allo stato \textit{ST\_SNAN1}, viene riscritto su \textit{res} il valore di \textit{op2} con il bit più significativo della mantissa a 1. Poi si passa a \textit{ST\_FINISH}. In caso ci siano due SNAN come operandi si entra lo stesso in questo stato.
@@ -177,32 +178,31 @@ L'algoritmo della moltiplicazione è descritto grazie alla EFSM [Figura \ref{fig
 
 \subsection{double\_multiplier}
 Questo componente esegue due moltiplicazioni tra numeri floating point a precisione singola.
-\\La scelta di realizzarlo in Verilog è stata del tutto arbitraria.
-\\L'interfaccia è mostrata in figura \ref{fig:Architettura} ed è la stessa sia per l'implementazione Verilog che quella SystemC:
+\\L'interfaccia è mostrata in figura \ref{fig:Architettura}:
 \begin{itemize}
     \item \textbf{op1} (32 bit input): primo operando.
     \item \textbf{op2} (32 bit input): secondo operando.
     \item \textbf{clk} (1 bit input): segnale di clock.
     \item \textbf{rst} (1 bit input): segnale di reset. Riporta il sistema allo stato iniziale.
-    \item \textbf{ready} (1 bit input): segnale che permette al sistema di uscire dallo stato iniziale. Nello specifico indica che in questo ciclo di clok \textit{op1} e \textit{op2} contengono gli operandi della prima moltiplicazione e nel ciclo di clock successivo ci saranno quelli per la seconda moltiplicazione.
+    \item \textbf{ready} (1 bit input): segnale che permette al sistema di uscire dallo stato iniziale. Nello specifico indica che al prossimo fronte di salita del clock \textit{op1} e \textit{op2} conterranno i valori degli operandi per la prima moltiplicazione e in quello successivo ci saranno quelli per la seconda moltiplicazione.
     \item \textbf{done} (1 bit output): segnale che indica che il valore su \textit{res} è il risultato.
     \item \textbf{res} (32 bit output): risultato.
 \end{itemize}
-    
-Gli altri segnali/registri intermedi utilizzati sono:
+
+Gli altri segnali intermedi utilizzati sono:
 \begin{itemize}
     \item \textbf{ready1} (1 bit) segnale che pone il \textit{ready} del primo multiplier (quello in Verilog) a 1.
     \item \textbf{ready2} (1 bit) segnale che pone il \textit{ready} del secondo multiplier (quello in VHDL) a 1.
     \item \textbf{done1} (1 bit) segnale che indica che il valore su \textit{res1} è il risultato della prima moltiplicazione.
     \item \textbf{done2} (1 bit) segnale che indica che il valore su \textit{res2} è il risultato della seconda moltiplicazione.
-    \item \textbf{op1\_tmp, op2\_tmp} (32 bit) che servono a memorizzare temporaneamente gli operandi per la prima moltiplicazione.
 \end{itemize}
 
 L'algoritmo è descritto grazie alla EFSM [Figura \ref{fig:EFSM_DM}] la quale è formata 8 stati:
 \begin{itemize}
-    \item \textbf{ST\_START:} stato di partenza. Qui vengono resettati i segnali a zero e inizializzati \textit{op1\_tmp}, \textit{op2\_tmp} rispettivamenete con i valori di \textit{op1} e \textit{op2} i quali serviranno per il primo moltiplicatore. In caso di segnale di reset si torna in questo stato e si pongono a 1 i segnali di reset dei due moltiplicatori. In caso il segnale \textit{ready} vada a 1 si passa a \textit{ST\_RUN}.
-    \item \textbf{ST\_RUN:} qui vengono posti \textit{ready1} e \textit{ready2} uguali a 1, attivando quindi i due moltiplicatori. Poi si passa a \textit{ST\_WAIT}.
-    \item \textbf{ST\_WAIT:} qui vengono posti \textit{ready1} e \textit{ready2} uguali a 0. Si rimane in questo stato finchè \textit{done1} $=1$ e in quel caso si passa a \textit{ST\_WAIT2} oppure che \textit{done2} $=1$ passando a {ST\_WAIT1}. Nel caso in cui sia \textit{done1} $=1$ che \textit{done2} $=1$ allora si passa direttamente a \textit{ST\_RET1}.
+    \item \textbf{ST\_START:} stato di partenza. Qui vengono resettati i segnali interni e gli output a zero. In caso di segnale \textit{reset} a 1 si torna in questo stato. In caso di segnale \textit{ready} a 1 si passa a \textit{ST\_RUN1}.
+    \item \textbf{ST\_RUN1:} qui viene posto \textit{ready1} a 1, attivando quindi il primo moltiplicatore. Poi si passa a \textit{ST\_RUN2}.
+    \item \textbf{ST\_RUN2:} qui viene posto \textit{ready2} a 1, attivando quindi il secondo moltiplicatore. Poi si passa a \textit{ST\_WAIT}.
+    \item \textbf{ST\_WAIT:} qui vengono posti \textit{ready1} e \textit{ready2} uguali a 0. Si rimane in questo stato finchè \textit{done1} e \textit{done2} rimangono a 0. Se \textit{done1} diventa 1 allora si passa a \textit{ST\_WAIT2}, se \textit{done2} diventa 1 allora si passa a \textit{ST\_WAIT1} e nel caso si attivino contemporaneamente allora si passa direttamente a \textit{ST\_RET1}.
     \item \textbf{ST\_WAIT1:} si resta qui finchè non finisce anche il primo moltiplicatore, cioè finchè \textit{ready1} è uguale a 0. Poi si passa a \textit{ST\_RET1}.
     \item \textbf{ST\_WAIT2:} si resta qui finchè non finisce anche il secondo moltiplicatore, cioè finchè \textit{ready2} è uguale a 0. Poi si passa a \textit{ST\_RET1}.
     \item \textbf{ST\_RET1:} pone \textit{done} uguale a 1 e \textit{res} uguale al risultato del primo moltiplicatore cioè \textit{res1}. Poi si passa a \textit{ST\_RET2}.
@@ -211,81 +211,44 @@ L'algoritmo è descritto grazie alla EFSM [Figura \ref{fig:EFSM_DM}] la quale è
 
 
 \subsection{testbench}
-Questo componente è un test automatizzato che incorpora il \textit{double\_multiplier} come mostrato in figura \ref{fig:Architettura}. 
-\\Nella variante Verilog prova casi speciali, valori scelti arbitrariamente e in particolare controlla che i sottocomponenti Verilog e VHDL si comportino allo stesso modo.
-\\Nella variante SystemC sono stati messi a disposizione tre thread da attivare togliendo i commenti nel costruttore del ``TestbenchModule'':
+Questo componente è un test automatizzato che incorpora il \textit{double\_multiplier} come mostrato in figura \ref{fig:Architettura}.
+\\La versione in Verilog ha il compiti di verificare:
 \begin{itemize}
-    \item \textbf{targeted\_test:} test analogo a quello in Verilog.
-    \item \textbf{rnd\_test:} test che prova \textit{TESTS\_NUM} moltiplicazioni generate casualmente tra un intervallo modificabile.
-    \item \textbf{run\_all:} test che prova tutte le possibili combinazioni cioè $2^{32} * 2^{32}$. Si può limitare il numero di combinazioni evitando di contare il bit del segno, in quanto il calcolo è un semplice xor. Poi si possono escludere tutti i numeri denormalizzati. In ogni caso risulta troppo pesante per essere eseguito.
+    \item che i sottocomponenti in Verilog e VHDL diano gli stessi risultati.
+    \item che il \textit{double\_multiplier} esegue correttamente due moltiplicazioni con operandi diversi.
+    \item che vengano provati per ogni nodo della EFSM tutti gli archi.
 \end{itemize}
-
-
-
-\subsection{Implementazione RTL con Verilog e VHDL}
-In \textbf{verilog\_multiplier} e \textit{double\_multiplier}
+La versione in SystemC sono state messe a disposizione tre thread (da attivare togliendo i commenti del costruttore del \textit{TestbenchModule} nel file testbench\_RTL.cc):
 \begin{itemize}
-    \item Sono definiti come ``wire'' tutti i segnali collegati alle porte di input mentre come ``reg'' tutti i registri collegati alle porte di output e quelli intermedi.
-    \item Gli stati e \textit{op1\_type, op2\_type, res\_type} sono stati definiti come ``parameter''.
+    \item \textbf{target\_test:} testa l'esecuzione di due specifici operandi scelti da una lista.
+    \item \textbf{full\_target\_test:} testa tutti gli elementi della lista, i quali sono scelti appositamente per provare tutti gli archi di ogni nodo della EFSM.
+    \item \textbf{rnd\_test:} testa l'esecuzione del \textit{double\_multiplier} con valori generati randomicamente.
 \end{itemize}
-In \textbf{vhdl\_multiplier:}
-\begin{itemize}
-    \item Sono utilizzate le librerie ``IEEE.STD\_LOGIC\_1164.ALL'' per abilitare i tipi std\_logic e ``use IEEE.NUMERIC\_STD.ALL'' al fine di poter usare funzioni aritmetiche con valori signed e unsigned
-    \item Sono definiti come ``signal'' tutti i segnali collegati alle porte di input e output.
-    \item Sono definiti come ``signal'' tutti i segnali interni di communicazione per la FSM.
-    \item Sono definite come ``variable'' \textit{sign1, sign2, esp1, esp2, esp\_tmp, mant1, mant2, mant\_tmp, op1\_type, op2\_type} perchè utilizzati solo all'interno del processo ``datapath''.
-    \item Gli stati e \textit{op1\_type, op2\_type, res\_type} sono stati definiti all'interno del \textit{package} rispettivamente come ``MULT\_STATE'' e ``MULT\_TYPE''.
-    \item L'architettura utilizzata segue lo stile ``behavioral'', cioè quello più ``program-like'' in quanto più semplice e chiaro per descrivere una FSMD con due processi.
-\end{itemize}
-
-
-\subsection{Implementazione RTL con SystemC \label{section:SystemC}}
-Sono stati creati i seguenti files e directory:
-\begin{itemize}
-    \item \textbf{Makefile:} tool per la compilazione automatica del progetto. Richiede che la variabile d'ambiente SYSTEMC\_HOME contenga il path alla libreria di SystemC.
-    \item \textbf{bin:} directory che contiene l'eseguibile \textit{double\_multiplier\_RLT.x} (generato dopo la compilazione) e \textit{wave.vcd} (generato dopo l'esecuzione dell'eseguibile).
-    \item \textbf{obj:} directory che contiene i file oggetto (generati dopo la compilazione)
-    \item \textbf{include:} directory che contiene gli headers \textit{double\_multiplier\_RTL.hh}, \textit{multiplier\_RTL.hh}, \textit{testbench\_RTL.hh}. Qui sono definite tutte le porte, segnali, variabili ed enumerazioni dei vari componenti
-    \item \textbf{src:} directory che contiene i file sorgenti \textit{double\_multiplier\_RTL.cc}, \textit{multiplier\_RTL.cc}, \textit{testbench\_RTL.cc} e \textit{main\_RTL.cc}.
-\end{itemize}
-In \textbf{double\_multiplier\_RTL.hh}
-\begin{itemize}
-    \item Sono definiti come ``sc\_signal'' tutti i segnali collegati alle porte di input e output.
-    \item Sono definiti come ``sc\_signal'' tutti i segnali interni di communicazione per la FSM.
-    \item Gli stati sono stati definiti come ``enumerazioni''.
-\end{itemize}
-In \textbf{multiplier\_RTL.hh}
-\begin{itemize}
-    \item Sono definiti come ``sc\_signal'' tutti i segnali collegati alle porte di input e output.
-    \item Sono definiti come ``sc\_signal'' tutti i segnali interni di communicazione per la FSM.
-    \item Sono definite come variabili di SystemC \textit{sign1, sign2, esp1, esp2, esp\_tmp, mant1, mant2, mant\_tmp, op1\_type, op2\_type} perchè utilizzati solo all'interno del processo ``datapath''.
-    \item Gli stati e \textit{op1\_type, op2\_type, res\_type} sono stati definiti come ``enumerazioni''.
-\end{itemize}
-A differenza di verilog e VHDL, in SystemC è necessario un file ``main'' che contenga il metodo \textit{sc\_main} e che permetta di collegare il componente da testare con il testbench. In esso si utilizza \textit{sc\_create\_vcd\_trace\_file} per salvare le tracce necessarie a lanciare una simulazione con tools come gtkwave.
-\\Per eseguire il dispositivo bisogna usare i comandi:
-\begin{itemize}
-    \item \textbf{make: } per compilare.
-    \item \textbf{./bin/double\_multiplier\_RTL.x:} per eseguire il programma.
-    \item \textbf{gtkwave/wave.vcd:} per lanciare la simulazione.
-\end{itemize}
+Per i testbench in entrambi i linguaggi è stato usato un array di bits contenenti gli inputs da testare. In SystemC sono state create due funzioni ausiliarie ``binary\_to\_float()'' e ``float\_to\_binary()'' per confrontare il risultato ottenuto dal \textit{double\_multiplier} con quelli ottenuti da una semplice moltiplicazione in c++. I risultati ottenuti sono stati interiti nell'array del testbench in Verilog per realizzare il test automatico.
 
 
 
 \section{risultati}
 
 \subsection{Simulazioni con script TCL}
-Dopo aver realizzato un componente questo è stato subito testato con un semplice script TCL. In questo modo si possono provare facilmente alcuni input e controllare che all'interno funzioni tutto come ci si aspetta. In particolare modificando lo script sono stati controllati casi particolari come la reazione del sistema al variare inaspettato degli operandi o di \textit{ready}, operazioni con operatori speciali e il comportamento con la richiesta di una nuova elaborazione.
-\\Un altro controllo fatto è il verificare che l'esecuzione del multiplier Verilog sia analoga a quella del multiplier VHDL.
-\\Le varie simulazioni sono riportate nelle figure \ref{fig:SIM_MULT_VHDL} \ref{fig:SIM_MULT_VERILOG} \ref{fig:SIM_DM}.
+Dopo aver realizzato il \textit{multiplier} in Verilog, questo è stato subito testato con un semplice script TCL. In questo modo si è potuto controllare facilmente che il componente esegua i passaggi aspettati. In particolare sono stati ricercati e provati gli input necessari a testare ogni arco della EFSM. Nel file ``/stimuli/multiplier.tcl'' si possono vedere i vari input testati, con gli stati percorsi e il risultato obiettivo ricavato grazie alle funzioni ausiliarie del testbench SystemC. Nelle figure \ref{fig:SIM_MULT_VERILOG} e \ref{fig:SIM_MULT_VHDL} si possono guardare le simulazioni dei moltiplicatori con lo script TCL.
+\\Lo script TCL per il \textit{double\_multiplier} analogamente è servito a controllare il corretto funzionamento del componente, in particolare che i moltiplicatori ricevessero i giusti input. In figura \ref{fig:SIM_DM} si può guardare la simulazione con lo script TCL.
 
 
 \subsection{Simulazione con testbench in Verilog}
-I test con gli script TCL sono serviti principalmente ad assistere l'implementazione, questo invece a verificare la correttezza del sistema. Sono stati testati i casi particolari e un po' di valori scelti arbitrariamente e confrontati col risultato che ci si aspettava. Questo risultato è stato ottenunto grazie al testbench in SystemC.
-\\In figura \ref{fig:SIM_TESTBENCH} si può guardare la simulazione.
+I test con gli script TCL sono serviti principalmente a controllare nel dettaglio il comporamento dei componenti e a ricavare gli input per questo testbench.
+\\Questo test ha due compiti:
+\begin{itemize}
+    \item Verificare che il \textit{multiplier} VHDL dia gli stessi valori di quello Verilog.
+    \item Verificare che il \textit{double\_multiplier} esegua correttamente due moltiplicazioni diverse.
+\end{itemize}
+In particolare è utilizzato per capire in modo automatico se i componenti fanno ciò che si aspetta, restituendo OK in caso il test sia andato a buon fine, mentre FAIL con il risultato ottenuto e quello corretto in caso di errore.
+In figura \ref{fig:SIM_TB_BH} si può vedere un pezzo della simulazione con questo testbench a livello Behavioral e in figura \ref{fig:SIM_TB_BH_RES} i risultati ottenuti.
+In figura \ref{fig:SIM_TB_TIM} si può vedere un pezzo della ``post-implementation timing simulation'' cioè la simulazione più simile al comportamento effettivo sulla fpga e in figura \ref{fig:SIM_TB_TIM_RES} i risultati ottenuti.
 
 
 \subsection{Simulazione con testbench in SystemC}
-Grazie al c++ è stato possibile realizzare dei testbench più accurati. 
+Grazie al c++ è stato possibile realizzare dei testbench più accurati.
 \\Sono stati provati gli stessi valori del testbench in Verilog i quali però sono stati confrontati con il risultato convertito in binario della moltiplicazione degli operandi converti in float [Figura \ref{fig:SIM_SC_TARGET}].
 \\Poi è stato fatto un testbench più sofisticato che genera un numero di valori arbitrario e confronta i risultati ottenuti dal dispositivo e dalla moltiplicazione in c++ [Figura \ref{fig:SIM_SC_RND}].
 \\SystemC è stato particolarmente comodo per testare il sistema grazie alla possibilità di guardare i valori di tutti i segnali evitando quindi di modificare le interfaccie o controllare i componenti separatamente come con gli script TCL.
@@ -326,9 +289,9 @@ Grazie al c++ è stato possibile realizzare dei testbench più accurati.
 
 \begin{figure*}[bt]
     \centering
-    \includegraphics[width=\textwidth]{figures/sim_mult_vhdl_zoom}
-    \caption{Simulazione multiplier in VHDL con script TCL con più zoom}
-    \label{fig:SIM_MULT_VHDL_ZOOM}
+    \includegraphics[width=\textwidth]{figures/sim_mult_verilog}
+    \caption{Simulazione multiplier in Verilog con script TCL}
+    \label{fig:SIM_MULT_VERILOG}
 \end{figure*}
 
 \begin{figure*}[bt]
@@ -340,13 +303,6 @@ Grazie al c++ è stato possibile realizzare dei testbench più accurati.
 
 \begin{figure*}[bt]
     \centering
-    \includegraphics[width=\textwidth]{figures/sim_mult_verilog}
-    \caption{Simulazione multiplier in Verilog con script TCL}
-    \label{fig:SIM_MULT_VERILOG}
-\end{figure*}
-
-\begin{figure*}[bt]
-    \centering
     \includegraphics[width=\textwidth]{figures/sim_dm}
     \caption{Simulazione double\_multiplier in Verilog con script TCL}
     \label{fig:SIM_DM}
@@ -354,24 +310,46 @@ Grazie al c++ è stato possibile realizzare dei testbench più accurati.
 
 \begin{figure*}[bt]
     \centering
-    \includegraphics[width=\textwidth]{figures/sim_testbench}
-    \caption{Simulazione double\_multiplier in Verilog con testbench}
-    \label{fig:SIM_TESTBENCH}
+    \includegraphics[width=\textwidth]{figures/sim_tb_bh}
+    \caption{Behavioral simulation double\_multiplier in Verilog con testbench}
+    \label{fig:SIM_TB_BH}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \subfloat[VHDL vs Verilog]{{\includegraphics[width=0.3\textwidth]{figures/tb_bh1} }}
+    \subfloat[VHDL and Verilog]{{\includegraphics[width=0.3\textwidth]{figures/tb_bh2} }}
+    \caption{Risultati testbench Behavioral}
+    \label{fig:SIM_TB_BH_RES}
 \end{figure*}
 
 \begin{figure*}[bt]
     \centering
-    \includegraphics[width=\textwidth]{figures/sim_systemc_target}
-    \caption{Simulazione double\_multiplier in SystemC con ``targeted test''}
-    \label{fig:SIM_SC_TARGET}
+    \includegraphics[width=\textwidth]{figures/sim_tb_tim}
+    \caption{Post-Implementation Timing simulation double\_multiplier in Verilog con testbench}
+    \label{fig:SIM_TB_TIM}
+\end{figure*}
+\begin{figure*}
+    \centering
+    \subfloat[VHDL vs Verilog]{{\includegraphics[width=0.3\textwidth]{figures/tb_tim1} }}
+    \subfloat[VHDL and Verilog]{{\includegraphics[width=0.3\textwidth]{figures/tb_tim2} }}
+    \caption{Risultati testbench Post-Implementation}
+    \label{fig:SIM_TB_TIM_RES}
 \end{figure*}
 
-\begin{figure*}[bt]
-    \centering
-    \includegraphics[width=\textwidth]{figures/sim_systemc_rnd}
-    \caption{Simulazione double\_multiplier in SystemC con ``random test''}
-    \label{fig:SIM_SC_RND}
-\end{figure*}
+% \begin{figure*}[bt]
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/sim_systemc_target}
+%     \caption{Simulazione double\_multiplier in SystemC con ``targeted test''}
+%     \label{fig:SIM_SC_TARGET}
+% \end{figure*}
+
+% \begin{figure*}[bt]
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/sim_systemc_rnd}
+%     \caption{Simulazione double\_multiplier in SystemC con ``random test''}
+%     \label{fig:SIM_SC_RND}
+% \end{figure*}
 
 
 \end{document}

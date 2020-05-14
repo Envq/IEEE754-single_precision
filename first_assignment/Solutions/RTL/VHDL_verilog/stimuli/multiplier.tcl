@@ -17,7 +17,7 @@ add_force clk {1 0ns} {0 50ns} -repeat_every $PERIOD;
 run $PERIOD;
 add_force rst 1;
 
-#run $HALF_PERIOD;
+run $HALF_PERIOD;
 run $PERIOD;
 add_force rst 0;
 
