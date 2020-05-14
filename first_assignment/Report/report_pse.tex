@@ -255,7 +255,7 @@ In questo tesbench sono state messe a disposizione tre tipi di test differenti.
 \\Come mostrato in figura \ref{fig:SIM_SC_ERROR} il test fallisce in alcuni casi a causa del metodo di arrotondamento utilizzato. Essendoci però più metodi di arrotondamento usabili nello standard, è stato deciso di lasciare quello utilizzato in quanto più semplice.
 
 
-\subsection{Sintesi}
+\subsection{Sintesi e HLS}
 La sintesi è stata fatta per la scheda Pynq xc7z020clg400-1.
 \\In figura \ref{fig:UTIL_SYNT_VERILOG} e \ref{fig:UTIL_IMPL_VERILOG} si possono vedere i valori di utilizzo delle risorse post-syntesis e post-implementation del \textit{verilog\_multiplier}. L'unica differenza fra le due sono le 4 LTU in meno dopo l'implementazione. In figura \ref{fig:TIMING_VERILOG} si possono vedere i risultati di timing.
 \begin{figure}[!htb]
@@ -339,8 +339,20 @@ Si nota subito come la versione VDHL dia risultati migliori sia a livello di spa
     \label{fig:POWER_ONCHIP}
 \end{figure}
 
+In figura \ref{fig:HLS} sono riportati i risultati dell' High Level Syntesis. Sono state usate circa 100 LUT in più rispetto ai moltiplicatori in Verilog e VHDL, ma circa 10 FF in meno. 
+\begin{figure}[!htb]
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/hls}
+    \caption{Power on-Chip}
+    \label{fig:HLS}
+\end{figure}
+
+
 
 \section{Conclusioni}
+Il progetto è stato abbastanza impegnativo, ma stimolante. Ho imparato molte cose, tra cui la difficoltà di dimostrare la correttezza del sistema, più volte infatti sono dovuto ritornare sui miei passi, perchè ho inserito dei bug durante l'implementazione della EFSM o perchè non avevo pensato ad un determinato caso speciale. Sono soddisfatto dei risultati ottenuti dalla sintesi, anche se penso che si potrebbe fare di meglio dal punto di vista del tempo. Sono poi rimasto particolarmente sorpreso dei risultati ottenuti con la HLS che pensavo sarebbero stati molto peggiori.
+
+
 
 \nocite{*}
 \bibliographystyle{IEEEtran}
