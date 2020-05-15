@@ -137,7 +137,7 @@ begin
                 elsif ((exp_tmp(9 downto 8) = "00") AND (mant_tmp(22) = '1')) then
                     NEXT_STATE <= ST_ROUND;
                     
-                elsif (((exp_tmp + 48) < "1000000000")) then
+                elsif (((exp_tmp + 21) < "1000000000")) then
                     NEXT_STATE <= ST_SHIFTR;
             
                 else

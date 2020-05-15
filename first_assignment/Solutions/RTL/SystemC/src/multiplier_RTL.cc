@@ -139,7 +139,7 @@ void MultiplierModule::fsm() {
                  (mant_tmp.read()[22] == 1))
             NEXT_STATE = ST_ROUND;
 
-        else if (((exp_tmp.read().to_int() + 48) >= 0))
+        else if (((exp_tmp.read().to_int() + 21) >= 0))
             NEXT_STATE = ST_SHIFTR;
 
         else

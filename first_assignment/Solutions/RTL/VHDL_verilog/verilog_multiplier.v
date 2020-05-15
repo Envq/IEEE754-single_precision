@@ -136,7 +136,7 @@ begin
             else if ((exp_tmp[9:8] == 2'b00) && (mant_tmp[22] == 1'b1))             // exp_tmp == 00..  && exp_tmp != 0
                 NEXT_STATE <= ST_ROUND;                                             // need to round   
                 
-            else if (((exp_tmp + 10'd48) < 10'b1000000000))                         // exp_tmp == 1x.. && exp_tmp+48 >= 0
+            else if (((exp_tmp + 10'd21) < 10'b1000000000))                         // exp_tmp == 1x.. && exp_tmp+48 >= 0
                 NEXT_STATE <= ST_SHIFTR;                                            // create subnorm if possible
         
             else                                                                    // exp_tmp == 1x.. && exp_tmp+48 < 0

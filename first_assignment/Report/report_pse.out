@@ -13,7 +13,8 @@
 \BOOKMARK [2][-]{subsection.4.1}{Simulazioni con script TCL}{section.4}% 13
 \BOOKMARK [2][-]{subsection.4.2}{Simulazione con testbench in Verilog}{section.4}% 14
 \BOOKMARK [2][-]{subsection.4.3}{Simulazione con testbench in SystemC}{section.4}% 15
-\BOOKMARK [2][-]{subsection.4.4}{Sintesi e HLS}{section.4}% 16
-\BOOKMARK [1][-]{section.5}{Conclusioni}{}% 17
-\BOOKMARK [1][-]{section*.16}{Riferimenti bibliografici}{}% 18
-\BOOKMARK [1][-]{section*.17}{Appendice}{}% 19
+\BOOKMARK [2][-]{subsection.4.4}{Sintesi double\137multiplier}{section.4}% 16
+\BOOKMARK [2][-]{subsection.4.5}{Sintesi multiplier e HLS}{section.4}% 17
+\BOOKMARK [1][-]{section.5}{Conclusioni}{}% 18
+\BOOKMARK [1][-]{section*.20}{Riferimenti bibliografici}{}% 19
+\BOOKMARK [1][-]{section*.21}{Appendice}{}% 20

@@ -6,7 +6,7 @@ module testbench();
     reg[31:0] op1, op2;
     wire[31:0] res;
     wire done;
-    parameter PERIOD = 10;
+    parameter PERIOD = 10.0;
     parameter NUM_TEST = 20;
     reg [31:0] mem [0:NUM_TEST*3-1]; 
     integer i;
@@ -115,14 +115,14 @@ initial begin
     mem[53] = 32'b00000000010000000000000000000000; //5.87747175411e-39 (DENORM) 
     
     // Test 19
-    mem[54] = 32'b01000001010110000000000000000000; //13.5
-    mem[55] = 32'b00111111100000000000000000000000; //1.0
-    mem[56] = 32'b01000001010110000000000000000000; //13.5
+    mem[57] = 32'b01000001010110000000000000000000; //13.5
+    mem[58] = 32'b00111111100000000000000000000000; //1.0
+    mem[59] = 32'b01000001010110000000000000000000; //13.5
          
     // Test 20
-    mem[57] = 32'b01000000000000000000000000000000; //2.0
-    mem[58] = 32'b01000000001000000000000000000000; //2.5
-    mem[59] = 32'b01000000101000000000000000000000; //5.0 
+    mem[54] = 32'b01000000000000000000000000000000; //2.0
+    mem[55] = 32'b01000000001000000000000000000000; //2.5
+    mem[56] = 32'b01000000101000000000000000000000; //5.0 
 end
 
 
@@ -192,12 +192,12 @@ begin
         if (res == mem[i+2])
             $display("TEST VERILOG %d OK", 1+i/3);
         else
-            $display("TEST VERILOG %d FAILED -> res= %b", 1+i/3, res);
+            $display("TEST VERILOG %d FAILED -> res= %b -> correct= %b", 1+i/3, res, mem[i+2]);
         #PERIOD;
         if (res == mem[i+5])
             $display("TEST VHDL    %d OK", 2+i/3);
-        else
-            $display("TEST VHDL    %d FAILED -> res= %b", 2+i/3, res);  
+        else 
+            $display("TEST VHDL    %d FAILED -> res= %b -> correct= %b", 2+i/3, res, mem[i+5]);    
         #(PERIOD/2);      
         i = i + 6;
     end
