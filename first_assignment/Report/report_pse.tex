@@ -263,10 +263,10 @@ La sintesi è stata fatta per la scheda Pynq xc7z020clg400-1.
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/util_synt_dm}
-    \caption{Valori di utilizzo risorse post syntesis del \textit{double\_multiplier}}
+    \caption{Valori di utilizzo risorse post-syntesis del \textit{double\_multiplier}}
     \label{fig:UTIL_SYNT_DM}
 \end{figure}
-\\Il periodo di clock minimo raggiungibile prima che WNS diventi negativo (e che quindi avvengano violazioni) è 8ns. Con questo valore la simulazione post-implementation funzionale funziona, ma quella post-implementation del tempo da valori sbagliati. Per questo motivo è stato usato come periodo di clock minimo 10ns. \\Nelle figure \ref{fig:TIMING_DM_8}, \ref{fig:TIMING_DM_8} e \ref{fig:TIMING_DM_8} sono mostrati i valori riguardanti le risorse di tempo utilizzate post-implementation che risultato essere peggiori con l'aumentare del periodo di clock.
+\\Il periodo di clock minimo raggiungibile prima che WNS diventi negativo (e che quindi avvengano violazioni) è 8ns. Con questo valore la simulazione post-implementation funzionale funziona, ma quella post-implementation del tempo da valori sbagliati. Per questo motivo è stato usato come periodo di clock minimo 10ns. \\Nelle figure \ref{fig:TIMING_DM_8}, \ref{fig:TIMING_DM_9} e \ref{fig:TIMING_DM_10} sono mostrati i valori riguardanti le risorse di tempo utilizzate post-implementation che risultato essere peggiori con l'aumentare del periodo di clock.
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=1.0\linewidth]{figures/8-timing}
@@ -289,19 +289,19 @@ La sintesi è stata fatta per la scheda Pynq xc7z020clg400-1.
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/8-util_impl}
-    \caption{valori di utilizzo risorse post implementation del \textit{double\_multiplier} con periodo minimo di 8ns}
+    \caption{valori di utilizzo risorse post-implementation del \textit{double\_multiplier} con periodo minimo di 8ns}
     \label{fig:UTIL_IMPL_DM_8}
 \end{figure}
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/9-util_impl}
-    \caption{valori di utilizzo risorse post implementation del \textit{double\_multiplier} con periodo minimo di 9ns}
+    \caption{valori di utilizzo risorse post-implementation del \textit{double\_multiplier} con periodo minimo di 9ns}
     \label{fig:UTIL_IMPL_DM_9}
 \end{figure}
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/10-util_impl}
-    \caption{valori di utilizzo risorse post implementation del \textit{double\_multiplier} con periodo minimo di 10ns}
+    \caption{valori di utilizzo risorse post-implementation del \textit{double\_multiplier} con periodo minimo di 10ns}
     \label{fig:UTIL_IMPL_DM_10}
 \end{figure}
 \\Nelle figure \ref{fig:POWER_SUMMARY} e \ref{fig:POWER_ONCHIP} si possono vedere i valori di potenza.
@@ -331,13 +331,13 @@ Nelle figure \ref{fig:UTIL_SYNT_VERILOG} e \ref{fig:UTIL_IMPL_VERILOG} sono most
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/util_synt_verilog}
-    \caption{Valori di utilizzo risorse post syntesis del \textit{verilog\_multiplier}}
+    \caption{Valori di utilizzo risorse post-syntesis del \textit{verilog\_multiplier}}
     \label{fig:UTIL_SYNT_VERILOG}
 \end{figure}
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/util_impl_verilog}
-    \caption{valori di utilizzo risorse post implementation del \textit{verilog\_multiplier}}
+    \caption{valori di utilizzo risorse post-implementation del \textit{verilog\_multiplier}}
     \label{fig:UTIL_IMPL_VERILOG}
 \end{figure}
 \begin{figure}[!htb]
@@ -350,13 +350,13 @@ Nelle figure \ref{fig:UTIL_SYNT_VERILOG} e \ref{fig:UTIL_IMPL_VERILOG} sono most
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/util_synt_vhdl}
-    \caption{Valori di utilizzo risorse post syntesis del \textit{vhdl\_multiplier}}
+    \caption{Valori di utilizzo risorse post-syntesis del \textit{vhdl\_multiplier}}
     \label{fig:UTIL_SYNT_VHDL}
 \end{figure}
 \begin{figure}[!htb]
     \centering
     \includegraphics[width=0.9\linewidth]{figures/util_impl_vhdl}
-    \caption{valori di utilizzo risorse post implementation del \textit{vhdl\_multiplier}}
+    \caption{valori di utilizzo risorse post-implementation del \textit{vhdl\_multiplier}}
     \label{fig:UTIL_IMPL_VHDL}
 \end{figure}
 \begin{figure}[!htb]
@@ -377,7 +377,7 @@ Nelle figure \ref{fig:UTIL_SYNT_VERILOG} e \ref{fig:UTIL_IMPL_VERILOG} sono most
 
 
 \section{Conclusioni}
-Il progetto è stato abbastanza impegnativo, ma stimolante. Ho imparato molte cose, tra cui la difficoltà di dimostrare la correttezza del sistema, più volte infatti sono dovuto ritornare sui miei passi, perchè ho inserito dei bug durante l'implementazione della EFSM o perchè non avevo pensato a determinati casi speciali. Sono soddisfatto dei risultati ottenuti dalla sintesi, anche se penso che si potrebbe fare di meglio dal punto di vista del tempo. Sono poi rimasto particolarmente sorpreso dei risultati ottenuti con la HLS che pensavo sarebbero stati molto peggio.
+Il progetto è stato abbastanza impegnativo, ma stimolante. Ho imparato molte cose, tra cui la difficoltà di dimostrare la correttezza del sistema, più volte infatti sono dovuto ritornare sui miei passi, perchè ho inserito dei bug durante l'implementazione della EFSM o perchè non avevo pensato a determinati casi speciali. Sono soddisfatto dei risultati ottenuti dalla sintesi, anche se penso che si possa fare ancora meglio dal punto di vista del tempo. Sono poi rimasto particolarmente sorpreso dei risultati ottenuti con la HLS che pensavo sarebbero stati peggiori.
 
 
 
