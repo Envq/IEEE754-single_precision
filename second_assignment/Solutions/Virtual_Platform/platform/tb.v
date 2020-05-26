@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: UniVr
-// Engineer: Centomo Stefano
+// Engineer: Centomo Stefano, Sgarbanti Enrico
 // 
 // Create Date: 04.11.2019 12:07:40
 // Design Name: Testbench
@@ -87,13 +87,26 @@ module tb;
         
         #20;
         rst = 1'b0;
+              
         
         // When data request (din_req) set din port 
         while(~din_req)begin #20; end
-        din = 32'd6;
+        din = 32'h40200000; //2.5
         din_rdy = 1'd1;
-        #100000;
-        // 
+        
+        // First result
+        while(dout_rdy != 1'b1)begin #20; end
+        $display("first result: %h", dout);
+        
+        // Wait dout_rdy==0
+        while(dout_rdy != 1'b0)begin #20; end
+        
+        // Second result
+        while(dout_rdy != 1'b1)begin #20; end
+        $display("second result: %h", dout);
+        
+        
+        #1000000;
         
     end
 endmodule

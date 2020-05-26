@@ -1,6 +1,7 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Company: 
+// Company: UniVr
+// Engineer: Centomo Stefano, Sgarbanti Enrico
 // Create Date: 09.11.2019 15:06:45
 // Design Name: 
 // Module Name: top_level
@@ -76,6 +77,26 @@ module top_level(
     wire [31:0] apb_2_pwdata;
     wire        apb_2_pready;
     wire [31:0] apb_2_prdata;
+    
+    wire        apb_3_pclk;
+    wire        apb_3_presetn;
+    wire [31:0] apb_3_paddr;
+    wire        apb_3_psel;
+    wire        apb_3_penable;
+    wire        apb_3_pwrite;
+    wire [31:0] apb_3_pwdata;
+    wire        apb_3_pready;
+    wire [31:0] apb_3_prdata;
+    
+    wire        apb_4_pclk;
+    wire        apb_4_presetn;
+    wire [31:0] apb_4_paddr;
+    wire        apb_4_psel;
+    wire        apb_4_penable;
+    wire        apb_4_pwrite;
+    wire [31:0] apb_4_pwdata;
+    wire        apb_4_pready;
+    wire [31:0] apb_4_prdata;
     
     //add new wire for the bus
     
@@ -168,7 +189,25 @@ module top_level(
                         .apb_2_pwrite(apb_2_pwrite),
                         .apb_2_pwdata(apb_2_pwdata),
                         .apb_2_pready(apb_2_pready),
-                        .apb_2_prdata(apb_2_prdata)
+                        .apb_2_prdata(apb_2_prdata),
+                        .apb_3_pclk(apb_3_pclk),
+                        .apb_3_presetn(apb_3_presetn),
+                        .apb_3_paddr(apb_3_paddr),
+                        .apb_3_psel(apb_3_psel),
+                        .apb_3_penable(apb_3_penable),
+                        .apb_3_pwrite(apb_3_pwrite),
+                        .apb_3_pwdata(apb_3_pwdata),
+                        .apb_3_pready(apb_3_pready),
+                        .apb_3_prdata(apb_3_prdata),
+                        .apb_4_pclk(apb_4_pclk),
+                        .apb_4_presetn(apb_4_presetn),
+                        .apb_4_paddr(apb_4_paddr),
+                        .apb_4_psel(apb_4_psel),
+                        .apb_4_penable(apb_4_penable),
+                        .apb_4_pwrite(apb_4_pwrite),
+                        .apb_4_pwdata(apb_4_pwdata),
+                        .apb_4_pready(apb_4_pready),
+                        .apb_4_prdata(apb_4_prdata)
                         );
     
     //------------------------------------------------------
@@ -203,10 +242,31 @@ module top_level(
 		.dout_rdy(dout_rdy),
 		.din_req(din_req)
     );                       
-     
-     //------------------------------------------------------
-     // ADD your floating point Multiplier here! 
-     // Pay attention on clock.... ;)  
-     //------------------------------------------------------       
+    
+    //------------------------------------------------------
+    // FloatMultiplier
+    //------------------------------------------------------                    
+    float_multiplier_apb_wrapper float_multiplier(      .pclk(apb_3_pclk),
+                                                        .presetn(apb_3_presetn),
+                                                        .paddr(apb_3_paddr),
+                                                        .psel(apb_3_psel),
+                                                        .penable(apb_3_penable),
+                                                        .pwrite(apb_3_pwrite),  
+                                                        .pwdata(apb_3_pwdata),
+                                                        .pready(apb_3_pready),
+                                                        .prdata(apb_3_prdata));   
+    
+    //------------------------------------------------------
+    // DoubleMultiplier
+    //------------------------------------------------------                    
+    double_multiplier_apb_wrapper double_multiplier(    .pclk(apb_4_pclk),
+                                                        .presetn(apb_4_presetn),
+                                                        .paddr(apb_4_paddr),
+                                                        .psel(apb_4_psel),
+                                                        .penable(apb_4_penable),
+                                                        .pwrite(apb_4_pwrite),  
+                                                        .pwdata(apb_4_pwdata),
+                                                        .pready(apb_4_pready),
+                                                        .prdata(apb_4_prdata));   
                
 endmodule
