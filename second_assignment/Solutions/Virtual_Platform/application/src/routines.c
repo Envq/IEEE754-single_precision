@@ -153,6 +153,9 @@ void double_multiplier(uint32_t op1, uint32_t op2, uint32_t op3, uint32_t op4,
   // Disable the operation.
   set_penable(0);
 
+  // Enable op4 read.
+  set_penable(1);
+  
   // stay here until prdata_rdy is ready.
   while (get_pready() == 0)
     __asm__("nop");

@@ -19,7 +19,7 @@ module double_multiplier_apb_wrapper(pclk, presetn, paddr, psel, penable, pwrite
     output reg[31:0] prdata;
     
     // states
-    parameter ST_WAIT1=0, ST_READ1=1, ST_WAIT2=2, ST_READ2=3, ST_WAIT3=4, ST_READ3=5, ST_WAIT4=6, ST_ELAB1=7, ST_ELAB2=8, ST_RET0=9, ST_RET1=10, ST_WAIT5=11, ST_RET2=12;
+    parameter ST_WAIT1=0, ST_READ1=1, ST_WAIT2=2, ST_READ2=3, ST_WAIT3=4, ST_READ3=5, ST_WAIT4=6, ST_READ4=7, ST_ELAB1=8, ST_ELAB2=9, ST_RET0=10, ST_RET1=11, ST_ACK=12, ST_RET2=13;
     reg[3:0] STATE;
     reg[3:0] NEXT_STATE = ST_WAIT1;
     
@@ -28,8 +28,8 @@ module double_multiplier_apb_wrapper(pclk, presetn, paddr, psel, penable, pwrite
     reg [31:0] op1_tmp, op2_tmp, op3_tmp, op4_tmp, res_tmp;
     reg ready;
     wire done;
-    wire [31:0] res1, res2;
-
+    wire [31:0] res;
+    
     double_multiplier dm(
         .clk(pclk),
         .rst(presetn),
@@ -89,9 +89,13 @@ begin
         
         ST_WAIT4: begin
             if (penable == 1'b1)
-                NEXT_STATE <= ST_ELAB1;
+                NEXT_STATE <= ST_READ4;
             else
                 NEXT_STATE <= STATE;
+        end
+        
+        ST_READ4: begin
+            NEXT_STATE <= ST_ELAB1;
         end
         
         ST_ELAB1: begin
@@ -100,7 +104,7 @@ begin
         
         ST_ELAB2: begin
             if (done == 1'b1)
-                NEXT_STATE <= ST_RET1;
+                NEXT_STATE <= ST_RET0;
             else
                 NEXT_STATE <= STATE;
         end
@@ -111,13 +115,13 @@ begin
         
         ST_RET1: begin
             if (penable == 1'b0)
-                NEXT_STATE <= ST_WAIT3;
+                NEXT_STATE <= ST_ACK;
             else
                 NEXT_STATE <= STATE;
         end
         
-        ST_WAIT5: begin
-            if (done == 1'b1)
+        ST_ACK: begin
+            if (penable == 1'b1)
                 NEXT_STATE <= ST_RET2;
             else
                 NEXT_STATE <= STATE;
@@ -192,11 +196,14 @@ begin
                 // Do nothing
             end
             
-            ST_ELAB1: begin
+            ST_READ4: begin
                 op4_tmp <= pwdata;
+                ready <= 1'b1;
+            end
+            
+            ST_ELAB1: begin
                 op1 <= op1_tmp;
                 op2 <= op2_tmp;
-                ready <= 1'b1;
             end
             
             ST_ELAB2: begin
@@ -205,17 +212,17 @@ begin
             end
             
             ST_RET0: begin
+                ready <= 1'b0;
                 pready <= 1'b1;
                 prdata <= res;
-                ready <= 1'b0;
             end
             
             ST_RET1: begin
                 res_tmp <= res;
             end
             
-            ST_WAIT5: begin
-                // Do nothing
+            ST_ACK: begin
+                pready <= 1'b0;
             end
             
             ST_RET2: begin
