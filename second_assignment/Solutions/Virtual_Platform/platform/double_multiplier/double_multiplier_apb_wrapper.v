@@ -19,7 +19,7 @@ module double_multiplier_apb_wrapper(pclk, presetn, paddr, psel, penable, pwrite
     output reg[31:0] prdata;
     
     // states
-    parameter ST_WAIT1=0, ST_READ1=1, ST_WAIT2=2, ST_READ2=3, ST_WAIT3=4, ST_READ3=5, ST_WAIT4=6, ST_READ4=7, ST_ELAB1=8, ST_ELAB2=9, ST_RET0=10, ST_RET1=11, ST_ACK=12, ST_RET2=13;
+    parameter ST_WAIT1=0, ST_READ1=1, ST_WAIT2=2, ST_READ2=3, ST_WAIT3=4, ST_READ3=5, ST_WAIT4=6, ST_READ4=7, ST_ELAB1=8, ST_ELAB2=9, ST_RET0=10, ST_RET1=11, ST_WAIT5=12, ST_RET2=13;
     reg[3:0] STATE;
     reg[3:0] NEXT_STATE = ST_WAIT1;
     
@@ -115,12 +115,12 @@ begin
         
         ST_RET1: begin
             if (penable == 1'b0)
-                NEXT_STATE <= ST_ACK;
+                NEXT_STATE <= ST_WAIT5;
             else
                 NEXT_STATE <= STATE;
         end
         
-        ST_ACK: begin
+        ST_WAIT5: begin
             if (penable == 1'b1)
                 NEXT_STATE <= ST_RET2;
             else
@@ -221,7 +221,7 @@ begin
                 res_tmp <= res;
             end
             
-            ST_ACK: begin
+            ST_WAIT5: begin
                 pready <= 1'b0;
             end
             
