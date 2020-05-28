@@ -1,7 +1,7 @@
 #ifndef define_h
 #define define_h
 
-#define DEBUG 0
+#define DEBUG 1
 #define TESTNUM 1000000
 
 #include <bitset>
