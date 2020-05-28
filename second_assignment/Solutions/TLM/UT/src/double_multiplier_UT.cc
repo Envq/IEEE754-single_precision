@@ -44,13 +44,13 @@ unsigned int MultiplierModule::transport_dbg(tlm::tlm_generic_payload &trans) {
 
 // Private:
 void MultiplierModule::dm_function() {
-    tmp_op1 = binary_to_float(ioDataStruct.op1.to_string());
-    tmp_op2 = binary_to_float(ioDataStruct.op2.to_string());
-    tmp_op3 = binary_to_float(ioDataStruct.op3.to_string());
-    tmp_op4 = binary_to_float(ioDataStruct.op4.to_string());
-
-    tmp_res1 = float_to_binary(tmp_op1 * tmp_op2).c_str();
-    tmp_res2 = float_to_binary(tmp_op3 * tmp_op4).c_str();
+    tmp_op1 = uint_to_float(ioDataStruct.op1.to_uint());
+    tmp_op2 = uint_to_float(ioDataStruct.op2.to_uint());
+    tmp_op3 = uint_to_float(ioDataStruct.op3.to_uint());
+    tmp_op4 = uint_to_float(ioDataStruct.op4.to_uint());
+    
+    tmp_res1 = float_to_uint(tmp_op1 * tmp_op2);
+    tmp_res2 = float_to_uint(tmp_op3 * tmp_op4);
 }
 
 void MultiplierModule::end_of_elaboration() {

@@ -6,6 +6,7 @@ FILE_MAIN=main_${ABSTRACTION_LEVEL}
 FILE_TEST=testbench_${ABSTRACTION_LEVEL}
 FILE1=double_multiplier_${ABSTRACTION_LEVEL}
 FILE2=multiplier_${ABSTRACTION_LEVEL}
+FILE_OTHER=define_${ABSTRACTION_LEVEL}
 
 SYSTEMC=$$SYSTEMC_HOME
 
@@ -41,7 +42,7 @@ obj/$(FILE_MAIN).o: src/$(FILE_MAIN).cc include/$(FILE_TEST).hh include/$(FILE1)
 	@echo Building $@
 	$(CXX) -g $(CFLAGS) $(INCDIR) -o $@ $< 
 
-obj/$(FILE_TEST).o: src/$(FILE_TEST).cc include/$(FILE_TEST).hh
+obj/$(FILE_TEST).o: src/$(FILE_TEST).cc include/$(FILE_TEST).hh include/$(FILE_OTHER).hh
 	@echo Building $@
 	$(CXX) -g $(CFLAGS) $(INCDIR) -o $@ $< 
 

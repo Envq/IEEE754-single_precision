@@ -17,19 +17,20 @@ struct iostruct {
     sc_lv<32> res2;
 };
 
-static float binary_to_float(const std::string &val_str) {
-    uint32_t val = std::bitset<32>(val_str).to_ulong();
-    return *reinterpret_cast<float *>(&val);
+
+union {
+    float floating_point;
+    uint32_t unsigned_int;
+} convertitor32;
+
+static float uint_to_float(const uint32_t &val) {
+    convertitor32.unsigned_int = val;
+    return convertitor32.floating_point;
 }
 
-static std::string float_to_binary(const float &value) {
-    union {
-        float input;
-        int output;
-    } data;
-
-    data.input = value;
-    return std::bitset<sizeof(float) * 8>(data.output).to_string();
+static uint32_t float_to_uint(const float &val) {
+    convertitor32.floating_point = val;
+    return convertitor32.unsigned_int;
 }
 
 #define ADDRESS_TYPE int
