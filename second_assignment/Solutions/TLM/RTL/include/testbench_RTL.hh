@@ -2,8 +2,7 @@
 #define TB_H
 
 #define PERIOD 10
-#define TESTS_NUM 500000
-
+#define TESTS_NUM 1000000
 
 #include <systemc.h>
 
@@ -23,7 +22,7 @@ class TestbenchModule : public sc_core::sc_module {
 
   private:
     void clk_gen();
-    void rnd_test();
+    void run();
 };
 
 #endif

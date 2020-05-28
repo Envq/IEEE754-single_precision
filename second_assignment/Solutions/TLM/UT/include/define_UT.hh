@@ -1,13 +1,19 @@
 #ifndef define_h
 #define define_h
 
+#define DEBUG 0
+#define TESTNUM 1000000
+
 #include <bitset>
 #include <systemc.h>
 
 struct iostruct {
     sc_lv<32> op1;
     sc_lv<32> op2;
-    sc_lv<32> result;
+    sc_lv<32> op3;
+    sc_lv<32> op4;
+    sc_lv<32> res1;
+    sc_lv<32> res2;
 };
 
 static float binary_to_float(const std::string &val_str) {

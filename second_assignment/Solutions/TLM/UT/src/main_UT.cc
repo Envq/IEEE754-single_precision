@@ -1,18 +1,16 @@
-#include "multiplier_UT.hh"
+#include "double_multiplier_UT.hh"
 #include "testbench_UT.hh"
 
 class TopModule : public sc_module {
-
-private:
+  private:
     MultiplierModule m_target;
     TestbenchModule m_initiator;
 
-public:
+  public:
     TopModule(const sc_module_name &name)
         : sc_module(name), m_target("target"), m_initiator("initiator") {
         m_initiator.initiator_socket(m_target.target_socket);
     }
-
 };
 
 

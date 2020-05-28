@@ -4,10 +4,9 @@
 MultiplierModule::MultiplierModule(const sc_module_name &module_name)
     : sc_module(module_name), clk("clk"), rst("rst"), ready("ready"),
       op1("op1"), op2("op2"), done("done"), res("res") {
-
     SC_METHOD(fsm);
     sensitive << STATE << ready << exp1 << mant1 << exp2 << mant2 << exp_tmp
-              << mant_tmp;              
+              << mant_tmp;
     SC_METHOD(datapath);
     sensitive << clk.pos() << rst.pos();
 }
@@ -221,19 +220,20 @@ void MultiplierModule::datapath() {
             break;
 
         case ST_SNAN2:
-            res.write((sign2.read(), sc_lv<9>(511), mant2.read().range(21,0)));
+            res.write((sign2.read(), sc_lv<9>(511), mant2.read().range(21, 0)));
             break;
 
         case ST_SNAN1:
-            res.write((sign1.read(), sc_lv<9>(511), mant1.read().range(21,0)));
+            res.write((sign1.read(), sc_lv<9>(511), mant1.read().range(21, 0)));
             break;
 
-        case ST_ZERO:            
+        case ST_ZERO:
             res.write(((sign1.read() xor sign2.read()), sc_lv<31>(0)));
             break;
 
         case ST_INF:
-            res.write(((sign1.read() xor sign2.read()), sc_lv<8>(255), sc_lv<23>(0)));
+            res.write(
+                ((sign1.read() xor sign2.read()), sc_lv<8>(255), sc_lv<23>(0)));
             break;
 
         case ST_ADJ3:
@@ -281,12 +281,14 @@ void MultiplierModule::datapath() {
             break;
 
         case ST_ROUND:
-            mant_tmp.write((sc_lv<25>(mant_tmp.read().range(47, 23).to_uint() + 1),
-                            mant_tmp.read().range(22, 0)));
+            mant_tmp.write(
+                (sc_lv<25>(mant_tmp.read().range(47, 23).to_uint() + 1),
+                 mant_tmp.read().range(22, 0)));
             break;
 
         case ST_WRITE:
-            res.write(((sign1.read() xor sign2.read()), exp_tmp.read().range(7, 0),
+            res.write(((sign1.read() xor sign2.read()),
+                       exp_tmp.read().range(7, 0),
                        mant_tmp.read().range(45, 23)));
             break;
 

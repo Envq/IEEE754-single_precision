@@ -1,8 +1,6 @@
 #ifndef TB_H
 #define TB_H
 
-#define TESTS_NUM 500000
-
 #include "define_LT.hh"
 #include <random>
 #include <systemc.h>

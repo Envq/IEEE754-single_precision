@@ -17,8 +17,9 @@ class MultiplierModule : public sc_core::sc_module,
     iostruct ioDataStruct;
     tlm::tlm_generic_payload *pending_transaction;
     sc_event io_event;
-    sc_lv<32> tmp_result;
-    float tmp_op1, tmp_op2;
+    sc_lv<32> tmp_res1;
+    sc_lv<32> tmp_res2;
+    float tmp_op1, tmp_op2, tmp_op3, tmp_op4;
 
     virtual void b_transport(tlm::tlm_generic_payload &trans, sc_time &t);
 
@@ -32,7 +33,7 @@ class MultiplierModule : public sc_core::sc_module,
     virtual unsigned int transport_dbg(tlm::tlm_generic_payload &trans);
 
     void IOPROCESS();
-    void multiplier_function();
+    void dm_function();
     void end_of_elaboration();
     void reset();
 };

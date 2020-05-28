@@ -5,8 +5,8 @@ TestbenchModule::TestbenchModule(sc_module_name name) : sc_module(name) {
     initiator_socket(*this);
     SC_THREAD(run);
 
-    m_qk.set_global_quantum(sc_time(500, SC_NS));
-    m_qk.reset();
+    m_qk.set_global_quantum(sc_time(DELAY*5, SC_NS));  // set the global quantum
+    m_qk.reset();                                    // reset the local quantum
 }
 
 void TestbenchModule::invalidate_direct_mem_ptr(uint64 start_range,
@@ -22,39 +22,62 @@ TestbenchModule::nb_transport_bw(tlm::tlm_generic_payload &trans,
 void TestbenchModule::run() {
     // TLM settings
     sc_time local_time = m_qk.get_local_time();
-    iostruct mult_packet;
+    iostruct dm_packet;
     tlm::tlm_generic_payload payload;
 
     // Random settings
     std::random_device seed;
-    std::minstd_rand generator1(seed());
+    std::minstd_rand generator(seed());
     std::uniform_real_distribution<float> random_float(
         sqrt(std::numeric_limits<float>::min()),
         sqrt(std::numeric_limits<float>::max()));
 
 
-    for (int i = 0; i < TESTS_NUM; i++) {
-        mult_packet.op1 = float_to_binary(random_float(generator1)).c_str();
-        mult_packet.op2 = float_to_binary(random_float(generator1)).c_str();
+    for (int i = 0; i < (DEBUG ? 1 : TESTNUM); i++) {
+        dm_packet.op1 = float_to_binary(random_float(generator)).c_str();
+        dm_packet.op2 = float_to_binary(random_float(generator)).c_str();
+        dm_packet.op3 = float_to_binary(random_float(generator)).c_str();
+        dm_packet.op4 = float_to_binary(random_float(generator)).c_str();
+        if (DEBUG) {
+            dm_packet.op1 = "01000000000000000000000000000000";  // 2.0
+            dm_packet.op2 = "01000000010000000000000000000000";  // 3.0
+            dm_packet.op3 = "01000000101000000000000000000000";  // 5.0
+            dm_packet.op4 = "00111111000000000000000000000000";  // 0.5
+            cout << "[TB:] Want to performe double_multiplication" << endl;
+        }
 
-        payload.set_data_ptr((unsigned char *)&mult_packet);
+        payload.set_data_ptr((unsigned char *)&dm_packet);
         payload.set_address(0);
         payload.set_write();
 
-        local_time = m_qk.get_local_time();
+        // update the local time variable to send it to the target
+        local_time = m_qk.get_local_time();  // retrive current local time
 
         // start write transaction
+        if (DEBUG) cout << "[TB:] Invoking the b_transport primitive" << endl;
         initiator_socket->b_transport(payload, local_time);
 
         // start read transaction
-        if (payload.get_response_status() == tlm::TLM_OK_RESPONSE) {
-            // cout << "\t is: " << root_packet.result << endl;
+        if (payload.get_response_status() == tlm::TLM_OK_RESPONSE && DEBUG) {
+            cout << "[TB:] Results are: " << endl;
+            cout << "\t 1): " << dm_packet.res1 << " => "
+                 << binary_to_float(dm_packet.res1.to_string()) << endl;
+            cout << "\t 2): " << dm_packet.res2 << " => "
+                 << binary_to_float(dm_packet.res2.to_string()) << endl
+                 << endl;
         }
-        
-        // cout << "Time: " << sc_time_stamp() << " + " << local_time << endl;
-        m_qk.set(local_time);
-        if (m_qk.need_sync()) {
-            m_qk.sync();
+
+
+        // temporal decoupling> get time and check if we have to synchronize
+        // with the target
+        if (DEBUG) cout << "Time: " << sc_time_stamp() << " + " << local_time << endl
+             << "----------------------------------------------------" << endl;
+        m_qk.set(local_time);    // time consumed by transport
+        if (m_qk.need_sync()) {  // check local time against quantum
+            m_qk.sync();         // synchronize if necessary
+            if (DEBUG) cout << "SYNCHRONIZING" << endl
+                 << "####################################################"
+                 << endl;
         }
     }
 

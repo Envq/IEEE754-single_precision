@@ -1,4 +1,4 @@
-#include "multiplier_LT.hh"
+#include "double_multiplier_LT.hh"
 #include "testbench_LT.hh"
 
 class TopModule : public sc_module {

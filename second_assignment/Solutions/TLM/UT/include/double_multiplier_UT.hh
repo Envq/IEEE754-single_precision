@@ -16,22 +16,22 @@ class MultiplierModule : public sc_core::sc_module,
   private:
     iostruct ioDataStruct;
     tlm::tlm_generic_payload *pending_transaction;
-    sc_lv<32> tmp_result;
-    float tmp_op1, tmp_op2;
+    sc_lv<32> tmp_res1;
+    sc_lv<32> tmp_res2;
+    float tmp_op1, tmp_op2, tmp_op3, tmp_op4;
 
     virtual void b_transport(tlm::tlm_generic_payload &trans, sc_time &t);
 
     virtual bool get_direct_mem_ptr(tlm::tlm_generic_payload &trans,
                                     tlm::tlm_dmi &dmi_data);
 
-    virtual tlm::tlm_sync_enum nb_transport_fw(tlm::tlm_generic_payload
-    &trans,
+    virtual tlm::tlm_sync_enum nb_transport_fw(tlm::tlm_generic_payload &trans,
                                                tlm::tlm_phase &phase,
                                                sc_time &t);
 
     virtual unsigned int transport_dbg(tlm::tlm_generic_payload &trans);
 
-    void multiplier_function();
+    void dm_function();
     void end_of_elaboration();
     void reset();
 };

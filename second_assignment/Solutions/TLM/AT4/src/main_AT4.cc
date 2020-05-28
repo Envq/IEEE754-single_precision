@@ -1,4 +1,4 @@
-#include "multiplier_AT4.hh"
+#include "double_multiplier_AT4.hh"
 #include "testbench_AT4.hh"
 
 class TopModule : public sc_module {

@@ -1,10 +1,11 @@
-DESIGN_NAME=multiplier
+DESIGN_NAME=double_multiplier
 ABSTRACTION_LEVEL=RTL
 
 EXECUTABLE=bin/$(DESIGN_NAME)_$(ABSTRACTION_LEVEL).x
 FILE_MAIN=main_${ABSTRACTION_LEVEL}
 FILE_TEST=testbench_${ABSTRACTION_LEVEL}
-FILE_SRC=multiplier_${ABSTRACTION_LEVEL}
+FILE1=double_multiplier_${ABSTRACTION_LEVEL}
+FILE2=multiplier_${ABSTRACTION_LEVEL}
 
 SYSTEMC=$$SYSTEMC_HOME
 
@@ -32,11 +33,11 @@ LD=g++
 
 all: $(EXECUTABLE)
 
-$(EXECUTABLE):  obj/$(FILE_MAIN).o obj/$(FILE_TEST).o obj/$(FILE_SRC).o
+$(EXECUTABLE):  obj/$(FILE_MAIN).o obj/$(FILE_TEST).o obj/$(FILE1).o obj/$(FILE2).o
 	@echo Building $@
 	$(CXX) -g $(INCDIR) -o $@ $^ $(LIBDIR)/libsystemc.a -lpthread
 
-obj/$(FILE_MAIN).o: src/$(FILE_MAIN).cc include/$(FILE_TEST).hh include/$(FILE_SRC).hh
+obj/$(FILE_MAIN).o: src/$(FILE_MAIN).cc include/$(FILE_TEST).hh include/$(FILE1).hh include/$(FILE2).hh
 	@echo Building $@
 	$(CXX) -g $(CFLAGS) $(INCDIR) -o $@ $< 
 
@@ -44,7 +45,11 @@ obj/$(FILE_TEST).o: src/$(FILE_TEST).cc include/$(FILE_TEST).hh
 	@echo Building $@
 	$(CXX) -g $(CFLAGS) $(INCDIR) -o $@ $< 
 
-obj/$(FILE_SRC).o: src/$(FILE_SRC).cc include/$(FILE_SRC).hh
+obj/$(FILE1).o: src/$(FILE1).cc include/$(FILE1).hh include/$(FILE2).hh
+	@echo Building $@
+	$(CXX) -g $(CFLAGS) $(INCDIR) -o $@ $<
+
+obj/$(FILE2).o: src/$(FILE2).cc include/$(FILE2).hh
 	@echo Building $@
 	$(CXX) -g $(CFLAGS) $(INCDIR) -o $@ $<
 

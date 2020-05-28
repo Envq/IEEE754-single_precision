@@ -1,5 +1,5 @@
+#include "double_multiplier_RTL.hh"
 #include "testbench_RTL.hh"
-#include "multiplier_RTL.hh"
 
 
 
@@ -21,14 +21,14 @@ int sc_main(int argc, char *argv[]) {
     tb.op1(op1);
     tb.op2(op2);
 
-    MultiplierModule m("dut");
-    m.clk(clk);
-    m.rst(rst);
-    m.ready(ready);
-    m.op1(op1);
-    m.op2(op2);
-    m.done(done);
-    m.res(res);
+    DoubleMultiplierModule dm("dut");
+    dm.clk(clk);
+    dm.rst(rst);
+    dm.ready(ready);
+    dm.op1(op1);
+    dm.op2(op2);
+    dm.done(done);
+    dm.res(res);
 
     sc_start();
 

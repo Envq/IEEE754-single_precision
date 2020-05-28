@@ -1,5 +1,6 @@
 #!/bin/bash
 CMD=$1
+NAME=double_multiplier
 declare -a ABSTRACTION=("UT" "LT" "AT4" "RTL")
 
 
@@ -26,7 +27,7 @@ elif [ "$CMD" == "time" ]; then
     echo "COMMAND: time"
     for i in "${ABSTRACTION[@]}"; do
         echo -e "\n >> time of $i"
-        time ./$i/bin/multiplier_$i.x
+        time ./${i}/bin/${NAME}_${i}.x
     done
 
 else
