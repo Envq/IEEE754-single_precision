@@ -1,17 +1,18 @@
-# PSE
+# Floating-point IEEE 754 single precision
+
+**This is my project for the "Embedded & IoT systems design" course**
 
 
-LATEX:
-sudo apt install texmaker texlive-latex-extra texlive-fonts-recommended texlive-lang-italian
+In this project an RTL multiplier has been created in Verilog, VHDL and SystemC-RTL. It was then integrated into the COM6502-Splatters virtual platform and made in SystemC-TLM in various styles.
 
-VSCODE:
-latex-workshop by james yu
+---
+## Author
 
-LATEXINDENT:
-sudo apt install texlive-extra-utils
-sudo apt install perl
-cpan
-install Log::Log4perl
-install YAML::Tiny
-install File::HomeDir
-install Log::Dispatch::File
+**Enrico Sgarbanti** [**@Envq**](https://github.com/Envq)
+
+**ESD LAB UNIVR** for Splatters virtual platform
+
+---
+## License
+
+This project is licensed under the GPL v3 License - see the [LICENSE.md](LICENSE.md) file for details
