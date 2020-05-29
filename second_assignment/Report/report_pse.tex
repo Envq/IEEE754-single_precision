@@ -22,15 +22,16 @@
 
 
 \section{Introduzione}
-% work in progress
+Il primo obiettivo consiste nell'integrazione del modulo double\_multiplier creato nel \textit{first assignment} nella virtual platform COM6502-Splatters. Per far ciò è necessario creare un wrapper che collegi il componente al bus AMBA APB e il driver per poterlo utilizzare dal lato software.
+\\L'altro obiettivo del progetto è implementare il componente double\_multipliere nei vari stili di SystemC-TLM e fare con confronto con l'implementazione in SystemC-RTL. Ci si aspetta che con l'aumentare dell'accuratezza della descrizione temporale, la simulazione risulti più lunga.
 
 
 
 \section{Background}
 Nel classico flusso di progettazione di un sistema ciberfisico si parte a sviluppare software solo dopo aver finito la progettazione hardware. Manca però una visione concretamente utilizzabile all'interno del sistema prima della fase di tape-out, e ciò porta spesso a dover modificare il codice e quindi ad avere diversi rallentamenti.
 La \textbf{progettazione basata su piattaforma} è la creazione di un'architettura stabile basata su microprocessore che può essere rapidamente estesa, personalizzata per diverse applicazioni e consegnata ai clienti per una rapida implementazione. (J.M. Chateau-STMicroelectornics). Essa permette di fare verifica funzionale, stime di tempo per analisi di perfomance, partizionale hardware e software, porta ad un incremento della velocità e permette modularità e riuso.
-\\La modellazione a livello di transazione (\textbf{TLM}) è un tipo di progettazione che sta tra il livello algoritmico e quello RT. I dettagli di implementazione vengono astratti preservando però gli aspetti comportamentali del sistema, permettendo quindi una simulazione di quella RTL e di avere una piattaforma dove si può iniziare velocemente a sviluppare software. Permette quindi di iniziare a sviluppare software molto prima rispetto al classico flusso di sviluppo.
-\\In SystemC-TLM la comunicazione tra componenti si ottiene dallo scambio di pacchetti tra un modulo \textbf{initiator} e un modulo \textbf{target} attraverso 0 o più componenti intermedi. Il trasferimento di dati da un modulo ad un altro è detto \textbf{transazione} e avviene attraverso una \textbf{socket}. Il percorso che compiono i dati dal initiator al target è detto \textbf{forward-path}, invece quello dal target all'iniator è detto \textbf{backward-path} e lo si utilizza solo se l'interfaccia è non bloccante.
+\\La modellazione a livello di transazione (\textbf{TLM}) è un tipo di progettazione che sta tra il livello algoritmico e quello RT. I dettagli di implementazione vengono astratti preservando però gli aspetti comportamentali del sistema, permettendo quindi una simulazione più veloce, ma meno accurata di quella RTL e di avere una piattaforma dove si può iniziare velocemente a sviluppare software, molto prima rispetto al classico flusso di sviluppo.
+\\In SystemC-TLM la comunicazione tra componenti si ottiene dallo scambio di pacchetti tra un modulo \textbf{initiator} e un modulo \textbf{target} attraverso 0 o più componenti intermedi. Il trasferimento di dati da un modulo ad un altro è detto \textbf{transazione} e avviene attraverso una \textbf{socket}. Il percorso che compiono i dati dal initiator al target è detto \textbf{forward-path}, invece quello dal target all'initiator è detto \textbf{backward-path} e lo si utilizza solo se l'interfaccia è non bloccante.
 \\Ci sono poi tre principali sistemi che definiscono la relazione tra tempo e dati e permettono al progettista di descrivere il sistema con livello più o meno astratto:
 \begin{itemize}
     \item \textbf{Approximately timed: } le transazioni sono divise in quattro fasi: inizio richiesta, fine richiesta, inizio risposta, fine risposta. L'interfaccia è non bloccante quindi viene usato sia il forward-path che il backward-path. Esso è indicato per l'esplorazione architetturale e l'analisi delle performance.
@@ -150,17 +151,25 @@ Per utilizzare il double\_multiplier è stata aggiunta una routine all'interno d
 
 
 \subsection{SystemC TLM}
-
-\subsubsection{Procedimento}
-È stato descritto il double\_multiplier a livello TLM nei diversi stili, untimed, loosely-timed, approximately-timed, raffinando via via la notazione di tempo e adattato il testbench RTL per rendere più significativo il confronto. In ogni progetto dentro il file ``define.hh'' si può attivare la modalità debug in cui viene testato il double\_multiplier con degli operandi scelti arbitrariamente e stampati dei messaggi per controllare il corretto funzionamento (figure ...). Se la modalità di debug è disattiva tutti i progetti eseguirano TESTNUM volte double\_multiplier con operandi generati randomicamente.
-\\Con lo script messo a disposizione è possibile eseguire con l'argomento:
+L'obiettivo è realizzare il double\_multiplier funzionalmente in modo da avere una piattaforma su cui poter sviluppare software parallelamente alla realizzazione dell'hardware.
+\\Nello stile \textbf{untimed} il testbench è l'initiator che chiama il target cioè il double\_multiplier, il quale elabora le moltiplicazioni e restituisce i risultati, sbloccando l'initiator. Nella figura \ref{fig:SIM_TLM_UT} si vedono i risultati ottenuti.
+\\Nello stile \textbf{loosely-timed}, analogamente all'untimed, il testbench chiama il double\_multiplier, il quale elabora le moltiplicazioni e restituisce i risultati con l'informazione di tempo trascorso. Come valore di \textbf{timing\_annotation} è stato utilizzato 100ns, valore ricavato dalla moltiplicazione di 10ns (cioè il periodo minimo a cui il componente sintezzato può funzionare) per 10 (cioè la lunghezza di cicli di clock media che sono necessari al componente per eseguire le due moltiplicazioni). Il numero di cicli di clock necessari all'esecuzione di una moltiplicazione può variare molto, come si può osservare lanciando la simulazione col \textbf{full\_target\_test} della descrizione in SystemC RTL. Come lunghezza del quanto per il loosely-timed è stato utilizzato il periodo di clock minimo cioè 10ns. Nella figura \ref{fig:SIM_TLM_UT} si vede bene che l'initiator invoca il target, resta in attesa della risposta e poi stampa i risultati. Si nota anche che dal tempo 0 sono passati 100ns.
+\\Nello stile \textbf{approximately-timed} ci sono quattro fasi per la comunicazione osservabili in figura \ref{fig:SIM_TLM_AT4}:
+\begin{itemize}
+    \item Fase \textbf{BEGIN REQUEST}: l'initiator invoca il target, mandandogli gli operandi. Inizio forward-path
+    \item Fase \textbf{END REQUEST}: il target riceve gli operandi e attiva IOPROCESS. Fine forward-path
+    \item Fase \textbf{BEGIN RESPONSE}: vengono calcolate le moltiplicazioni e viene notificato l'initiato. Inizio backward-path
+    \item Fase \textbf{END RESPONSE}: Viene ricevuta la notifica. Fine backward-paths
+\end{itemize}
+Analogamente si eseguendo le quattro fasi per ottenere il risultati.
+\\Per rendere più significativo il confronto è stato riportato anche il progetto RTL, ma con con testbench analagoto a quello usato per gli stili del TLM. In figura \ref{fig:SIM_RTL} si vedono i risultati del test.
+\\In ogni progetto dentro il file ``define.hh'' si può attivare la modalità debug in cui viene testato il double\_multiplier con degli operandi scelti arbitrariamente e stampati dei messaggi per controllare il corretto funzionamento (figure \ref{fig:SIM_TLM_UT}\ref{fig:SIM_TLM_LT}\ref{fig:SIM_TLM_AT4}\ref{fig:SIM_RTL}). Se la modalità di debug è disattiva tutti i progetti eseguirano TESTNUM volte double\_multiplier con operandi generati randomicamente.
+\\È stato poi messo a disposizione uno script messo a dove è possibile eseguire con l'argomento:
 \begin{itemize}
     \item \textbf{clean} il comando make clean in ogni directory, per eliminare i file sorgenti ed eseguibili.
     \item \textbf{make} il comando make in ogni directory, per eseguire la compilazione.
     \item \textbf{time} per eseguire sequenzialmente gli eseguibili con il comando \textit{time} per ricavare il tempo di esecuzione delle simulazioni.
 \end{itemize}
-Come valore di \textbf{timing\_annotation} è stato utilizzato 100ns, valore ricavato dalla moltiplicazione di 10ns, cioè il periodo minimo a cui il componente sintezzato può funzionare, per 10 cioè la lunghezza di cicli di clock media che sono necessari al componente per eseguire le due moltiplicazioni. Questo valore in base ai valori dei due operanti utilizzati può variare molto, come si può osservare lanciando la simulazione col \textbf{full\_target\_test} della descrizione in SystemC RTL, che evidenzia una certa approssimazione di questi valori.
-
 
 
 
@@ -168,18 +177,18 @@ Come valore di \textbf{timing\_annotation} è stato utilizzato 100ns, valore ric
 
 \subsubsection{Simulazione e testbench sulla VirtualPlatform}
 Il main del software legge un valore dal modulo I/O e chiama il driver di \textit{double\_multiplier} per eseguire la moltiplicazione con l'operando letto e altri 3 scelti arbitrariamente. Una volta ottenuto i risultati vengono poi trasmessi per essere letti in simulazione del testbench. (Nel main è anche presente la possibilità di utilizzare gli stessi operandi per eseguire due moltiplicazioni separate col driver \textit{float\_multiplier}).
-\\Nel testbench scritto in verilog viene caricato il codice del software nella ROM, inviato un valore sul bus, che verrà poi utilizzato come operando e infine stampati i due risultati ottenuti. Nelle figure \ref{fig:SIM}\ref{fig:SIM_ZOOM} è possibile guardare la simulazione.
-
+\\Nel testbench scritto in verilog viene caricato il codice del software nella ROM, inviato un valore sul bus, che verrà poi utilizzato come operando e infine stampati i due risultati ottenuti. Nelle figure \ref{fig:SIM_VP}\ref{fig:SIM_VP_ZOOM} è possibile guardare la simulazione.
 
 \subsubsection{TLM}
-In figura ... si vede che. come previsto, con l'aumentare dell'accuratezza temporale aumenta anche il tempo di simulazione. Si nota che fra lo stile untimed e loosely-timed non cambia molto, ma tra tra la versione più accurata TLM cioè approximately-timed e quella RTL c'è una grossa differenza.
+In figura \ref{fig:SIM_TLM_TIME} si vede che, come previsto, con l'aumentare dell'accuratezza temporale aumenta anche il tempo necessario per la simulazione. Si nota che fra lo stile untimed e loosely-timed non cambia molto, ma tra tra la versione più accurata TLM cioè approximately-timed e quella RTL c'è una grossa differenza.
 
 
 
+\section{Conclusioni}
+Sono rimasto particolarmente colpito dalla velocità delle simulazioni con SystemC-TLM rispetto a SystemC-RTL, ma soprattutto alla velocità con cui si riesce a descrivere il sistema funzionalmente anche se purtroppo la versione approximately-timed risulta molto distante dalla versione RTL a livello di accuratezza.
+\\Sono soddisfatto dei risultati ottenuti e sicuramente questo progetto mi ha aiutato a comprendere meglio cos'è la progettazione basata su piattaforma e la sua utilità.
 
 
-% \section{Conclusioni}
-% %work in progress
 
 \nocite{*}
 \bibliographystyle{IEEEtran}
@@ -203,16 +212,52 @@ In figura ... si vede che. come previsto, con l'aumentare dell'accuratezza tempo
 
 \begin{figure*}[bt]
     \centering
-    \includegraphics[width=\textwidth]{figures/sim.png}
+    \includegraphics[width=\textwidth]{figures/SIM_VP.png}
     \caption{Simulazione virtual platform}
-    \label{fig:SIM}
+    \label{fig:SIM_VP}
 \end{figure*}
 
 \begin{figure*}[bt]
     \centering
-    \includegraphics[width=\textwidth]{figures/sim_zoom.png}
+    \includegraphics[width=\textwidth]{figures/SIM_VP_ZOOM.png}
     \caption{Simulazione con zoom virtual platform}
-    \label{fig:SIM_ZOOM}
+    \label{fig:SIM_VP_ZOOM}
+\end{figure*}
+
+
+\begin{figure*}[bt]
+    \centering
+    \includegraphics[width=\textwidth]{figures/SIM_TLM_timing.png}
+    \caption{Confronto timing simulazioni TLM e RTL con 1000000 esecuzioni di double\_multiplier}
+    \label{fig:SIM_TLM_TIME}
+\end{figure*}
+
+\begin{figure*}[bt]
+    \centering
+    \includegraphics[width=\textwidth]{figures/SIM_TLM_UT.png}
+    \caption{Simulazione con SystemC TLM untimed}
+    \label{fig:SIM_TLM_UT}
+\end{figure*}
+
+\begin{figure*}[bt]
+    \centering
+    \includegraphics[width=\textwidth]{figures/SIM_TLM_LT.png}
+    \caption{Simulazione con SystemC TLM loosely-timed}
+    \label{fig:SIM_TLM_LT}
+\end{figure*}
+
+\begin{figure*}[bt]
+    \centering
+    \includegraphics[width=\textwidth]{figures/SIM_TLM_AT4.png}
+    \caption{Simulazione con SystemC TLM approximately-timed}
+    \label{fig:SIM_TLM_AT4}
+\end{figure*}
+
+\begin{figure*}[bt]
+    \centering
+    \includegraphics[width=\textwidth]{figures/SIM_RTL.png}
+    \caption{Simulazione con SystemC RTL}
+    \label{fig:SIM_RTL}
 \end{figure*}
 
 \end{document}
